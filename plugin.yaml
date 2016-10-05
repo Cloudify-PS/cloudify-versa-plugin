@@ -1,0 +1,40 @@
+plugins:
+  versa:
+    executor: central_deployment_agent
+    source: https://github.com/kostya13/cloudify-versa-plugin/archive/master.zip
+    package_name: cloudify-versa-plugin
+    package_version: '1.0'
+
+node_types:
+  cloudify.versa.nodes.Appliance:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+        versa_url:
+          default: ""
+        client_id:
+          default: ""
+        client_secret:
+          default: ""
+        user:
+          default: ""
+        password:
+          default: ""
+        cms_organisation:
+          default: ""
+        organisaion:
+          default: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create
+          inputs:
+            cms_config:
+              default: {}
+            nms_config:
+              default: {}
+        configure:
+          implementation: versa.versa_plugin.operations.configure
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete
+          inputs: {}

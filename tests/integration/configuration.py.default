@@ -1,0 +1,7 @@
+data = {
+    "client_id": "voae_rest",
+    "client_secret": "asrevnet_123",
+    "username": "username",
+    "password": "password",
+    "grant_type": "password"
+}
