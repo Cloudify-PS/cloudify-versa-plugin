@@ -1,5 +1,6 @@
 import requests
 import json
+from xml.dom.minidom import parseString
 
 from cloudify import exceptions as cfy_exc
 from requests.exceptions import RequestException
@@ -8,12 +9,15 @@ JSON = 'json'
 XML = 'xml'
 
 
-def _check_response(response, return_code):
+def _check_response(response, return_code, accept):
     if response.status_code != return_code:
         raise cfy_exc.HttpException(response.url, response.status_code,
                                     response.content)
     if response.content:
-        return json.loads(response.content)
+        if accept == JSON:
+            return json.loads(response.content)
+        else:
+            return parseString(response.content)
     else:
         return None
 
@@ -55,32 +59,37 @@ class VersaClient():
                 "Incorrect reply: {}".format(result))
 
     def revoke_token(self):
-        self.post("/auth/revoke", None, None, return_code=200)
+        self.post("/auth/revoke", None, None, return_code=200, accept=JSON)
 
-    def get(self, path, data, content_type, return_code=200):
+    def get(self, path, data, content_type, return_code=200, accept=JSON):
         return self._request(requests.get, path, data,
-                             content_type, return_code)
+                             content_type, return_code, accept)
 
-    def post(self, path, data, content_type, return_code=201):
+    def post(self, path, data, content_type, return_code=201, accept=JSON):
         return self._request(requests.post, path, data,
-                             content_type, return_code)
+                             content_type, return_code, accept)
 
-    def delete(self, path, return_code=204):
+    def put(self, path, data, content_type, return_code=204, accept=JSON):
+        return self._request(requests.put, path, data,
+                             content_type, return_code, accept)
+
+    def delete(self, path, return_code=204, accept=JSON):
         return self._request(requests.delete, path, None,
-                             None, return_code)
+                             None, return_code, accept)
 
-    def _request(self, request_type, path, data, content_type, return_code):
-        headers = self._get_headers(content_type)
+    def _request(self, request_type, path, data, content_type, return_code,
+                 accept):
+        headers = self._get_headers(content_type, accept)
         try:
             response = request_type(
                 self.versa_url + path,
                 headers=headers, data=data,
                 verify=self.verify)
-            return _check_response(response, return_code)
+            return _check_response(response, return_code, accept)
         except RequestException:
             raise cfy_exc.HttpException(path, 404, "")
 
-    def _get_headers(self, content_type):
+    def _get_headers(self, content_type, accept):
         content_dict = {'json': 'application/json', 'xml': 'application/xml'}
         headers = {}
         if content_type:
@@ -91,7 +100,7 @@ class VersaClient():
                     "Unknown content-type: {}".format(content_type))
         if self.access_token:
             headers["Authorization"] = "Bearer {}".format(self.access_token)
-        headers['Accept'] = 'application/json'
+        headers['Accept'] = content_dict[accept]
         return headers
 
     def _refresh_token(self):

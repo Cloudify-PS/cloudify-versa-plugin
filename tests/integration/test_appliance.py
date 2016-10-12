@@ -19,7 +19,7 @@ import versa_plugin.appliance
 import versa_plugin.tasks
 import configuration
 from versa_plugin.connectors import Network
-from versa_plugin.appliance import ApplianceInterface
+from versa_plugin.appliance import ApplianceInterface, NetworkInfo
 requests.packages.urllib3.disable_warnings()
 
 
@@ -42,13 +42,14 @@ class ApplianceTestCase(unittest.TestCase):
                                                                     resource)
             nms_org_uuid = versa_plugin.appliance.add_organization(client,
                                                                    nms_org_name,
+                                                                   None,
                                                                    cms_org_uuid,
                                                                    cms_org_name)
             versa_plugin.appliance.delete_organization(client, nms_org_uuid)
             versa_plugin.connectors.delete_organization(client, cms_org_uuid)
             versa_plugin.connectors.delete_resource_pool(client, resource)
 
-    def test_add_delete_appliance(self):
+    def notest_add_delete_appliance(self):
         cms_org_name = "cmsorgname"
         resource = "Test_resource"
         resource_address = "10.2.0.10"
@@ -67,6 +68,7 @@ class ApplianceTestCase(unittest.TestCase):
                                                               resource)
             org = versa_plugin.appliance.add_organization(client,
                                                           nms_org_name,
+                                                          None,
                                                           cmsorg,
                                                           cms_org_name)
             print 'Wait for device'
@@ -105,5 +107,35 @@ class ApplianceTestCase(unittest.TestCase):
                                                                    cms_org_name)
             versa_plugin.appliance.add_organization(client,
                                                     nms_org_name,
+                                                    None,
                                                     cmsorg,
                                                     cms_org_name)
+
+    def notest_associate_via_network(self):
+        org = 'child'
+        appliance = 'testapp'
+        net_info = NetworkInfo("net", "vni-0/0", "12", "10.22.0.100",
+                               "255.255.255.0")
+        with VersaClient(self.config) as client:
+            res = versa_plugin.appliance.associate_org_via_network(client,
+                                                                   appliance,
+                                                                   org,
+                                                                   net_info)
+            print res
+
+    def notest_associate_via_services(self):
+        services = ['cgnat', 'nextgen-firewall']
+        org = 'child'
+        appliance = 'testapp'
+        with VersaClient(self.config) as client:
+            res = versa_plugin.appliance.associate_org_via_services(client,
+                                                                    appliance,
+                                                                    org,
+                                                                    services)
+            print res
+
+    def notest_disassociate_org(self):
+        org = 'child'
+        appliance = 'testapp'
+        with VersaClient(self.config) as client:
+            versa_plugin.appliance.disassociate_org(client, appliance, org)

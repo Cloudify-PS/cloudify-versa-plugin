@@ -4,41 +4,40 @@ import uuid
 from versa_plugin.versaclient import JSON, XML
 from requests import codes
 from cloudify import exceptions as cfy_exc
+from collections import namedtuple
 import random
 
 SUCCESS = 'SUCCESS'
 MAX_RETRY = 30
 SLEEP_TIME = 3
 
-
-class ApplianceInterface:
-    def __init__(self, name, address, interface):
-        self.name = name
-        self.address = address
-        self.interface = interface
+ApplianceInterface = namedtuple("ApplianceInterface",
+                                "name, address, interface")
+NetworkInfo = namedtuple("NetworkInfo", "name, parent, vlan, address, mask")
 
 
 def _get_task_id(task_info):
     return task_info['output']['result']['task']['task-id']
 
 
-def add_organization(client, org_name, cms_org_uuid, cms_org_name):
+def add_organization(client, org_name, parent, cms_org_uuid, cms_org_name):
     url = "/api/config/nms/provider/organizations"
     org_uuid = str(uuid.uuid4())
+    parent = parent if parent else 'none'
     xmldata = """
     <organization>
         <uuid>{0}</uuid>
         <id>{1}</id>
         <name>{2}</name>
-        <parent-org>none</parent-org>
+        <parent-org>{3}</parent-org>
         <subscription-plan>Default-All-Services-Plan</subscription-plan>
         <cms-orgs>
-            <uuid>{3}</uuid>
-            <name>{4}</name>
+            <uuid>{4}</uuid>
+            <name>{5}</name>
             <cms-connector>local</cms-connector>
         </cms-orgs>
      </organization>""".format(org_uuid, random.randint(1, 1000), org_name,
-                               cms_org_uuid, cms_org_name)
+                               parent, cms_org_uuid, cms_org_name)
     client.post(url, xmldata, XML, codes.created)
     return org_uuid
 
@@ -89,6 +88,62 @@ def add_appliance(client, mgm_ip, name, org, cmsorg, net):
                               net[1].name, net[1].address, net[1].interface)
     result = client.post(url, xmldata, XML, codes.ok)
     return _get_task_id(result)
+
+
+def associate_org_via_network(client, appliance, org, network_info):
+    url = '/api/config/nms/actions/'\
+        '/associate-organization-to-appliance'
+    appliance_uuid = get_appliance_uuid(client, appliance)
+    org_uuid = get_organization_uuid(client, org)
+    data = {
+        "associate-organization-to-appliance": {
+            "orguuid": org_uuid,
+            "networking-info": {
+                "network-info": [{
+                    "network-name": network_info.name,
+                    "parent-interface": network_info.parent,
+                    "vlan-id": network_info.vlan,
+                    "ipaddress-allocation-mode": "MANUAL",
+                    "slot": "0",
+                    "ip-address": network_info.address,
+                    "mask": network_info.mask}]},
+            "applianceuuid": appliance_uuid,
+            "subscription": {
+                "solution-tier": "nextgen-firewall",
+                "bandwidth": "100"}}}
+    import pdb; pdb.set_trace()  # XXX BREAKPOINT
+    result = client.post(url, json.dumps(data), JSON, codes.ok)
+    return _get_task_id(result)
+
+
+def associate_org_via_services(client, appliance, org, services):
+    url = '/api/config/nms/actions'\
+        '/associate-organization-to-appliance'
+    appliance_uuid = get_appliance_uuid(client, appliance)
+    org_uuid = get_organization_uuid(client, org)
+    data = {
+        "associate-organization-to-appliance": {
+            "orguuid": org_uuid,
+            "networking-info": {"network-info": []},
+            "services": services,
+            "applianceuuid": appliance_uuid,
+            "subscription": {
+                "solution-tier": "nextgen-firewall",
+                "bandwidth": "100"}}}
+    result = client.post(url, json.dumps(data), JSON, codes.ok)
+    return _get_task_id(result)
+
+
+def disassociate_org(client, appliance, org):
+    url = '/api/config/nms/actions'\
+          '/dissociate-organization-from-appliances'
+    appliance_uuid = get_appliance_uuid(client, appliance)
+    org_uuid = get_organization_uuid(client, org)
+    data = {
+        "dissociate-organization-from-appliances": {
+            "orguuid": org_uuid,
+            "appliances": [appliance_uuid]}}
+    client.post(url, json.dumps(data), JSON, codes.ok)
 
 
 def get_appliance_uuid(client, name):
