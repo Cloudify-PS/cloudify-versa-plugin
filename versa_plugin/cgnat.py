@@ -8,7 +8,7 @@ AddressRange = namedtuple("AddressRange", "name, low, high")
 
 
 def create_pool(client, appliance, org, pool_name, addresses,
-                ranges):
+                ranges, routing_instance, provider_org):
     """
         :param client - versa client "str"
         :param appliance - appliance name "str"
@@ -16,12 +16,14 @@ def create_pool(client, appliance, org, pool_name, addresses,
         :param pool_name - pool name "str"
         :param addresses - list of addrres in format ["addr, "addr"]
         :param ranges - list of type AddressRange [range1, range2]
+        :param routing_instance - routing instance "str"
+        :param provider_org - provider organizarion "str"
     """
-    url = '/api/config/appliances/{}/orgs/org-services/{}/cgnat'.format(
-        appliance, org)
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org-services/{}/cgnat/pools'.format(appliance, org)
     range_list = [{'name': r.name,
                    'low': r.low,
-                   'hight': r.hight} for r in ranges]
+                   'high': r.high} for r in ranges]
     data = {
         "pool": {
             "name": pool_name,
@@ -30,10 +32,22 @@ def create_pool(client, appliance, org, pool_name, addresses,
             "udp-mapping-timeout": "300",
             "tcp-mapping-timeout": "7440",
             "address-allocation": "round-robin",
+            "routing-instance": routing_instance,
+            "provider-org": provider_org,
+            "source-port": {
+                "allocation-scheme": "automatic",
+                "random-allocation": ""},
             "address-range": {
                 'range': range_list}}}
     pools = client.post(url, json.dumps(data), JSON, codes.created)
     return pools
+
+
+def delete_pool(client, appliance, org, name):
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org-services/{}'\
+          '/cgnat/pools/pool/{}'.format(appliance, org, name)
+    client.delete(url, codes.no_content)
 
 
 def create_rule(client, appliance, org, rule_name, source_zone,

@@ -1,6 +1,7 @@
 import json
 import time
 import uuid
+import versa_plugin
 from versa_plugin.versaclient import JSON, XML
 from requests import codes
 from cloudify import exceptions as cfy_exc
@@ -13,7 +14,7 @@ SLEEP_TIME = 3
 
 ApplianceInterface = namedtuple("ApplianceInterface",
                                 "name, address, interface")
-NetworkInfo = namedtuple("NetworkInfo", "name, parent, vlan, address, mask")
+NetworkInfo = namedtuple("NetworkInfo", "name, parent, address, mask")
 
 
 def _get_task_id(task_info):
@@ -48,8 +49,25 @@ def delete_organization(client, org_uuid):
     return client.post(url, json.dumps(data), JSON, codes.ok)
 
 
-def add_appliance(client, mgm_ip, name, org, cmsorg, net):
+def add_appliance(client, mgm_ip, name, nms_org_name, cms_org_name, networks):
     url = "/api/config/nms/actions/add-devices"
+    nms_org_uuid = get_organization_uuid(client, nms_org_name)
+    cms_org_uuid = versa_plugin.connectors.get_organization_uuid(client,
+                                                                 cms_org_name)
+    if not nms_org_uuid:
+        raise cfy_exc.NonRecoverableError("NMS organization uuid not found")
+    elif not cms_org_uuid:
+        raise cfy_exc.NonRecoverableError("CMS organization uuid not found")
+    net_info = ""
+    for net in networks:
+        info = """
+                    <network-info>
+                        <network-name>{0}</network-name>
+                        <ip-address>{1}</ip-address>
+                        <interface>{2}</interface>
+                    </network-info>
+               """.format(net.name, net.address, net.interface)
+        net_info += info
     xmldata = """
     <add-devices>
         <devices>
@@ -60,16 +78,7 @@ def add_appliance(client, mgm_ip, name, org, cmsorg, net):
                 <cmsorg>{3}</cmsorg>
                 <type>service-vnf</type>
                 <networking-info>
-                    <network-info>
-                        <network-name>{4}</network-name>
-                        <ip-address>{5}</ip-address>
-                        <interface>{6}</interface>
-                    </network-info>
-                    <network-info>
-                        <network-name>{7}</network-name>
-                        <ip-address>{8}</ip-address>
-                        <interface>{9}</interface>
-                    </network-info>
+                {4}
                 </networking-info>
                 <snglist>
                     <sng>
@@ -83,14 +92,14 @@ def add_appliance(client, mgm_ip, name, org, cmsorg, net):
                 </subscription>
             </device>
         </devices>
-    </add-devices> """.format(mgm_ip, name, org, cmsorg,
-                              net[0].name, net[0].address, net[0].interface,
-                              net[1].name, net[1].address, net[1].interface)
+    </add-devices> """.format(mgm_ip, name, nms_org_uuid, cms_org_uuid,
+                              net_info)
+    import pdb; pdb.set_trace()  # XXX BREAKPOINT
     result = client.post(url, xmldata, XML, codes.ok)
     return _get_task_id(result)
 
 
-def associate_org_via_network(client, appliance, org, network_info):
+def associate_organization(client, appliance, org, network_info, services=None):
     url = '/api/config/nms/actions/'\
         '/associate-organization-to-appliance'
     appliance_uuid = get_appliance_uuid(client, appliance)
@@ -102,7 +111,7 @@ def associate_org_via_network(client, appliance, org, network_info):
                 "network-info": [{
                     "network-name": network_info.name,
                     "parent-interface": network_info.parent,
-                    "vlan-id": network_info.vlan,
+                    "subinterface-unit-number": "0",
                     "ipaddress-allocation-mode": "MANUAL",
                     "slot": "0",
                     "ip-address": network_info.address,
@@ -111,25 +120,8 @@ def associate_org_via_network(client, appliance, org, network_info):
             "subscription": {
                 "solution-tier": "nextgen-firewall",
                 "bandwidth": "100"}}}
-    import pdb; pdb.set_trace()  # XXX BREAKPOINT
-    result = client.post(url, json.dumps(data), JSON, codes.ok)
-    return _get_task_id(result)
-
-
-def associate_org_via_services(client, appliance, org, services):
-    url = '/api/config/nms/actions'\
-        '/associate-organization-to-appliance'
-    appliance_uuid = get_appliance_uuid(client, appliance)
-    org_uuid = get_organization_uuid(client, org)
-    data = {
-        "associate-organization-to-appliance": {
-            "orguuid": org_uuid,
-            "networking-info": {"network-info": []},
-            "services": services,
-            "applianceuuid": appliance_uuid,
-            "subscription": {
-                "solution-tier": "nextgen-firewall",
-                "bandwidth": "100"}}}
+    if services:
+        data["associate-organization-to-appliance"]["services"] = services
     result = client.post(url, json.dumps(data), JSON, codes.ok)
     return _get_task_id(result)
 

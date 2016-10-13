@@ -1,15 +1,45 @@
 import json
 from versa_plugin.versaclient import JSON, XML
 from requests import codes
+from collections import namedtuple
+
+Routing = namedtuple("Routing",
+                     "ip_prefix, next_hop, interface, preference, tag")
 
 
-def create_virtual_router(client, appliance, name, networks):
-    url = '/api/config/devices/device/{}/config/routing-instances'.format(appliance)
+def create_interface(client, appliance, name):
+    url = '/api/config/devices/device/{}/config/interfaces'.format(appliance)
+    data = {"vni": {"name": name, "enable": True, "promiscuous": False}}
+    client.post(url, json.dumps(data), JSON, codes.created)
+
+
+def delete_interface(client, appliance, name):
+    url = '/api/config/devices/device/{}'\
+          '/config/interfaces/vni/%22{}%22'.format(appliance, name)
+    client.delete(url, codes.no_content)
+
+
+def create_virtual_router(client, appliance, name, networks, routings=None):
+    url = '/api/config/devices/device/{}'\
+          '/config/routing-instances'.format(appliance)
+    route_list = []
+    if routings:
+        for route in routings:
+            route_list.append({
+                            "ip-prefix": route.ip_prefix,
+                            "next-hop": route.next_hop,
+                            "preference": route.preference,
+                            "tag": route.tag,
+                            "interface": route.interface})
     data = {
-        "routing-instance":[{
-            "name": name,
-            "instance-type":"virtual-router",
-            "networks":networks}]}
+        "routing-instance": [{
+            "name": "wan",
+            "instance-type": "virtual-router",
+            "networks": networks,
+            "routing-options": {
+                "static": {
+                    "route": {
+                        "rti-static-route-list": route_list}}}}]}
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
@@ -42,27 +72,36 @@ def get_organization_limits(client, appliance, org):
     return result
 
 
+def add_organization_child(xml, tagname, text):
+    org_node = xml.lastChild
+    node = xml.createElement(tagname)
+    value = xml.createTextNode(text)
+    node.appendChild(value)
+    org_node.appendChild(node)
+
+
 def update_dhcp_profile(client, appliance, org, profile):
     url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
                                                                     org)
     limits = get_organization_limits(client, appliance, org)
-    org_node = limits.lastChild
-    profile_node = limits.createElement('dhcp-profile')
-    profile_value = limits.createTextNode(profile)
-    profile_node.appendChild(profile_value)
-    org_node.appendChild(profile_node)
+    add_organization_child(limits, 'dhcp-profile', profile)
     xmldata = limits.toxml()
     client.put(url, xmldata, XML, codes.no_content)
 
 
-def update_available_routing_instances(client, appliance, org, instance):
+def update_routing_instance(client, appliance, org, instance):
     url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
                                                                     org)
     limits = get_organization_limits(client, appliance, org)
-    org_node = limits.lastChild
-    routing_node = limits.createElement("available-routing-instances")
-    routing_value = limits.createTextNode(instance)
-    routing_node.appendChild(routing_value)
-    org_node.appendChild(routing_node)
+    add_organization_child(limits, "available-routing-instances", instance)
+    xmldata = limits.toxml()
+    client.put(url, xmldata, XML, codes.no_content)
+
+
+def update_provider_orranization(client, appliance, org, provider):
+    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
+                                                                    org)
+    limits = get_organization_limits(client, appliance, org)
+    add_organization_child(limits, "available-provider-orgs", provider)
     xmldata = limits.toxml()
     client.put(url, xmldata, XML, codes.no_content)

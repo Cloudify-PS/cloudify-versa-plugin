@@ -58,15 +58,39 @@ class NetworkingTestCase(unittest.TestCase):
                                                         org,
                                                         profile)
 
+    def notest_update_routing_instances(self):
+        with VersaClient(self.config) as client:
+            appliance = 'testapp'
+            org = 'mytestorg'
+            instance = 'testrouter'
+            versa_plugin.networking.update_routing_instance(client,
+                                                            appliance,
+                                                            org,
+                                                            instance)
+
+    def notest_update_provider_organization(self):
+        with VersaClient(self.config) as client:
+            appliance = 'testapp'
+            org = 'child3'
+            provider = 'mytestorg'
+            versa_plugin.networking.update_provider_orranization(client,
+                                                                 appliance,
+                                                                 org,
+                                                                 provider)
+
     def notest_create_virtual_router(self):
         with VersaClient(self.config) as client:
             appliance = 'testapp'
             name = 'testrouter'
-            networks = ['versa1']
+            networks = ['versa2']
+            routing = [versa_plugin.networking.Routing("1.2.3.0/24",
+                                                       "5.6.7.8", "vni-0/0.0",
+                                                       None, 1)]
             versa_plugin.networking.create_virtual_router(client,
                                                           appliance,
                                                           name,
-                                                          networks)
+                                                          networks,
+                                                          routing)
 
     def notest_delete_virtual_router(self):
         with VersaClient(self.config) as client:
@@ -76,3 +100,18 @@ class NetworkingTestCase(unittest.TestCase):
                                                           appliance,
                                                           name)
 
+    def notest_create_interface(self):
+        with VersaClient(self.config) as client:
+            appliance = 'testapp'
+            name = 'vni-0/3'
+            versa_plugin.networking.create_interface(client,
+                                                     appliance,
+                                                     name)
+
+    def notest_delete_interface(self):
+        with VersaClient(self.config) as client:
+            appliance = 'testapp'
+            name = 'vni-0/3'
+            versa_plugin.networking.delete_interface(client,
+                                                     appliance,
+                                                     name)

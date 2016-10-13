@@ -16,6 +16,7 @@ import unittest
 import requests
 from versa_plugin.versaclient import VersaClient
 import versa_plugin.cgnat
+from versa_plugin.cgnat import AddressRange
 import configuration
 requests.packages.urllib3.disable_warnings()
 
@@ -24,7 +25,7 @@ class CgnatTestCase(unittest.TestCase):
     def setUp(self):
         self.config = configuration.data
 
-    def test_get_pools(self):
+    def notest_get_pools(self):
         with VersaClient(self.config) as client:
             app = 'mytestapp'
             org = 'mytestorg'
@@ -35,3 +36,23 @@ class CgnatTestCase(unittest.TestCase):
             app = 'mytestapp'
             org = 'mytestorg'
             print versa_plugin.cgnat.get_list_nat_rules(client, app, org)
+
+    def notest_create_pool(self):
+        with VersaClient(self.config) as client:
+            app = 'testapp'
+            org = 'child'
+            pool_name = "testpool"
+            routing = "vr",
+            provider = "mytestorg"
+            addr_range = [AddressRange("range",
+                                       "172.168.35.1", "175.168.35.30")]
+            versa_plugin.cgnat.create_pool(client, app, org, pool_name,
+                                           None, addr_range,
+                                           routing, provider)
+
+    def test_delete_pool(self):
+        with VersaClient(self.config) as client:
+            app = 'testapp'
+            org = 'child'
+            pool_name = "testpool"
+            versa_plugin.cgnat.delete_pool(client, app, org, pool_name)

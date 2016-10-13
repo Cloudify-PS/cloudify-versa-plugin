@@ -87,6 +87,21 @@ class ApplianceTestCase(unittest.TestCase):
             versa_plugin.connectors.delete_organization(client, cmsorg)
             versa_plugin.connectors.delete_resource_pool(client, resource)
 
+    def notest_add_appliance(self):
+        cms_org_name = "localorg"
+        resource_address = "10.2.0.18"
+        nms_org_name = "mytestorg"
+        name = "testapp"
+        app_networks = [ApplianceInterface("versa2", "10.3.0.15", "vni-0/0")]
+        with VersaClient(self.config) as client:
+            task = versa_plugin.appliance.add_appliance(client,
+                                                        resource_address, name,
+                                                        nms_org_name,
+                                                        cms_org_name,
+                                                        app_networks)
+            print 'Wait for applaince creation'
+            versa_plugin.tasks.wait_for_task(client, task)
+
     def notest_delete_appliance(self):
         with VersaClient(self.config) as client:
             versa_plugin.appliance.delete_appliance(client, "")
@@ -111,28 +126,19 @@ class ApplianceTestCase(unittest.TestCase):
                                                     cmsorg,
                                                     cms_org_name)
 
-    def notest_associate_via_network(self):
-        org = 'child'
+    def notest_associate_organization(self):
+        org = 'child3'
         appliance = 'testapp'
-        net_info = NetworkInfo("net", "vni-0/0", "12", "10.22.0.100",
+        net_info = NetworkInfo("versa4", "vni-0/2", "10.22.0.100",
                                "255.255.255.0")
-        with VersaClient(self.config) as client:
-            res = versa_plugin.appliance.associate_org_via_network(client,
-                                                                   appliance,
-                                                                   org,
-                                                                   net_info)
-            print res
-
-    def notest_associate_via_services(self):
         services = ['cgnat', 'nextgen-firewall']
-        org = 'child'
-        appliance = 'testapp'
         with VersaClient(self.config) as client:
-            res = versa_plugin.appliance.associate_org_via_services(client,
-                                                                    appliance,
-                                                                    org,
-                                                                    services)
-            print res
+            task = versa_plugin.appliance.associate_organization(client,
+                                                                 appliance,
+                                                                 org,
+                                                                 net_info,
+                                                                 services)
+            versa_plugin.tasks.wait_for_task(client, task)
 
     def notest_disassociate_org(self):
         org = 'child'
