@@ -29,8 +29,6 @@ class VersaClient():
         self.client_secret = config["client_secret"]
         self.username = config["username"]
         self.password = config["password"]
-        self.cms_organization = config["cms_organization"]
-        self.organization = config["organization"]
         self.access_token = None
         self.refresh_token = None
         self.verify = False
