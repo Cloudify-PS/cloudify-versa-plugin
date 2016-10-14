@@ -1,0 +1,167 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+description: >
+  This blueprint configure Versa Director
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.4.1/types.yaml
+  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/master/plugin.yaml
+
+
+inputs:
+
+  versa_url:
+    default: ""
+
+  client_id:
+    default: ""
+
+  client_secret:
+    default: ""
+
+  username:
+    default: ""
+
+  passord:
+    default: ""
+
+###################
+
+  pool_name:
+    default: ""
+
+  pool_ip_address:
+    default: ""
+
+  cms_org_name:  
+    default: ""
+
+  network_mask:  
+    default: ""
+
+  network1_name:
+    default: ""
+
+  network1_subnet:
+    default: ""
+
+  network2_name:
+    default: ""
+
+  network2_subnet:
+    default: ""
+
+  ip_address1:  
+    default: ""
+
+  ip_address2:  
+    default: ""
+
+  interface1:
+    default: ""
+
+  interface2:
+    default: ""
+
+  unit:
+    default: ""  
+
+  nms_org_name1:
+    default: ""
+
+  nms_org_name2:
+    default: ""
+
+  appliance_name:
+    default: ""
+
+
+
+node_templates:
+
+  versa_configuration:
+    type: cloudify.versa.nodes.versa_configuration
+    properties:
+      versa_config:
+        username: { get_input: username }
+        password: { get_input: password }
+        versa_url: { get_input: versa_url}
+        client_id: { get_input: client_id}
+        client_secret: { get_input: client_secret}
+
+
+  resource_pool:
+    type: cloudify.versa.nodes.ResourcePool
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      name: { get_input: pool_name }
+      ip_address: { get_input: pool_ip_address }
+
+  cms_organization:  
+    type: cloudify.versa.nodes.CMSLocalOrganization
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      name: { get_input: cms_org_name }
+      networks:
+        - name: { get_input: network1_name }
+          subnet: { get_input: network1_subnet }
+          mask: { get_input: network_mask }
+        - name: { get_input: network2_name }
+          subnet: { get_input: network2_subnet }
+          mask: { get_input: network_mask }
+      resources:
+        - { get_property: [resource_pool, name] }
+    relationships:
+      - type: cloudify.versa.cms_org_connected_to_pool
+        target: resource_pool
+
+  organization1:
+    type: cloudify.versa.nodes.Organization
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      name: { get_input: nms_org_name1 }
+      parent: ""
+      cms_org_name: { get_input: cms_org_name }
+    relationships:
+      - type: cloudify.versa.nms_org_connected_to_cms_org
+        target: cms_organization
+
+  organization2:
+    type: cloudify.versa.nodes.Organization
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      name: { get_input: nms_org_name2 }
+      parent: { get_input: nms_org_name1 }
+      cms_org_name: { get_input: cms_org_name }
+    relationships:
+      - type: cloudify.versa.nms_org_connected_to_cms_org
+        target: cms_organization
+
+  appliance:
+    type: cloudify.versa.nodes.Appliance
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      management_ip: { get_input: pool_ip_address }
+      appliance_owner:
+        nms_org_name: { get_input: nms_org_name1 }
+        cms_org_name: { get_input: cms_org_name }
+        networks:
+          - name: { get_input: network1_name }
+            ip_address: { get_input: ip_address1 }
+            interface: { get_input: interface1 }
+      organizations:
+        - nms_org_name: { get_input: nms_org_name1 }
+          networks:
+            - name: { get_input: network1_name }
+              parent_interface: { get_input: interface2 }
+              ip_address: { get_input: ip_address1 }
+              mask: { get_input: network_mask }
+              unit: { get_input: unit }
+    relationships:
+      - type: cloudify.versa.organization_connected_to_appliance
+        target: organiztaion1
+      - type: cloudify.versa.organization_connected_to_appliance
+        target: organiztaion2
+
+

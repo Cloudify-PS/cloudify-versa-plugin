@@ -1,40 +1,94 @@
 plugins:
   versa:
     executor: central_deployment_agent
-    source: https://github.com/kostya13/cloudify-versa-plugin/archive/master.zip
+    source: http://github.com/Cloudify-PS/cloudify-versa-plugin/archive/master.zip
     package_name: cloudify-versa-plugin
     package_version: '1.0'
 
 node_types:
-  cloudify.versa.nodes.Appliance:
-    derived_from: cloudify.nodes.SoftwareComponent
+
+  cloudify.versa.nodes.versa_configuration:
+    derived_from: cloudify.nodes.Root
     properties:
-        versa_url:
-          default: ""
-        client_id:
-          default: ""
-        client_secret:
-          default: ""
-        user:
-          default: ""
-        password:
-          default: ""
-        cms_organisation:
-          default: ""
-        organisaion:
-          default: ""
+      versa_config: 
+        default: {}
+              
+  cloudify.versa.nodes.ResourcePool:
+    derived_from: cloudify.nodes.Root
+    properties:
+      versa_config:
+        default: {}
+      name:
+        default: ""
+      ip_address:  
+        default: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: versa.versa_plugin.operations.create
-          inputs:
-            cms_config:
-              default: {}
-            nms_config:
-              default: {}
-        configure:
-          implementation: versa.versa_plugin.operations.configure
+          implementation: versa.versa_plugin.operations.create_resource_pool
           inputs: {}
-        delete:
-          implementation: versa.versa_plugin.operations.delete
+  
+  cloudify.versa.nodes.CMSLocalOrganization:
+    derived_from: cloudify.nodes.Root
+    properties:
+      versa_config:
+        default: {}
+      name:
+        default: ""
+      networks:  
+        default: {}
+      resources:  
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_cms_local_organization
           inputs: {}
+
+  cloudify.versa.nodes.Organization:
+    derived_from: cloudify.nodes.Root
+    properties:
+      versa_config:
+        default: {}
+      name:
+        default: ""
+      parent:  
+        default: ""
+      cms_org_name:  
+        default: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_organization
+          inputs: {}
+
+  cloudify.versa.nodes.Appliance:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      management_ip:
+        default: ""
+      appliance_owner:
+        default: {}
+      organizations:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        postconfigure:
+          implementation: versa.versa_plugin.operations.create_appliance
+          inputs: {}
+
+
+relationships:
+    cloudify.versa.cms_org_connected_to_pool:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.nms_org_connected_to_cms_org:
+      derived_from: cloudify.relationships.connected_to
+          
+    cloudify.versa.organization_connected_to_appliance:
+      derived_from: cloudify.relationships.connected_to
+          

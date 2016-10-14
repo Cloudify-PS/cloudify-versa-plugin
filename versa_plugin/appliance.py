@@ -14,16 +14,18 @@ SLEEP_TIME = 3
 
 ApplianceInterface = namedtuple("ApplianceInterface",
                                 "name, address, interface")
-NetworkInfo = namedtuple("NetworkInfo", "name, parent, address, mask")
+NetworkInfo = namedtuple("NetworkInfo", "name, parent, address, mask, unit")
 
 
 def _get_task_id(task_info):
     return task_info['output']['result']['task']['task-id']
 
 
-def add_organization(client, org_name, parent, cms_org_uuid, cms_org_name):
+def add_organization(client, org_name, parent, cms_org_name):
     url = "/api/config/nms/provider/organizations"
     org_uuid = str(uuid.uuid4())
+    cms_org_uuid = versa_plugin.connectors.get_organization_uuid(client,
+                                                                 cms_org_name)
     parent = parent if parent else 'none'
     xmldata = """
     <organization>
@@ -94,12 +96,12 @@ def add_appliance(client, mgm_ip, name, nms_org_name, cms_org_name, networks):
         </devices>
     </add-devices> """.format(mgm_ip, name, nms_org_uuid, cms_org_uuid,
                               net_info)
-    import pdb; pdb.set_trace()  # XXX BREAKPOINT
     result = client.post(url, xmldata, XML, codes.ok)
     return _get_task_id(result)
 
 
-def associate_organization(client, appliance, org, network_info, services=None):
+def associate_organization(client, appliance, org, network_info,
+                           services=None):
     url = '/api/config/nms/actions/'\
         '/associate-organization-to-appliance'
     appliance_uuid = get_appliance_uuid(client, appliance)
@@ -111,7 +113,8 @@ def associate_organization(client, appliance, org, network_info, services=None):
                 "network-info": [{
                     "network-name": network_info.name,
                     "parent-interface": network_info.parent,
-                    "subinterface-unit-number": "0",
+                    "subinterface-unit-number": network_info.unit,
+                    "vlan-id": network_info.unit,
                     "ipaddress-allocation-mode": "MANUAL",
                     "slot": "0",
                     "ip-address": network_info.address,

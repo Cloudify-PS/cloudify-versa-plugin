@@ -126,11 +126,11 @@ class ApplianceTestCase(unittest.TestCase):
                                                     cmsorg,
                                                     cms_org_name)
 
-    def notest_associate_organization(self):
-        org = 'child3'
+    def test_associate_organization(self):
+        org = 'child2'
         appliance = 'testapp'
-        net_info = NetworkInfo("versa4", "vni-0/2", "10.22.0.100",
-                               "255.255.255.0")
+        net_info = NetworkInfo("testnet2", "vni-0/1", "10.22.0.100",
+                               "255.255.255.0", "4")
         services = ['cgnat', 'nextgen-firewall']
         with VersaClient(self.config) as client:
             task = versa_plugin.appliance.associate_organization(client,

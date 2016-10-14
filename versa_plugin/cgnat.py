@@ -50,50 +50,43 @@ def delete_pool(client, appliance, org, name):
     client.delete(url, codes.no_content)
 
 
-def create_rule(client, appliance, org, rule_name, source_zone,
-                source_addresses,
-                source_ranges, dest_zone, dest_addresses, dest_ranges,
-                translation_type):
+def create_rule(client, appliance, org, rule_name,
+                source_addresses, source_pool):
     """
         :param client - versa client "str"
         :param appliance - appliance name "str"
         :param org - organization name "str"
         :param rule_name - rule name "str"
-        :param source_zone - source_zone "str"
         :param source_addresses - list in format ["10.0.0.0/8", ... ]
-        :param source_ranges - list of type AddressRange [range1, range2]
-        :param dest_zone - dest_zone "str"
-        :param dest_addresses - list in format ["10.0.0.0/8", ... ]
-        :param dest_ranges - list of type AddressRange [range1, range2]
-        :param translation_type - type of translation "str"
+        :param source_pool - source pool
     """
-    url = '/api/config/appliances/{}/orgs/org-services/{}/cgnat'.format(
+    url = '/api/config/appliances/{}/orgs/org-services/{}/cgnat/rules'.format(
         appliance, org)
-    source_range_list = [{'name': r.name,
-                          'low': r.low,
-                          'hight': r.hight} for r in source_ranges]
-    dest_range_list = [{'name': r.name,
-                        'low': r.low,
-                        'hight': r.hight} for r in dest_ranges]
     data = {
         "rule": {
             "name": rule_name,
             "precedence": "1",
             "from": {
-                "source-zone": [source_zone],
+                "destination-address-range": {
+                    "range": []},
                 "source-address": source_addresses,
                 "source-address-range": {
-                    "range": source_range_list}},
-            "destination-zone": [dest_zone],
-            "destination-address": dest_addresses,
-            "destination-address-range": {
-                    "range": dest_range_list}},
+                    "range": []}},
             "then": {
                 "translated": {
-                    "translation-type": translation_type,
-                    "source-pool": "pool1"}}}
+                    "translation-type": "napt-44",
+                    "source-pool": source_pool,
+                    "filtering-type": "none",
+                    "mapping-type": "none"}}}}
     rules = client.post(url, json.dumps(data), JSON, codes.created)
     return rules
+
+
+def delete_rule(client, appliance, org, name):
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org-services/{}'\
+          '/cgnat/rules/rule/{}'.format(appliance, org, name)
+    client.delete(url, codes.no_content)
 
 
 def get_list_nat_pools(client, appliance, org):

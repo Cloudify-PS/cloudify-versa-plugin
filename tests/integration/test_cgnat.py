@@ -50,9 +50,26 @@ class CgnatTestCase(unittest.TestCase):
                                            None, addr_range,
                                            routing, provider)
 
-    def test_delete_pool(self):
+    def notest_delete_pool(self):
         with VersaClient(self.config) as client:
             app = 'testapp'
             org = 'child'
             pool_name = "testpool"
             versa_plugin.cgnat.delete_pool(client, app, org, pool_name)
+
+    def notest_create_rule(self):
+        with VersaClient(self.config) as client:
+            app = 'testapp'
+            org = 'child'
+            pool_name = "testpool"
+            rule_name = "testrule"
+            source_addr = ["1.2.3.0/24"]
+            versa_plugin.cgnat.create_rule(client, app, org, rule_name,
+                                           source_addr, pool_name)
+
+    def test_delete_rule(self):
+        with VersaClient(self.config) as client:
+            app = 'testapp'
+            org = 'child'
+            rule_name = "testrule"
+            versa_plugin.cgnat.delete_rule(client, app, org, rule_name)
