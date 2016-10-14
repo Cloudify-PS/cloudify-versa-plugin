@@ -35,8 +35,10 @@ def create_cms_local_organization(versa_client, **kwargs):
 def create_organization(versa_client, **kwargs):
     nms_org_name = ctx.node.properties['name']
     cms_org_name = ctx.node.properties['cms_org_name']
+    parent = ctx.node.properties['parent']
     versa_plugin.appliance.add_organization(versa_client,
                                             nms_org_name,
+                                            parent,
                                             cms_org_name)
 
 
