@@ -22,7 +22,7 @@ inputs:
   username:
     default: ""
 
-  passord:
+  password:
     default: ""
 
 ###################
@@ -160,8 +160,8 @@ node_templates:
               unit: { get_input: unit }
     relationships:
       - type: cloudify.versa.organization_connected_to_appliance
-        target: organiztaion1
+        target: organization1
       - type: cloudify.versa.organization_connected_to_appliance
-        target: organiztaion2
+        target: organization2
 
 
