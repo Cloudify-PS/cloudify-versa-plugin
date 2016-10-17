@@ -7,6 +7,7 @@ from versa_plugin.appliance import ApplianceInterface, NetworkInfo
 from versa_plugin import with_versa_client
 import versa_plugin.tasks
 import versa_plugin.networking
+from versa_plugin.cgnat import AddressRange
 
 
 @operation
@@ -86,9 +87,6 @@ def create_appliance(versa_client, **kwargs):
                                                 app_networks)
     versa_plugin.tasks.wait_for_task(versa_client, task)
 
-    associate_organizations(versa_client, name,
-                            ctx.node.properties['organizations'])
-
 
 @operation
 @with_versa_client
@@ -98,17 +96,70 @@ def delete_appliance(versa_client, **kwargs):
     versa_plugin.tasks.wait_for_task(versa_client, task)
 
 
-def associate_organizations(versa_client, appliance, organizations):
-    for org in organizations:
-        nms_org_name = org['nms_org_name']
-        net = org['networks'][0]
-        net_info = NetworkInfo(net['name'], net['parent_interface'],
-                               net['ip_address'], net['mask'],
-                               net['unit'])
-        versa_plugin.networking.create_interface(versa_client, appliance,
-                                                 net['parent_interface'])
-        task = versa_plugin.appliance.associate_organization(versa_client,
-                                                             appliance,
-                                                             nms_org_name,
-                                                             net_info)
-        # versa_plugin.tasks.wait_for_task(versa_client, task)
+@operation
+@with_versa_client
+def associate_organization(versa_client, **kwargs):
+    appliance = ctx.node.properties['appliance_name']
+    org = ctx.node.properties['organization']
+    nms_org_name = org['nms_org_name']
+    net = org['networks'][0]
+    net_info = NetworkInfo(net['name'], net['parent_interface'],
+                           net['ip_address'], net['mask'],
+                           net['unit'])
+    parent = org['parent']
+    versa_plugin.networking.create_interface(versa_client, appliance,
+                                             net['parent_interface'])
+    task = versa_plugin.appliance.associate_organization(versa_client,
+                                                         appliance,
+                                                         nms_org_name,
+                                                         net_info)
+    versa_plugin.tasks.wait_for_task(versa_client, task)
+    versa_plugin.networking.update_provider_organization(versa_client,
+                                                         appliance,
+                                                         nms_org_name,
+                                                         parent)
+
+
+@operation
+@with_versa_client
+def create_router(versa_client, **kwargs):
+    appliance_name = ctx.node.properties['appliance_name']
+    router_name = ctx.node.properties['name']
+    organization_name = ctx.node.properties['organization']
+    networks = ctx.node.properties['networks']
+    versa_plugin.networking.create_virtual_router(versa_client, appliance_name,
+                                                  router_name, networks)
+    versa_plugin.networking.update_routing_instance(versa_client,
+                                                    appliance_name,
+                                                    organization_name,
+                                                    router_name)
+
+
+@operation
+@with_versa_client
+def create_cgnat(versa_client, **kwargs):
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    pool = ctx.node.properties['pool']
+    pool_name = pool['name']
+    addresses = pool['addresses']
+    ranges = [AddressRange(r['name'], r['low'], r['hight'])
+              for r in pool['ranges']]
+    routing_instance = pool['routing_instance']
+    provider_org = pool['provider_org']
+    versa_plugin.cgnat.create_pool(versa_client, appliance_name,
+                                   org_name, pool_name,
+                                   addresses, ranges, routing_instance,
+                                   provider_org)
+    rule = ctx.node.properties['rule']
+    rule_name = rule['name']
+    source_addresses = rule['addresses']
+    versa_plugin.cgnat.create_rule(versa_client, appliance_name,
+                                   org_name, rule_name,
+                                   source_addresses, pool_name)
+
+
+@operation
+@with_versa_client
+def create_firewall(versa_client, **kwargs):
+    pass

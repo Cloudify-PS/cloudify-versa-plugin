@@ -82,8 +82,6 @@ node_types:
         default: ""
       appliance_owner:
         default: {}
-      organizations:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -93,8 +91,96 @@ node_types:
           implementation: versa.versa_plugin.operations.delete_appliance
           inputs: {}
 
+  cloudify.versa.nodes.Associated_organization:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      organization:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.associate_organization
+          inputs: {}
+
+  cloudify.versa.nodes.Router:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      name:
+        default: ""
+      networks:
+        default: {}
+      routings:
+        default: {}
+      organization:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_router
+          inputs: {}
+
+  cloudify.versa.nodes.CGNat:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org__name:
+        default: ""
+      pool:
+        default: {}
+      rule: 
+        name:
+          default: ""
+        addresses:
+          default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_cgnat
+          inputs: {}
+
+  cloudify.versa.nodes.Firewall:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org__name:
+        default: ""
+      policy:
+        default: {}
+      rule: 
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_firewall
+          inputs: {}
 
 relationships:
+    cloudify.versa.org_connected_to_firewall:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.org_connected_to_cgnat:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.org_connected_to_router:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.associated:
+      derived_from: cloudify.relationships.connected_to
+
     cloudify.versa.parent:
       derived_from: cloudify.relationships.connected_to
 
