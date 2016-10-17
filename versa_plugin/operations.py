@@ -80,7 +80,6 @@ def create_appliance(versa_client, **kwargs):
                                        net['ip_address'],
                                        net['interface']) for net in networks]
     versa_plugin.appliance.wait_for_device(versa_client, management_ip)
-    import pdb; pdb.set_trace()  # XXX BREAKPOINT
     task = versa_plugin.appliance.add_appliance(versa_client,
                                                 management_ip, name,
                                                 nms_org_name, cms_org_name,
