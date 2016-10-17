@@ -86,8 +86,8 @@ def create_appliance(versa_client, **kwargs):
                                                 app_networks)
     versa_plugin.tasks.wait_for_task(versa_client, task)
 
-    associate_organizations(versa_client, name,
-                            ctx.node.properties['organizations'])
+    # associate_organizations(versa_client, name,
+                            # ctx.node.properties['organizations'])
 
 
 @operation
