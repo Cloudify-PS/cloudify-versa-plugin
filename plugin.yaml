@@ -27,6 +27,9 @@ node_types:
         create:
           implementation: versa.versa_plugin.operations.create_resource_pool
           inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_resource_pool
+          inputs: {}
   
   cloudify.versa.nodes.CMSLocalOrganization:
     derived_from: cloudify.nodes.Root
@@ -43,6 +46,9 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_cms_local_organization
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_cms_local_organization
           inputs: {}
 
   cloudify.versa.nodes.Organization:
@@ -61,6 +67,9 @@ node_types:
         create:
           implementation: versa.versa_plugin.operations.create_organization
           inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_organization
+          inputs: {}
 
   cloudify.versa.nodes.Appliance:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -77,8 +86,11 @@ node_types:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
-        postconfigure:
+        create:
           implementation: versa.versa_plugin.operations.create_appliance
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_appliance
           inputs: {}
 
 

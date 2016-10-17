@@ -49,6 +49,16 @@ class ApplianceTestCase(unittest.TestCase):
             versa_plugin.connectors.delete_organization(client, cms_org_uuid)
             versa_plugin.connectors.delete_resource_pool(client, resource)
 
+
+    def notest_add_organization(self):
+        cms_org_name = "testcmsorg"
+        nms_org_name = "Testname"
+        with VersaClient(self.config) as client:
+            versa_plugin.appliance.add_organization(client,
+                                                    nms_org_name,
+                                                    None,
+                                                    cms_org_name)
+
     def notest_add_delete_appliance(self):
         cms_org_name = "cmsorgname"
         resource = "Test_resource"
@@ -88,11 +98,11 @@ class ApplianceTestCase(unittest.TestCase):
             versa_plugin.connectors.delete_resource_pool(client, resource)
 
     def notest_add_appliance(self):
-        cms_org_name = "localorg"
+        cms_org_name = "cmsorg"
         resource_address = "10.2.0.18"
-        nms_org_name = "mytestorg"
+        nms_org_name = "org"
         name = "testapp"
-        app_networks = [ApplianceInterface("versa2", "10.3.0.15", "vni-0/0")]
+        app_networks = [ApplianceInterface("net1", "10.3.0.15", "vni-0/0")]
         with VersaClient(self.config) as client:
             task = versa_plugin.appliance.add_appliance(client,
                                                         resource_address, name,
@@ -106,9 +116,9 @@ class ApplianceTestCase(unittest.TestCase):
         with VersaClient(self.config) as client:
             versa_plugin.appliance.delete_appliance(client, "")
 
-    def notest_get_organizations(self):
+    def test_get_organizations(self):
         with VersaClient(self.config) as client:
-            name = 'Testname2'
+            name = 'org'
             orgs = versa_plugin.appliance.get_organization(client, name)
             print orgs
             # self.assertTrue(orgs)
@@ -126,7 +136,7 @@ class ApplianceTestCase(unittest.TestCase):
                                                     cmsorg,
                                                     cms_org_name)
 
-    def test_associate_organization(self):
+    def notest_associate_organization(self):
         org = 'child2'
         appliance = 'testapp'
         net_info = NetworkInfo("testnet2", "vni-0/1", "10.22.0.100",

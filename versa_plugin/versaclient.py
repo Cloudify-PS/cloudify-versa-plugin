@@ -10,6 +10,8 @@ XML = 'xml'
 
 
 def _check_response(response, return_code, accept):
+    if response.status_code == requests.codes.no_content:
+        return None
     if response.status_code != return_code:
         raise cfy_exc.HttpException(response.url, response.status_code,
                                     response.content)

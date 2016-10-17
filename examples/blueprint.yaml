@@ -5,7 +5,7 @@ description: >
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4.1/types.yaml
-  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/master/plugin.yaml
+  - plugin.yaml
 
 
 inputs:
@@ -136,6 +136,8 @@ node_templates:
     relationships:
       - type: cloudify.versa.nms_org_connected_to_cms_org
         target: cms_organization
+      - type: cloudify.versa.parent
+        target: organization1
 
   appliance:
     type: cloudify.versa.nodes.Appliance
@@ -151,11 +153,11 @@ node_templates:
             ip_address: { get_input: ip_address1 }
             interface: { get_input: interface1 }
       organizations:
-        - nms_org_name: { get_input: nms_org_name1 }
+        - nms_org_name: { get_input: nms_org_name2 }
           networks:
             - name: { get_input: network1_name }
               parent_interface: { get_input: interface2 }
-              ip_address: { get_input: ip_address1 }
+              ip_address: { get_input: ip_address2 }
               mask: { get_input: network_mask }
               unit: { get_input: unit }
     relationships:

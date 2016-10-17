@@ -27,7 +27,7 @@ def delete_resource_pool(client, name):
 
 def add_organization(client, org_name, networks, resource):
     url = "/api/config/cms/local/organizations"
-    org_uuid = 'cms:org:' + str(uuid.uuid4())
+    org_uuid = str(uuid.uuid4())
     network_list = []
     for network in networks:
         net = {
@@ -50,7 +50,8 @@ def add_organization(client, org_name, networks, resource):
     return org_uuid
 
 
-def delete_organization(client, org_uuid):
+def delete_organization(client, org_name):
+    org_uuid = get_organization_uuid(client, org_name)
     url = "/api/config/cms/local/organizations/organization/" + org_uuid
     client.delete(url)
 
@@ -58,6 +59,8 @@ def delete_organization(client, org_uuid):
 def get_organization_uuid(client, name):
     url = "/api/config/cms/local/organizations?deep"
     result = client.get(url, None, None)
+    if not result:
+        return None
     for org in result['organizations']['organization']:
         if name == org['name']:
             return org['uuid']
@@ -67,6 +70,8 @@ def get_organization_uuid(client, name):
 def get_organization(client, name):
     url = "/api/config/cms/local/organizations?deep"
     result = client.get(url, None, None)
+    if not result:
+        return None
     for org in result['organizations']['organization']:
         if name == org['name']:
             return org

@@ -26,12 +26,14 @@ def add_organization(client, org_name, parent, cms_org_name):
     org_uuid = str(uuid.uuid4())
     cms_org_uuid = versa_plugin.connectors.get_organization_uuid(client,
                                                                  cms_org_name)
-    parent = parent if parent else 'none'
+    if not parent:
+        parent = 'none'
     xmldata = """
     <organization>
         <uuid>{0}</uuid>
         <id>{1}</id>
         <name>{2}</name>
+        <right>2</right>
         <parent-org>{3}</parent-org>
         <subscription-plan>Default-All-Services-Plan</subscription-plan>
         <cms-orgs>
@@ -45,7 +47,10 @@ def add_organization(client, org_name, parent, cms_org_name):
     return org_uuid
 
 
-def delete_organization(client, org_uuid):
+def delete_organization(client, org_name):
+    org_uuid = get_organization_uuid(client, org_name)
+    if not org_uuid:
+        return None
     url = "/api/config/nms/actions/delete-organization"
     data = {"delete-organization": {"orguuid":  org_uuid}}
     return client.post(url, json.dumps(data), JSON, codes.ok)
@@ -144,14 +149,19 @@ def disassociate_org(client, appliance, org):
 def get_appliance_uuid(client, name):
     url = '/api/config/nms/provider/appliances/appliance/'
     result = client.get(url, None, None, codes.ok)
+    if not result:
+        return None
     for app in result['appliance']:
         if app['name'] == name:
             return app['uuid']
     return None
 
 
-def delete_appliance(client, uuid):
+def delete_appliance(client, name):
     url = "/api/config/nms/actions/delete-appliance"
+    uuid = get_appliance_uuid(client, name)
+    if not uuid:
+        return None
     data = {
         "delete-appliance": {
             "applianceuuid": uuid,
@@ -164,6 +174,8 @@ def delete_appliance(client, uuid):
 def get_organization(client, name):
     url = "/api/config/nms/provider/organizations?deep"
     result = client.get(url, None, None)
+    if not result:
+        return None
     for org in result['organizations']['organization']:
         if name == org['name']:
             return org
@@ -173,6 +185,8 @@ def get_organization(client, name):
 def get_organization_uuid(client, name):
     url = "/api/config/nms/provider/organizations?deep"
     result = client.get(url, None, None)
+    if not result:
+        return None
     for org in result['organizations']['organization']:
         if name == org['name']:
             return org['uuid']
@@ -186,6 +200,8 @@ def get_device_information(client, address):
           "ip-address": address,
           "clean-config": "false"}}
     result = client.post(url, json.dumps(data), JSON, codes.ok)
+    if not result:
+        return None
     if result['output']['status'] == SUCCESS:
         return result['output']['device-details']['interfaces']
     else:
@@ -200,3 +216,13 @@ def wait_for_device(client, address):
             return
         time.sleep(SLEEP_TIME)
     raise cfy_exc.NonRecoverableError("Can't get device information")
+
+
+def wait_for_parent(client, parent):
+    for retry in range(MAX_RETRY):
+        print "Waiting for parent org. Try {}/{}".format(retry + 1, MAX_RETRY)
+        uuid = get_organization_uuid(client, parent)
+        if uuid:
+            return
+        time.sleep(SLEEP_TIME)
+    raise cfy_exc.NonRecoverableError("Can't get parent organization")
