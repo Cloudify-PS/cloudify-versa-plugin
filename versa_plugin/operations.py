@@ -86,8 +86,8 @@ def create_appliance(versa_client, **kwargs):
                                                 app_networks)
     versa_plugin.tasks.wait_for_task(versa_client, task)
 
-    # associate_organizations(versa_client, name,
-                            # ctx.node.properties['organizations'])
+    associate_organizations(versa_client, name,
+                            ctx.node.properties['organizations'])
 
 
 @operation
@@ -107,8 +107,8 @@ def associate_organizations(versa_client, appliance, organizations):
                                net['unit'])
         versa_plugin.networking.create_interface(versa_client, appliance,
                                                  net['parent_interface'])
-        task = versa_plugin.appliance.associate_organization(versa_client,
-                                                             appliance,
-                                                             nms_org_name,
-                                                             net_info)
-        versa_plugin.tasks.wait_for_task(versa_client, task)
+        # task = versa_plugin.appliance.associate_organization(versa_client,
+                                                             # appliance,
+                                                             # nms_org_name,
+                                                             # net_info)
+        # versa_plugin.tasks.wait_for_task(versa_client, task)
