@@ -95,6 +95,9 @@ node_types:
 
 
 relationships:
+    cloudify.versa.parent:
+      derived_from: cloudify.relationships.connected_to
+
     cloudify.versa.cms_org_connected_to_pool:
       derived_from: cloudify.relationships.connected_to
 
