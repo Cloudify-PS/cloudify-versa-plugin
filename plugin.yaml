@@ -168,6 +168,31 @@ node_types:
           implementation: versa.versa_plugin.operations.create_firewall
           inputs: {}
 
+  cloudify.versa.nodes.DHCP:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org__name:
+        default: ""
+      profile_name:
+        default: {}
+      options_profile:
+        default: {}
+      lease_profile:
+        default: ""
+      pool: 
+        default: {}
+      server: 
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_firewall
+          inputs: {}
+
 relationships:
     cloudify.versa.org_connected_to_firewall:
       derived_from: cloudify.relationships.connected_to

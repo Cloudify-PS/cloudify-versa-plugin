@@ -162,4 +162,47 @@ def create_cgnat(versa_client, **kwargs):
 @operation
 @with_versa_client
 def create_firewall(versa_client, **kwargs):
-    pass
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    policy_name = ctx.node.properties['policy']
+    rule_name = ctx.node.properties['rule']
+
+    versa_plugin.firewall.add_policy(versa_client, appliance_name,
+                                     org_name, policy_name)
+    versa_plugin.firewall.add_rule(versa_client, appliance_name,
+                                   org_name, policy_name, rule_name)
+
+
+@operation
+@with_versa_client
+def create_dhcp(versa_client, **kwargs):
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    profile_name = ctx.node.properties['profile_name']
+    options = ctx.node.properties['options_profile']
+    options_name = options['name']
+    domain = options['domain']
+    servers = options['servers']
+    lease_name = ctx.node.properties['lease_pofile']
+    pool = ctx.node.properties['pool']
+    pool_name = pool['name']
+    mask = pool['mask']
+    range_name = pool['range_name']
+    begin_address = pool['begin_address']
+    end_address = pool['end_address']
+    server = ctx.node.properties['server']
+    server_name = server['name']
+    networks = server['networks']
+    versa_plugin.networking.create_dhcp_profile(versa_client, appliance_name,
+                                                profile_name)
+    versa_plugin.networking.update_dhcp_profile(versa_client, appliance_name,
+                                                org_name, profile_name)
+    versa_plugin.dhcp.create_options_profile(versa_client, appliance_name,
+                                             org_name, domain, servers)
+    versa_plugin.dhcp.create_lease_profile(versa_client, appliance_name,
+                                           lease_name)
+    versa_plugin.dhcp.create_pool(versa_client, appliance_name, pool_name,
+                                  mask, range_name, begin_address, end_address)
+    versa_plugin.dhcp.create_server(versa_client, appliance_name, org_name,
+                                    server_name, lease_name, options_name,
+                                    networks, pool_name)

@@ -16,16 +16,28 @@ def delete_policy(client, appliance, org, policy):
                                                                     org, policy)
     client.delete(url, None, None, codes.no_content)
 
-
-def add_rule(client, appliance, org, policy, rule):
+def add_rule(client, appliance, org, policy, rule_name):
     url = '/api/config/devices/device/{}/config/orgs'\
         '/org-services/{}/security/access-policies/'\
-        'access-policy-group/{}/rules'.format(appliance, org, policy, rule)
-    data = {}
+        'access-policy-group/{}/rules'.format(appliance, org, policy)
+    data = {
+        "access-policy": {
+            "name": rule_name,
+            "match": {
+                "source": {
+                    "zone": {
+                        "zone-list": ["trust"]}},
+                "destination": {
+                    "zone":{
+                        "zone-list": ["untrust"]}}},
+            "set": {
+                "lef" :{
+                    "event":"end",
+                    "options": {
+                        "send-pcap-data": {
+                            "enable": False}}},
+                "action": "allow"}}}
     client.post(url, json.dumps(data), JSON, codes.created)
-"""
-    {"access-policy":{"name":"newrule","match":{"source":{"zone":{"zone-list":["trust"]},"address":{}},"destination":{"zone":{"zone-list":["untrust"]},"address":{}},"application":{},"ttl":{}},"set":{"lef":{"event":"end","options":{"send-pcap-data":{"enable":false}}},"action":"allow"}}}"
-"""
 
 
 def delete_rule(client, appliance, org, policy, rule):
