@@ -7,6 +7,7 @@ from versa_plugin.appliance import ApplianceInterface, NetworkInfo
 from versa_plugin import with_versa_client
 import versa_plugin.tasks
 import versa_plugin.networking
+from versa_plugin.networking import Routing
 from versa_plugin.cgnat import AddressRange
 
 
@@ -127,8 +128,14 @@ def create_router(versa_client, **kwargs):
     router_name = ctx.node.properties['name']
     organization_name = ctx.node.properties['organization']
     networks = ctx.node.properties['networks']
+    routings = []
+    if ctx.node.properties['routing']:
+        routings = [Routing(r['ip_prefix'], r['next_hop'],
+                            r['interface'], r['preference'],
+                            r['tag']) for r in ctx.node.properties['routing']]
     versa_plugin.networking.create_virtual_router(versa_client, appliance_name,
-                                                  router_name, networks)
+                                                  router_name, networks,
+                                                  routings)
     versa_plugin.networking.update_routing_instance(versa_client,
                                                     appliance_name,
                                                     organization_name,
@@ -164,13 +171,29 @@ def create_cgnat(versa_client, **kwargs):
 def create_firewall(versa_client, **kwargs):
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
-    policy_name = ctx.node.properties['policy']
-    rule_name = ctx.node.properties['rule']
-
+    policy_name = ctx.node.properties['policy_name']
+    rule_name = ctx.node.properties['rule_name']
+    zones = ctx.node.properties.get('zones')
+    if zones:
+        for zone in zones:
+            networks = zones.get('networks', [])
+            routing_instances = zones.get('routing_instances', [])
+            versa_plugin.networking.update_zones(versa_client, appliance_name,
+                                                 org_name, networks,
+                                                 routing_instances)
     versa_plugin.firewall.add_policy(versa_client, appliance_name,
                                      org_name, policy_name)
     versa_plugin.firewall.add_rule(versa_client, appliance_name,
                                    org_name, policy_name, rule_name)
+
+
+@operation
+@with_versa_client
+def create_dhcp_profile(versa_client, **kwargs):
+    appliance_name = ctx.node.properties['appliance_name']
+    profile_name = ctx.node.properties['profile_name']
+    versa_plugin.networking.create_dhcp_profile(versa_client, appliance_name,
+                                                profile_name)
 
 
 @operation
@@ -193,8 +216,6 @@ def create_dhcp(versa_client, **kwargs):
     server = ctx.node.properties['server']
     server_name = server['name']
     networks = server['networks']
-    versa_plugin.networking.create_dhcp_profile(versa_client, appliance_name,
-                                                profile_name)
     versa_plugin.networking.update_dhcp_profile(versa_client, appliance_name,
                                                 org_name, profile_name)
     versa_plugin.dhcp.create_options_profile(versa_client, appliance_name,

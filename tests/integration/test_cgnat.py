@@ -47,7 +47,7 @@ class CgnatTestCase(unittest.TestCase):
             addr_range = [AddressRange("range",
                                        "172.168.35.1", "175.168.35.30")]
             versa_plugin.cgnat.create_pool(client, app, org, pool_name,
-                                           None, addr_range,
+                                           addr_range,
                                            routing, provider)
 
     def notest_delete_pool(self):

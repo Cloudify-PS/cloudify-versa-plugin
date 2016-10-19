@@ -10,9 +10,9 @@ node_types:
   cloudify.versa.nodes.versa_configuration:
     derived_from: cloudify.nodes.Root
     properties:
-      versa_config: 
+      versa_config:
         default: {}
-              
+
   cloudify.versa.nodes.ResourcePool:
     derived_from: cloudify.nodes.Root
     properties:
@@ -20,7 +20,7 @@ node_types:
         default: {}
       name:
         default: ""
-      ip_address:  
+      ip_address:
         default: ""
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -30,7 +30,7 @@ node_types:
         delete:
           implementation: versa.versa_plugin.operations.delete_resource_pool
           inputs: {}
-  
+
   cloudify.versa.nodes.CMSLocalOrganization:
     derived_from: cloudify.nodes.Root
     properties:
@@ -38,9 +38,9 @@ node_types:
         default: {}
       name:
         default: ""
-      networks:  
+      networks:
         default: {}
-      resources:  
+      resources:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -58,9 +58,9 @@ node_types:
         default: {}
       name:
         default: ""
-      parent:  
+      parent:
         default: ""
-      cms_org_name:  
+      cms_org_name:
         default: ""
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -113,13 +113,13 @@ node_types:
         default: {}
       appliance_name:
         default: ""
+      org_name:
+        default: ""
       name:
         default: ""
       networks:
         default: {}
       routings:
-        default: {}
-      organization:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -134,15 +134,12 @@ node_types:
         default: {}
       appliance_name:
         default: ""
-      org__name:
+      org_name:
         default: ""
       pool:
         default: {}
-      rule: 
-        name:
-          default: ""
-        addresses:
-          default: {}
+      rule:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -156,16 +153,33 @@ node_types:
         default: {}
       appliance_name:
         default: ""
-      org__name:
+      org_name:
         default: ""
-      policy:
-        default: {}
-      rule: 
+      policy_name:
+        default: ""
+      rule_name:
+        default: ""
+      zones:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_firewall
+          inputs: {}
+
+  cloudify.versa.nodes.DHCPProfile:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      profile_name:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_dhcp_profile
           inputs: {}
 
   cloudify.versa.nodes.DHCP:
@@ -175,7 +189,7 @@ node_types:
         default: {}
       appliance_name:
         default: ""
-      org__name:
+      org_name:
         default: ""
       profile_name:
         default: {}
@@ -183,24 +197,30 @@ node_types:
         default: {}
       lease_profile:
         default: ""
-      pool: 
+      pool:
         default: {}
-      server: 
+      server:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: versa.versa_plugin.operations.create_firewall
+          implementation: versa.versa_plugin.operations.create_dhcp
           inputs: {}
 
 relationships:
-    cloudify.versa.org_connected_to_firewall:
+    cloudify.versa.dhcp_profile_connected_to_appliance:
       derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.org_connected_to_cgnat:
+    cloudify.versa.dhcp_connected_to_profile:
       derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.org_connected_to_router:
+    cloudify.versa.firewall_connected_to_org:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.cgnat_connected_to_org:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.router_connected_to_org:
       derived_from: cloudify.relationships.connected_to
 
     cloudify.versa.associated:
@@ -214,7 +234,6 @@ relationships:
 
     cloudify.versa.nms_org_connected_to_cms_org:
       derived_from: cloudify.relationships.connected_to
-          
+
     cloudify.versa.organization_connected_to_appliance:
       derived_from: cloudify.relationships.connected_to
-          

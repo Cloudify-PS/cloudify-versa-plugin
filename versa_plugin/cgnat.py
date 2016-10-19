@@ -7,14 +7,13 @@ from collections import namedtuple
 AddressRange = namedtuple("AddressRange", "name, low, high")
 
 
-def create_pool(client, appliance, org, pool_name, addresses,
+def create_pool(client, appliance, org, pool_name,
                 ranges, routing_instance, provider_org):
     """
         :param client - versa client "str"
         :param appliance - appliance name "str"
         :param org - organization name "str"
         :param pool_name - pool name "str"
-        :param addresses - list of addrres in format ["addr, "addr"]
         :param ranges - list of type AddressRange [range1, range2]
         :param routing_instance - routing instance "str"
         :param provider_org - provider organizarion "str"
@@ -27,7 +26,6 @@ def create_pool(client, appliance, org, pool_name, addresses,
     data = {
         "pool": {
             "name": pool_name,
-            "address": addresses,
             "icmp-mapping-timeout": "60",
             "udp-mapping-timeout": "300",
             "tcp-mapping-timeout": "7440",

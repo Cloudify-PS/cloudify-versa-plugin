@@ -105,3 +105,14 @@ def update_provider_orranization(client, appliance, org, provider):
     add_organization_child(limits, "available-provider-orgs", provider)
     xmldata = limits.toxml()
     client.put(url, xmldata, XML, codes.no_content)
+
+
+def update_zones(client, appliance, org, zone, networks, routing_instances):
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org-services/{}/objects/zones/zone/{}'.format(appliance,
+                                                                      org, zone)
+    data = {
+        "zone": {"name": zone,
+                 "networks": networks,
+                 "routing-instance": routing_instances}}
+    client.put(url, json.dumps(data), JSON, codes.ok)
