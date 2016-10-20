@@ -238,7 +238,7 @@ def create_dhcp(versa_client, **kwargs):
     options_name = options['name']
     domain = options['domain']
     servers = options['servers']
-    lease_name = ctx.node.properties['lease_pofile']
+    lease_name = ctx.node.properties['lease_profile']
     pool = ctx.node.properties['pool']
     pool_name = pool['name']
     mask = pool['mask']
