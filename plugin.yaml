@@ -102,6 +102,8 @@ node_types:
   cloudify.versa.nodes.Associated_organization:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
+      use_existing: 
+        default: false
       versa_config:
         default: {}
       appliance_name:
@@ -117,6 +119,8 @@ node_types:
   cloudify.versa.nodes.Router:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
+      use_existing: 
+        default: false
       versa_config:
         default: {}
       appliance_name:
@@ -138,6 +142,8 @@ node_types:
   cloudify.versa.nodes.CGNat:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
+      use_existing: 
+        default: false
       versa_config:
         default: {}
       appliance_name:
@@ -157,6 +163,8 @@ node_types:
   cloudify.versa.nodes.Firewall:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
+      use_existing: 
+        default: false
       versa_config:
         default: {}
       appliance_name:
@@ -178,6 +186,8 @@ node_types:
   cloudify.versa.nodes.DHCPProfile:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
+      use_existing: 
+        default: false
       versa_config:
         default: {}
       appliance_name:
@@ -193,6 +203,8 @@ node_types:
   cloudify.versa.nodes.DHCP:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
+      use_existing: 
+        default: false
       versa_config:
         default: {}
       appliance_name:
