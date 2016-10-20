@@ -166,6 +166,15 @@ inputs:
   dhcp_lease_profile_name:
     default: ""
 
+  dhcp_pool_name: 
+    default: ""
+
+  dhcp_range_name:
+    default: ""
+
+  dhcp_server_name:
+    default: ""
+
   dns_server:
     default: ""
 
@@ -179,6 +188,33 @@ inputs:
     default: ""
 
   branch2_domain_name:
+    default: ""
+        
+  hq_dhcp_pool_mask:
+    default: ""
+        
+  hq_dhcp_begin_address:
+    default: ""
+        
+  hq_dhcp_end_address:
+    default: ""
+
+  branch1_dhcp_pool_mask:
+    default: ""
+        
+  branch1_dhcp_begin_address:
+    default: ""
+        
+  branch1_dhcp_end_address:
+    default: ""
+        
+  branch2_dhcp_pool_mask:
+    default: ""
+        
+  branch2_dhcp_begin_address:
+    default: ""
+        
+  branch2_dhcp_end_address:
     default: ""
 #
 # Node templates
@@ -468,12 +504,15 @@ node_templates:
         servers:
           - { get_input: dns_server}
       pool:
-        name: dhcp_pool_name
-        mask: dhcp_pool_mask
-        range_name: dhcp_range_name
-        begin_address: hg_dhcp_begin_address
-        end_address: hq_dhcp_end_address 
-
+        name: { get_input: dhcp_pool_name }
+        mask: { get_input: hq_dhcp_pool_mask }
+        range_name: { get_input: dhcp_range_name }
+        begin_address: { get_input: hg_dhcp_begin_address }
+        end_address: { get_input: hq_dhcp_end_address }
+      server:
+        name: { get_input: dhcp_server_name }
+        networks:
+          - { get_input: hq_network_name }
     relationships:
       - type: cloudify.versa.dhcp_connected_to_profile
         target: dhcp_profile
@@ -493,6 +532,16 @@ node_templates:
         domain: { get_input: branch1_domain_name}
         servers:
           - { get_input: dns_server}
+      pool:
+          name: { get_input: dhcp_pool_name }
+          mask: { get_input: branch1_dhcp_pool_mask }
+          range_name: { get_input: dhcp_range_name }
+          begin_address: { get_input: branch1_dhcp_begin_address }
+          end_address: { get_input: branch1_dhcp_end_address }
+      server:
+        name: { get_input: dhcp_server_name }
+        networks:
+          - { get_input: branch1_network_name }
     relationships:
       - type: cloudify.versa.dhcp_connected_to_profile
         target: dhcp_profile
@@ -512,6 +561,16 @@ node_templates:
         domain: { get_input: branch2_domain_name}
         servers:
           - { get_input: dns_server}
+      pool:
+          name: { get_input: dhcp_pool_name }
+          mask: { get_input: branch2_dhcp_pool_mask }
+          range_name: { get_input: dhcp_range_name }
+          begin_address: { get_input: branch2_dhcp_begin_address }
+          end_address: { get_input: branch2_dhcp_end_address }
+      server:
+        name: { get_input: dhcp_server_name }
+        networks:
+          - { get_input: branch2_network_name }
     relationships:
       - type: cloudify.versa.dhcp_connected_to_profile
         target: dhcp_profile
