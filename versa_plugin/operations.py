@@ -120,6 +120,8 @@ def delete_appliance(versa_client, **kwargs):
 @operation
 @with_versa_client
 def associate_organization(versa_client, **kwargs):
+    if is_use_existing():
+        return
     appliance = ctx.node.properties['appliance_name']
     org = ctx.node.properties['organization']
     nms_org_name = org['nms_org_name']
@@ -144,15 +146,17 @@ def associate_organization(versa_client, **kwargs):
 @operation
 @with_versa_client
 def create_router(versa_client, **kwargs):
+    if is_use_existing():
+        return
     appliance_name = ctx.node.properties['appliance_name']
     router_name = ctx.node.properties['name']
-    organization_name = ctx.node.properties['organization']
+    organization_name = ctx.node.properties['org_name']
     networks = ctx.node.properties['networks']
     routings = []
-    if ctx.node.properties['routing']:
+    if ctx.node.properties.get('routings'):
         routings = [Routing(r['ip_prefix'], r['next_hop'],
                             r['interface'], r['preference'],
-                            r['tag']) for r in ctx.node.properties['routing']]
+                            r['tag']) for r in ctx.node.properties['routings']]
     versa_plugin.networking.create_virtual_router(versa_client, appliance_name,
                                                   router_name, networks,
                                                   routings)
@@ -165,6 +169,8 @@ def create_router(versa_client, **kwargs):
 @operation
 @with_versa_client
 def create_cgnat(versa_client, **kwargs):
+    if is_use_existing():
+        return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
     pool = ctx.node.properties['pool']
@@ -189,6 +195,8 @@ def create_cgnat(versa_client, **kwargs):
 @operation
 @with_versa_client
 def create_firewall(versa_client, **kwargs):
+    if is_use_existing():
+        return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
     policy_name = ctx.node.properties['policy_name']
@@ -210,6 +218,8 @@ def create_firewall(versa_client, **kwargs):
 @operation
 @with_versa_client
 def create_dhcp_profile(versa_client, **kwargs):
+    if is_use_existing():
+        return
     appliance_name = ctx.node.properties['appliance_name']
     profile_name = ctx.node.properties['profile_name']
     versa_plugin.networking.create_dhcp_profile(versa_client, appliance_name,
@@ -219,6 +229,8 @@ def create_dhcp_profile(versa_client, **kwargs):
 @operation
 @with_versa_client
 def create_dhcp(versa_client, **kwargs):
+    if is_use_existing():
+        return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
     profile_name = ctx.node.properties['profile_name']

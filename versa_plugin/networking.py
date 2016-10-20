@@ -33,7 +33,7 @@ def create_virtual_router(client, appliance, name, networks, routings=None):
                             "interface": route.interface})
     data = {
         "routing-instance": [{
-            "name": "wan",
+            "name": name,
             "instance-type": "virtual-router",
             "networks": networks,
             "routing-options": {
