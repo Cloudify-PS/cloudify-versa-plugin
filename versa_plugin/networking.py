@@ -98,7 +98,7 @@ def update_routing_instance(client, appliance, org, instance):
     client.put(url, xmldata, XML, codes.no_content)
 
 
-def update_provider_orranization(client, appliance, org, provider):
+def update_provider_organization(client, appliance, org, provider):
     url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
                                                                     org)
     limits = get_organization_limits(client, appliance, org)

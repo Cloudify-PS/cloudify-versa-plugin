@@ -11,9 +11,15 @@ from versa_plugin.networking import Routing
 from versa_plugin.cgnat import AddressRange
 
 
+def is_use_existing():
+    return ctx.node.properties.get('use_existing')
+
+
 @operation
 @with_versa_client
 def create_resource_pool(versa_client, **kwargs):
+    if is_use_existing():
+        return
     resource = ctx.node.properties['name']
     resource_address = ctx.node.properties['ip_address']
     versa_plugin.connectors.add_resource_pool(versa_client, resource,
@@ -23,6 +29,8 @@ def create_resource_pool(versa_client, **kwargs):
 @operation
 @with_versa_client
 def delete_resource_pool(versa_client, **kwargs):
+    if is_use_existing():
+        return
     resource = ctx.node.properties['name']
     versa_plugin.connectors.delete_resource_pool(versa_client, resource)
 
@@ -30,6 +38,8 @@ def delete_resource_pool(versa_client, **kwargs):
 @operation
 @with_versa_client
 def create_cms_local_organization(versa_client, **kwargs):
+    if is_use_existing():
+        return
     cms_org_name = ctx.node.properties['name']
     resource = ctx.node.properties['resources'][0]
     networks = ctx.node.properties['networks']
@@ -44,6 +54,8 @@ def create_cms_local_organization(versa_client, **kwargs):
 @operation
 @with_versa_client
 def delete_cms_local_organization(versa_client, **kwargs):
+    if is_use_existing():
+        return
     cms_org_name = ctx.node.properties['name']
     versa_plugin.connectors.delete_organization(versa_client,
                                                 cms_org_name)
@@ -52,6 +64,8 @@ def delete_cms_local_organization(versa_client, **kwargs):
 @operation
 @with_versa_client
 def create_organization(versa_client, **kwargs):
+    if is_use_existing():
+        return
     nms_org_name = ctx.node.properties['name']
     cms_org_name = ctx.node.properties['cms_org_name']
     parent = ctx.node.properties['parent']
@@ -64,6 +78,8 @@ def create_organization(versa_client, **kwargs):
 @operation
 @with_versa_client
 def delete_organization(versa_client, **kwargs):
+    if is_use_existing():
+        return
     nms_org_name = ctx.node.properties['name']
     versa_plugin.appliance.delete_organization(versa_client,
                                                nms_org_name)
@@ -72,6 +88,8 @@ def delete_organization(versa_client, **kwargs):
 @operation
 @with_versa_client
 def create_appliance(versa_client, **kwargs):
+    if is_use_existing():
+        return
     name = ctx.node.properties['appliance_name']
     management_ip = ctx.node.properties['management_ip']
     config = ctx.node.properties['appliance_owner']
@@ -92,6 +110,8 @@ def create_appliance(versa_client, **kwargs):
 @operation
 @with_versa_client
 def delete_appliance(versa_client, **kwargs):
+    if is_use_existing():
+        return
     name = ctx.node.properties['appliance_name']
     task = versa_plugin.appliance.delete_appliance(versa_client, name)
     versa_plugin.tasks.wait_for_task(versa_client, task)

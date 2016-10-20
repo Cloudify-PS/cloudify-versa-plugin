@@ -16,6 +16,8 @@ node_types:
   cloudify.versa.nodes.ResourcePool:
     derived_from: cloudify.nodes.Root
     properties:
+      use_existing: 
+        default: false
       versa_config:
         default: {}
       name:
@@ -34,6 +36,8 @@ node_types:
   cloudify.versa.nodes.CMSLocalOrganization:
     derived_from: cloudify.nodes.Root
     properties:
+      use_existing: 
+        default: false
       versa_config:
         default: {}
       name:
@@ -54,6 +58,8 @@ node_types:
   cloudify.versa.nodes.Organization:
     derived_from: cloudify.nodes.Root
     properties:
+      use_existing: 
+        default: false
       versa_config:
         default: {}
       name:
@@ -74,6 +80,8 @@ node_types:
   cloudify.versa.nodes.Appliance:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
+      use_existing: 
+        default: false
       versa_config:
         default: {}
       appliance_name:
