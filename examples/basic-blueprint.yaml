@@ -9,7 +9,6 @@ imports:
   - http://www.getcloudify.org/spec/cloudify/3.4.1/types.yaml
   - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/master/plugin.yaml
 
-
 inputs:
 #
 # Versa configuration
@@ -94,7 +93,6 @@ inputs:
 
   branch2_org_name:
     default: ""
-
 #
 # Appliance configuration
 #
@@ -126,8 +124,7 @@ inputs:
     default: ""
 
   unit:
-    default: ""
-
+    default: 0
 #
 # Routing Configuration
 #
@@ -157,7 +154,6 @@ inputs:
 
   branch2_routing_name:
     default: ""
-
 #
 # DHCP Configuration
 #
@@ -165,6 +161,18 @@ inputs:
     default: ""
 
   dhcp_options_profile_name:
+    default: ""
+
+  dhcp_lease_profile_name:
+    default: ""
+
+  dhcp_pool_name: 
+    default: ""
+
+  dhcp_range_name:
+    default: ""
+
+  dhcp_server_name:
     default: ""
 
   dns_server:
@@ -181,7 +189,33 @@ inputs:
 
   branch2_domain_name:
     default: ""
+        
+  hq_dhcp_pool_mask:
+    default: ""
+        
+  hq_dhcp_begin_address:
+    default: ""
+        
+  hq_dhcp_end_address:
+    default: ""
 
+  branch1_dhcp_pool_mask:
+    default: ""
+        
+  branch1_dhcp_begin_address:
+    default: ""
+        
+  branch1_dhcp_end_address:
+    default: ""
+        
+  branch2_dhcp_pool_mask:
+    default: ""
+        
+  branch2_dhcp_begin_address:
+    default: ""
+        
+  branch2_dhcp_end_address:
+    default: ""
 #
 # Firewall configuration
 #
@@ -190,15 +224,16 @@ inputs:
 
   firewall_rule_name:
     default: ""
-
-
 #
 # NAT configuration
 #
-  hq_nat_pool_name:
+  nat_pool_name:
     default: ""
 
-  hq_nat_range_name:
+  nat_range_name:
+    default: ""
+
+  nat_rule_name:
     default: ""
 
   hq_range_low:
@@ -207,16 +242,7 @@ inputs:
   hq_range_hight:
     default: ""
 
-  hq_nat_rule_name:
-    default: ""
-
   hq_nat_rule_source_address:
-    default: ""
-
-  branch1_nat_pool_name:
-    default: ""
-
-  branch1_nat_range_name:
     default: ""
 
   branch1_range_low:
@@ -225,25 +251,13 @@ inputs:
   branch1_range_hight:
     default: ""
 
-  branch1_nat_rule_name:
-    default: ""
-
   branch1_nat_rule_source_address:
-    default: ""
-
-  branch2_nat_pool_name:
-    default: ""
-
-  branch2_nat_range_name:
     default: ""
 
   branch2_range_low:
     default: ""
 
   branch2_range_hight:
-    default: ""
-
-  branch2_nat_rule_name:
     default: ""
 
   branch2_nat_rule_source_address:
@@ -352,7 +366,7 @@ node_templates:
         target: cms_organization
       - type: cloudify.versa.parent
         target: parent_organization
-
+  
   #####################
   # Appliance configuration
   #####################
@@ -413,7 +427,7 @@ node_templates:
             unit: { get_input: unit }
     relationships:
       - type: cloudify.versa.associated
-        target: appliance
+        target: hq_associated
 
   branch2_associated:
     type: cloudify.versa.nodes.Associated_organization
@@ -431,8 +445,7 @@ node_templates:
             unit: { get_input: unit }
     relationships:
       - type: cloudify.versa.associated
-        target: appliance
-
+        target: branch1_associated
 
   #####################
   # Routing configuration
@@ -499,7 +512,7 @@ node_templates:
   # DHCP configuration
   #####################
   dhcp_profile:
-    type: cloudify.versa.nodes.DHCP
+    type: cloudify.versa.nodes.DHCPProfile
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
@@ -515,13 +528,26 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: hq_org_name }
       profile_name: { get_input: dhcp_profile_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
       options_profile:
         name: { get_input: dhcp_options_profile_name }
         domain: { get_input: hq_domain_name}
         servers:
           - { get_input: dns_server}
+      pool:
+        name: { get_input: dhcp_pool_name }
+        mask: { get_input: hq_dhcp_pool_mask }
+        range_name: { get_input: dhcp_range_name }
+        begin_address: { get_input: hq_dhcp_begin_address }
+        end_address: { get_input: hq_dhcp_end_address }
+      server:
+        name: { get_input: dhcp_server_name }
+        networks:
+          - { get_input: hq_network_name }
     relationships:
       - type: cloudify.versa.dhcp_connected_to_profile
+        target: dhcp_profile
+      - type: cloudify.versa.dhcp_connected_to_organization
         target: hq_associated
 
   branch1_dhcp:
@@ -531,13 +557,26 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch1_org_name }
       profile_name: { get_input: dhcp_profile_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
       options_profile:
         name: { get_input: dhcp_options_profile_name }
         domain: { get_input: branch1_domain_name}
         servers:
           - { get_input: dns_server}
+      pool:
+          name: { get_input: dhcp_pool_name }
+          mask: { get_input: branch1_dhcp_pool_mask }
+          range_name: { get_input: dhcp_range_name }
+          begin_address: { get_input: branch1_dhcp_begin_address }
+          end_address: { get_input: branch1_dhcp_end_address }
+      server:
+        name: { get_input: dhcp_server_name }
+        networks:
+          - { get_input: branch1_network_name }
     relationships:
       - type: cloudify.versa.dhcp_connected_to_profile
+        target: dhcp_profile
+      - type: cloudify.versa.dhcp_connected_to_organization
         target: branch1_associated
 
   branch2_dhcp:
@@ -547,13 +586,26 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch2_org_name }
       profile_name: { get_input: dhcp_profile_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
       options_profile:
         name: { get_input: dhcp_options_profile_name }
         domain: { get_input: branch2_domain_name}
         servers:
           - { get_input: dns_server}
+      pool:
+          name: { get_input: dhcp_pool_name }
+          mask: { get_input: branch2_dhcp_pool_mask }
+          range_name: { get_input: dhcp_range_name }
+          begin_address: { get_input: branch2_dhcp_begin_address }
+          end_address: { get_input: branch2_dhcp_end_address }
+      server:
+        name: { get_input: dhcp_server_name }
+        networks:
+          - { get_input: branch2_network_name }
     relationships:
       - type: cloudify.versa.dhcp_connected_to_profile
+        target: dhcp_profile
+      - type: cloudify.versa.dhcp_connected_to_organization
         target: branch2_associated
 
   #####################
@@ -573,7 +625,7 @@ node_templates:
             networks:
               - { get_input: hq_network_name }
         - untrust:
-            routing_instances:
+            routing_instance:
               - { get_input: parent_routing_name }
     relationships:
       - type: cloudify.versa.firewall_connected_to_org
@@ -592,7 +644,7 @@ node_templates:
             networks:
               - { get_input: branch1_network_name }
         - untrust:
-            routing_instances:
+            routing_instance:
               - { get_input: parent_routing_name }
     relationships:
       - type: cloudify.versa.firewall_connected_to_org
@@ -611,7 +663,7 @@ node_templates:
             networks:
               - { get_input: branch2_network_name }
         - untrust:
-            routing_instances:
+            routing_instance:
               - { get_input: parent_routing_name }
     relationships:
       - type: cloudify.versa.firewall_connected_to_org
@@ -627,20 +679,22 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: hq_org_name }
       pool:
-        name: { get_input: hq_nat_pool_name }
+        name: { get_input: nat_pool_name }
         ranges:
-          - name: { get_input: hq_nat_range_name }
+          - name: { get_input: nat_range_name }
             low: { get_input: hq_range_low }
             hight: { get_input: hq_range_hight }
         routing_instance: { get_input: hq_routing_name }
         provider_org: { get_input: parent_org_name }
       rule:
-        name: { get_input: hq_nat_rule_name }
+        name: { get_input: nat_rule_name }
         addresses:
           - { get_input: hq_nat_rule_source_address }
     relationships:
       - type: cloudify.versa.cgnat_connected_to_org
         target: hq_associated
+      - type: cloudify.versa.cgnat_connected_to_routing
+        target: hq_routing
 
   branch1_nat:
     type: cloudify.versa.nodes.CGNat
@@ -649,20 +703,22 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch1_org_name }
       pool:
-        name: { get_input: branch1_nat_pool_name }
+        name: { get_input: nat_pool_name }
         ranges:
-          - name: { get_input: branch1_nat_range_name }
+          - name: { get_input: nat_range_name }
             low: { get_input: branch1_range_low }
             hight: { get_input: branch1_range_hight }
         routing_instance: { get_input: branch1_routing_name }
         provider_org: { get_input: parent_org_name }
       rule:
-        name: { get_input: branch1_nat_rule_name }
+        name: { get_input: nat_rule_name }
         addresses:
           - { get_input: branch1_nat_rule_source_address }
     relationships:
       - type: cloudify.versa.cgnat_connected_to_org
         target: branch1_associated
+      - type: cloudify.versa.cgnat_connected_to_routing
+        target: branch1_routing
 
   branch2_nat:
     type: cloudify.versa.nodes.CGNat
@@ -671,19 +727,19 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch2_org_name }
       pool:
-        name: { get_input: branch2_nat_pool_name }
+        name: { get_input: nat_pool_name }
         ranges:
-          - name: { get_input: branch2_nat_range_name }
+          - name: { get_input: nat_range_name }
             low: { get_input: branch2_range_low }
             hight: { get_input: branch2_range_hight }
         routing_instance: { get_input: branch2_routing_name }
         provider_org: { get_input: parent_org_name }
       rule:
-        name: { get_input: branch2_nat_rule_name }
+        name: { get_input: nat_rule_name }
         addresses:
           - { get_input: branch2_nat_rule_source_address }
     relationships:
       - type: cloudify.versa.cgnat_connected_to_org
         target: branch2_associated
-
-
+      - type: cloudify.versa.cgnat_connected_to_routing
+        target: branch2_routing
