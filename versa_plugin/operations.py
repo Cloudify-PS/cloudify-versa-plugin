@@ -178,14 +178,13 @@ def create_cgnat(versa_client, **kwargs):
     org_name = ctx.node.properties['org_name']
     pool = ctx.node.properties['pool']
     pool_name = pool['name']
-    addresses = pool['addresses']
     ranges = [AddressRange(r['name'], r['low'], r['hight'])
               for r in pool['ranges']]
     routing_instance = pool['routing_instance']
     provider_org = pool['provider_org']
     versa_plugin.cgnat.create_pool(versa_client, appliance_name,
                                    org_name, pool_name,
-                                   addresses, ranges, routing_instance,
+                                   ranges, routing_instance,
                                    provider_org)
     rule = ctx.node.properties['rule']
     rule_name = rule['name']
@@ -207,11 +206,14 @@ def create_firewall(versa_client, **kwargs):
     zones = ctx.node.properties.get('zones')
     if zones:
         for zone in zones:
-            networks = zones.get('networks', [])
-            routing_instances = zones.get('routing_instances', [])
-            versa_plugin.networking.update_zones(versa_client, appliance_name,
-                                                 org_name, networks,
-                                                 routing_instances)
+            for zone_name in zone:
+                networks = zone[zone_name].get('networks', [])
+                routing_instances = zone[zone_name].get('routing_instances', [])
+                versa_plugin.networking.update_zones(versa_client,
+                                                     appliance_name,
+                                                     org_name, zone_name,
+                                                     networks,
+                                                     routing_instances)
     versa_plugin.firewall.add_policy(versa_client, appliance_name,
                                      org_name, policy_name)
     versa_plugin.firewall.add_rule(versa_client, appliance_name,

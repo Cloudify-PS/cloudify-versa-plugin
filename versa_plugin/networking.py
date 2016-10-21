@@ -56,8 +56,8 @@ def create_dhcp_profile(client, appliance, name):
         "dhcp-profile": {
             "name": name,
             "dhcp-options": {
-                "max-servers":"256",
-                "max-clients":"256"}}}
+                "max-servers": "256",
+                "max-clients": "256"}}}
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
