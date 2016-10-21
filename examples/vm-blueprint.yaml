@@ -1,0 +1,70 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
+  - http://www.getcloudify.org/spec/tosca-vcloud-plugin/1.3.1/plugin.yaml
+
+inputs:
+
+  management_network_name:
+    type: string
+
+  external_network_name:
+    type: string
+
+  hq_network_name:
+    type: string
+
+  branch1_network_name:
+    type: string
+
+  branch2_network_name:
+    type: string
+
+
+
+node_types:
+
+  management_network:
+      type: cloudify.vcloud.nodes.Network
+      properties:
+	use_external_resource: true
+	resource_id: { get_input: management_network_name }
+
+  external_network:
+      type: cloudify.vcloud.nodes.Network
+      properties:
+	use_external_resource: true
+	resource_id: { get_input: management_network_name }
+
+  hq_network:
+      type: cloudify.vcloud.nodes.Network
+      properties:
+	use_external_resource: true
+	resource_id: { get_input: management_network_name }
+
+  branch1_network:
+      type: cloudify.vcloud.nodes.Network
+      properties:
+	use_external_resource: true
+	resource_id: { get_input: management_network_name }
+
+  branch2_network:
+      type: cloudify.vcloud.nodes.Network
+      properties:
+	use_external_resource: true
+	resource_id: { get_input: management_network_name }
+
+
+  management_port:
+  external_port:
+  hq_port:
+  branch1_port:
+  branch2_port:
+
+  flexvm:
+
+  hqvm:
+
+  branch1_vm:
+  branch2_vm:
