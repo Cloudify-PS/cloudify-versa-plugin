@@ -625,7 +625,7 @@ node_templates:
             networks:
               - { get_input: hq_network_name }
         - untrust:
-            routing_instance:
+            routing_instances:
               - { get_input: parent_routing_name }
     relationships:
       - type: cloudify.versa.firewall_connected_to_org
@@ -644,7 +644,7 @@ node_templates:
             networks:
               - { get_input: branch1_network_name }
         - untrust:
-            routing_instance:
+            routing_instances:
               - { get_input: parent_routing_name }
     relationships:
       - type: cloudify.versa.firewall_connected_to_org
@@ -663,7 +663,7 @@ node_templates:
             networks:
               - { get_input: branch2_network_name }
         - untrust:
-            routing_instance:
+            routing_instances:
               - { get_input: parent_routing_name }
     relationships:
       - type: cloudify.versa.firewall_connected_to_org
