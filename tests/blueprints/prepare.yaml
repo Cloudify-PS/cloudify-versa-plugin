@@ -286,7 +286,6 @@ node_templates:
   resource_pool:
     type: cloudify.versa.nodes.ResourcePool
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       name: { get_input: pool_name }
       ip_address: { get_input: pool_ip_address }
@@ -294,7 +293,6 @@ node_templates:
   cms_organization:
     type: cloudify.versa.nodes.CMSLocalOrganization
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       name: { get_input: cms_org_name }
       networks:
@@ -322,7 +320,6 @@ node_templates:
   parent_organization:
     type: cloudify.versa.nodes.Organization
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       name: { get_input: parent_org_name }
       parent: ""
@@ -334,7 +331,6 @@ node_templates:
   hq_organization:
     type: cloudify.versa.nodes.Organization
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       name: { get_input: hq_org_name }
       parent: { get_input: parent_org_name }
@@ -348,7 +344,6 @@ node_templates:
   branch1_organization:
     type: cloudify.versa.nodes.Organization
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       name: { get_input: branch1_org_name }
       parent: { get_input: parent_org_name }
@@ -362,7 +357,6 @@ node_templates:
   branch2_organization:
     type: cloudify.versa.nodes.Organization
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       name: { get_input: branch2_org_name }
       parent: { get_input: parent_org_name }
@@ -379,7 +373,6 @@ node_templates:
   appliance:
     type: cloudify.versa.nodes.Appliance
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       management_ip: { get_input: pool_ip_address }
@@ -403,7 +396,6 @@ node_templates:
   hq_associated:
     type: cloudify.versa.nodes.Associated_organization
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       organization:
@@ -422,7 +414,6 @@ node_templates:
   branch1_associated:
     type: cloudify.versa.nodes.Associated_organization
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       organization:
@@ -441,7 +432,6 @@ node_templates:
   branch2_associated:
     type: cloudify.versa.nodes.Associated_organization
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       organization:
@@ -463,7 +453,6 @@ node_templates:
   parent_routing:
     type: cloudify.versa.nodes.Router
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: parent_org_name }
@@ -483,7 +472,6 @@ node_templates:
   hq_routing:
     type: cloudify.versa.nodes.Router
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: hq_org_name }
@@ -497,7 +485,6 @@ node_templates:
   branch1_routing:
     type: cloudify.versa.nodes.Router
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch1_org_name }
@@ -511,7 +498,6 @@ node_templates:
   branch2_routing:
     type: cloudify.versa.nodes.Router
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch2_org_name }
@@ -528,7 +514,6 @@ node_templates:
   dhcp_profile:
     type: cloudify.versa.nodes.DHCPProfile
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       profile_name: { get_input: dhcp_profile_name }
@@ -539,7 +524,6 @@ node_templates:
   hq_dhcp:
     type: cloudify.versa.nodes.DHCP
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: hq_org_name }
@@ -569,7 +553,6 @@ node_templates:
   branch1_dhcp:
     type: cloudify.versa.nodes.DHCP
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch1_org_name }
@@ -599,7 +582,6 @@ node_templates:
   branch2_dhcp:
     type: cloudify.versa.nodes.DHCP
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch2_org_name }
@@ -633,7 +615,6 @@ node_templates:
   hq_firewall:
     type: cloudify.versa.nodes.Firewall
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: hq_org_name }
@@ -653,7 +634,6 @@ node_templates:
   branch1_firewall:
     type: cloudify.versa.nodes.Firewall
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch1_org_name }
@@ -673,7 +653,6 @@ node_templates:
   branch2_firewall:
     type: cloudify.versa.nodes.Firewall
     properties:
-      use_existing: true
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch2_org_name }
@@ -714,6 +693,8 @@ node_templates:
     relationships:
       - type: cloudify.versa.cgnat_connected_to_org
         target: hq_associated
+      - type: cloudify.versa.cgnat_connected_to_routing
+        target: hq_routing
 
   branch1_nat:
     type: cloudify.versa.nodes.CGNat
@@ -736,6 +717,8 @@ node_templates:
     relationships:
       - type: cloudify.versa.cgnat_connected_to_org
         target: branch1_associated
+      - type: cloudify.versa.cgnat_connected_to_routing
+        target: branch1_routing
 
   branch2_nat:
     type: cloudify.versa.nodes.CGNat
@@ -758,3 +741,5 @@ node_templates:
     relationships:
       - type: cloudify.versa.cgnat_connected_to_org
         target: branch2_associated
+      - type: cloudify.versa.cgnat_connected_to_routing
+        target: branch2_routing

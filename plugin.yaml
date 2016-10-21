@@ -240,6 +240,9 @@ relationships:
     cloudify.versa.firewall_connected_to_org:
       derived_from: cloudify.relationships.connected_to
 
+    cloudify.versa.cgnat_connected_to_routing:
+      derived_from: cloudify.relationships.connected_to
+
     cloudify.versa.cgnat_connected_to_org:
       derived_from: cloudify.relationships.connected_to
 
