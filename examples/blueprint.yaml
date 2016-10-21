@@ -5,7 +5,7 @@ description: >
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4.1/types.yaml
-  - plugin.yaml
+  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/master/plugin.yaml
 
 
 inputs:

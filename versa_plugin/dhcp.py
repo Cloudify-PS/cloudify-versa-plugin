@@ -3,8 +3,21 @@ from versa_plugin.versaclient import JSON
 from requests import codes
 
 
+def update_global_configuration(client, appliance, org_name, lease_profile,
+                                options_profile):
+    url = '/api/config/devices/device/{}'\
+        '/config/orgs/org-services/{}'\
+        '/dhcp/dhcp4-server-and-relay'.format(appliance, org_name)
+    data = {
+        "dhcp4-server-and-relay": {
+            "default-lease-profile": lease_profile,
+            "default-options-profile": options_profile,
+            "log-unmatched-requests": False}}
+    client.put(url, json.dumps(data), JSON, codes.ok)
+
+
 def create_options_profile(client, appliance, org_name, name, domain, servers):
-    url = ' /api/config/devices/device/{}'\
+    url = '/api/config/devices/device/{}'\
         '/config/orgs/org-services/{}'\
         '/dhcp/dhcp4-options-profiles'.format(appliance, org_name)
     data = {
@@ -17,7 +30,7 @@ def create_options_profile(client, appliance, org_name, name, domain, servers):
 
 
 def create_lease_profile(client, appliance, org_name, name):
-    url = ' /api/config/devices/device/{}'\
+    url = '/api/config/devices/device/{}'\
         '/config/orgs/org-services/{}'\
         '/dhcp/dhcp4-lease-profiles'.format(appliance, org_name)
     data = {
@@ -31,14 +44,17 @@ def create_lease_profile(client, appliance, org_name, name):
 
 
 def create_pool(client, appliance, org_name, pool_name, mask,
+                lease_profile, options_profile,
                 range_name, begin_address, end_address):
-    url = ' /api/config/devices/device/{}'\
+    url = '/api/config/devices/device/{}'\
         '/config/orgs/org-services/{}'\
         '/dhcp/dhcp4-dynamic-pools'.format(appliance, org_name)
     data = {
         "dhcp4-dynamic-pool": {
             "name": pool_name,
             "subnet-mask": mask,
+            "lease-profile": lease_profile,
+            "options-profile": options_profile,
             "address-pools": {
                 "dhcp4-address-pool-info": [{
                     "name": range_name,
@@ -52,8 +68,8 @@ def create_pool(client, appliance, org_name, pool_name, mask,
 
 def create_server(client, appliance, org_name, server_name,
                   lease_profile, options_profile, networks, pool):
-    url = ' /api/config/devices/device/{}'\
-        '/config/orgs/org-services/{}/dhcp/'\
+    url = '/api/config/devices/device/{}'\
+        '/config/orgs/org-services/{}/dhcp'\
         '/dhcp4-server-and-relay/service-profiles'.format(appliance, org_name)
     data = {
         "dhcp4-service-profile": {

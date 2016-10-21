@@ -7,6 +7,9 @@ from versa_plugin.appliance import ApplianceInterface, NetworkInfo
 from versa_plugin import with_versa_client
 import versa_plugin.tasks
 import versa_plugin.networking
+import versa_plugin.dhcp
+import versa_plugin.firewall
+import versa_plugin.cgnat
 from versa_plugin.networking import Routing
 from versa_plugin.cgnat import AddressRange
 
@@ -251,11 +254,16 @@ def create_dhcp(versa_client, **kwargs):
     versa_plugin.networking.update_dhcp_profile(versa_client, appliance_name,
                                                 org_name, profile_name)
     versa_plugin.dhcp.create_options_profile(versa_client, appliance_name,
-                                             org_name, domain, servers)
+                                             org_name, options_name,
+                                             domain, servers)
     versa_plugin.dhcp.create_lease_profile(versa_client, appliance_name,
-                                           lease_name)
-    versa_plugin.dhcp.create_pool(versa_client, appliance_name, pool_name,
-                                  mask, range_name, begin_address, end_address)
+                                           org_name, lease_name)
+    versa_plugin.dhcp.create_pool(versa_client, appliance_name, org_name,
+                                  pool_name, mask, lease_name, options_name,
+                                  range_name, begin_address, end_address)
+    versa_plugin.dhcp.update_global_configuration(versa_client, appliance_name,
+                                                  org_name, lease_name,
+                                                  options_name)
     versa_plugin.dhcp.create_server(versa_client, appliance_name, org_name,
                                     server_name, lease_name, options_name,
                                     networks, pool_name)

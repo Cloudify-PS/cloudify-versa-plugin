@@ -507,7 +507,7 @@ node_templates:
         name: { get_input: dhcp_pool_name }
         mask: { get_input: hq_dhcp_pool_mask }
         range_name: { get_input: dhcp_range_name }
-        begin_address: { get_input: hg_dhcp_begin_address }
+        begin_address: { get_input: hq_dhcp_begin_address }
         end_address: { get_input: hq_dhcp_end_address }
       server:
         name: { get_input: dhcp_server_name }

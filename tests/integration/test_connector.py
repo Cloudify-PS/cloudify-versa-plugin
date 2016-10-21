@@ -21,7 +21,7 @@ from versa_plugin.connectors import Network
 requests.packages.urllib3.disable_warnings()
 
 
-class ConnectorTestCase(unittest.TestCase):
+
     def setUp(self):
         self.config = configuration.data
 
@@ -32,22 +32,23 @@ class ConnectorTestCase(unittest.TestCase):
             versa_plugin.connectors.add_resource_pool(client, name, address)
             versa_plugin.connectors.delete_resource_pool(client, name)
 
-    def notest_add_delete_organization(self):
+    def test_add_delete_organization(self):
         org_name = "Test orgname"
         resource = "Test_resource"
         address = "192.168.0.1"
         networks = [Network("versa2", "10.3.0.0", "255.255.255.0")]
         with VersaClient(self.config) as client:
             versa_plugin.connectors.add_resource_pool(client, resource, address)
-            org_uuid = versa_plugin.connectors.add_organization(client,
-                                                                org_name,
-                                                                networks,
-                                                                resource)
-            versa_plugin.connectors.delete_organization(client, org_uuid)
+            versa_plugin.connectors.add_organization(client,
+                                                     org_name,
+                                                     networks,
+                                                     resource)
+            import pdb;pdb.set_trace()
+            versa_plugin.connectors.delete_organization(client, org_name)
             versa_plugin.connectors.delete_resource_pool(client, resource)
 
-    def test_get_organizations(self):
+    def notest_get_organization(self):
         with VersaClient(self.config) as client:
-            orgs = versa_plugin.connectors.get_organizations(client)
+            orgs = versa_plugin.connectors.get_organization(client)
             print orgs
             self.assertTrue(orgs)

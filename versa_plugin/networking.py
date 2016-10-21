@@ -52,7 +52,12 @@ def delete_virtual_router(client, appliance, name):
 
 def create_dhcp_profile(client, appliance, name):
     url = '/api/config/devices/device/{}/config/dhcp-profiles'.format(appliance)
-    data = {"dhcp-profile": {"name": name}}
+    data = {
+        "dhcp-profile": {
+            "name": name,
+            "dhcp-options": {
+                "max-servers":"256",
+                "max-clients":"256"}}}
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
