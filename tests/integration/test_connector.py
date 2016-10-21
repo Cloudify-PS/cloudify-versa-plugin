@@ -21,18 +21,18 @@ from versa_plugin.connectors import Network
 requests.packages.urllib3.disable_warnings()
 
 
-
+class ConnectorTestCase(unittest.TestCase):
     def setUp(self):
         self.config = configuration.data
 
-    def notest_add_delete_resource_pool(self):
+    def test_add_delete_resource_pool(self):
         name = "Test_resource"
         address = "192.168.0.1"
-        with VersaClient(self.config) as client:
+        with VersaClient(self.config, '/tmp/versa.key') as client:
             versa_plugin.connectors.add_resource_pool(client, name, address)
             versa_plugin.connectors.delete_resource_pool(client, name)
 
-    def test_add_delete_organization(self):
+    def notest_add_delete_organization(self):
         org_name = "Test orgname"
         resource = "Test_resource"
         address = "192.168.0.1"
@@ -43,7 +43,6 @@ requests.packages.urllib3.disable_warnings()
                                                      org_name,
                                                      networks,
                                                      resource)
-            import pdb;pdb.set_trace()
             versa_plugin.connectors.delete_organization(client, org_name)
             versa_plugin.connectors.delete_resource_pool(client, resource)
 
