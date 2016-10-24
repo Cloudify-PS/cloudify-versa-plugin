@@ -167,6 +167,12 @@ def create_router(versa_client, **kwargs):
                                                     appliance_name,
                                                     organization_name,
                                                     router_name)
+    parent_router = ctx.node.properties.get('parent_router_name')
+    if parent_router:
+        versa_plugin.networking.update_routing_instance(versa_client,
+                                                        appliance_name,
+                                                        organization_name,
+                                                        parent_router)
 
 
 @operation

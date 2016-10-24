@@ -129,6 +129,8 @@ node_types:
         default: ""
       name:
         default: ""
+      parent_router_name: 
+        default: ""
       networks:
         default: {}
       routings:
@@ -237,6 +239,9 @@ relationships:
     cloudify.versa.dhcp_connected_to_profile:
       derived_from: cloudify.relationships.connected_to
 
+    cloudify.versa.firewall_connected_to_router:
+      derived_from: cloudify.relationships.connected_to
+
     cloudify.versa.firewall_connected_to_org:
       derived_from: cloudify.relationships.connected_to
 
@@ -244,6 +249,9 @@ relationships:
       derived_from: cloudify.relationships.connected_to
 
     cloudify.versa.cgnat_connected_to_org:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.router_connected_to_router:
       derived_from: cloudify.relationships.connected_to
 
     cloudify.versa.router_connected_to_org:
