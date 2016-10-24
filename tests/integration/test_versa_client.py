@@ -24,6 +24,6 @@ class VersaPluginTestCase(unittest.TestCase):
 
     def test_get_revoke_token(self):
         config = configuration.data
-        client = VersaClient(config)
+        client = VersaClient(config, '/tmp/versa.key')
         client.get_token()
         client.revoke_token()
