@@ -1,14 +1,5 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
-description: >
-  This blueprint configure Versa Director for basic use case
-  One HQ with two branches.
-
-
-imports:
-  - http://www.getcloudify.org/spec/cloudify/3.4.1/types.yaml
-  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/master/plugin.yaml
-
 inputs:
 #
 # Versa configuration
@@ -181,9 +172,6 @@ inputs:
   hq_domain_name:
     default: ""
 
-  hq_domain_name:
-    default: ""
-
   branch1_domain_name:
     default: ""
 
@@ -289,6 +277,9 @@ node_templates:
       versa_config: { get_property: [versa_configuration, versa_config] }
       name: { get_input: pool_name }
       ip_address: { get_input: pool_ip_address }
+    relationships:
+      - type: cloudify.versa.associated
+        target: flexvm
 
   cms_organization:
     type: cloudify.versa.nodes.CMSLocalOrganization
@@ -558,6 +549,8 @@ node_templates:
         target: dhcp_profile
       - type: cloudify.versa.dhcp_connected_to_organization
         target: hq_associated
+      - type: cloudify.versa.dhcp_connected_to_routing
+        target: hq_routing
 
   branch1_dhcp:
     type: cloudify.versa.nodes.DHCP
@@ -587,6 +580,8 @@ node_templates:
         target: dhcp_profile
       - type: cloudify.versa.dhcp_connected_to_organization
         target: branch1_associated
+      - type: cloudify.versa.dhcp_connected_to_routing
+        target: branch1_routing
 
   branch2_dhcp:
     type: cloudify.versa.nodes.DHCP
@@ -616,6 +611,8 @@ node_templates:
         target: dhcp_profile
       - type: cloudify.versa.dhcp_connected_to_organization
         target: branch2_associated
+      - type: cloudify.versa.dhcp_connected_to_routing
+        target: branch2_routing
 
   #####################
   # Firewall configuration

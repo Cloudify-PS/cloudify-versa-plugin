@@ -4,7 +4,7 @@ hq_network_name: hq_network
 branch1_network_name: branch1_network
 branch2_network_name: branch2_network
 catalog: tdc
-flexvnf_template: VersaFlexVNF
+flexvnf_template: FlexVMnonic
 template: CentOSWithoutNic
 flex_vm_name: test_flex
 hq_vm_name: test_hq
