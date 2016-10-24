@@ -8,15 +8,6 @@ inputs:
   external_network_name:
     type: string
 
-  hq_network_name_vm:
-    type: string
-
-  branch1_network_name_vm:
-    type: string
-
-  branch2_network_name_vm:
-    type: string
-
   catalog:
     type: string
 
@@ -59,19 +50,19 @@ node_templates:
     type: cloudify.vcloud.nodes.Network
     properties:
       use_external_resource: true
-      resource_id: { get_input: hq_network_name_vm }
+      resource_id: { get_input: hq_network_name }
 
   branch1_network:
     type: cloudify.vcloud.nodes.Network
     properties:
       use_external_resource: true
-      resource_id: { get_input: branch1_network_name_vm }
+      resource_id: { get_input: branch1_network_name }
 
   branch2_network:
     type: cloudify.vcloud.nodes.Network
     properties:
       use_external_resource: true
-      resource_id: { get_input: branch2_network_name_vm }
+      resource_id: { get_input: branch2_network_name }
 
 #
 # Ports
