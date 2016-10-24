@@ -233,6 +233,9 @@ relationships:
     cloudify.versa.dhcp_profile_connected_to_appliance:
       derived_from: cloudify.relationships.connected_to
 
+    cloudify.versa.dhcp_connected_to_routing:
+      derived_from: cloudify.relationships.connected_to
+
     cloudify.versa.dhcp_connected_to_organization:
       derived_from: cloudify.relationships.connected_to
 
