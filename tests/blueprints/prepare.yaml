@@ -483,7 +483,7 @@ node_templates:
       - type: cloudify.versa.router_connected_to_org
         target: hq_associated
       - type: cloudify.versa.router_connected_to_router
-        target: parent_router
+        target: parent_routing
 
   branch1_routing:
     type: cloudify.versa.nodes.Router
@@ -499,7 +499,7 @@ node_templates:
       - type: cloudify.versa.router_connected_to_org
         target: branch1_associated
       - type: cloudify.versa.router_connected_to_router
-        target: parent_router
+        target: parent_routing
 
   branch2_routing:
     type: cloudify.versa.nodes.Router
@@ -515,7 +515,7 @@ node_templates:
       - type: cloudify.versa.router_connected_to_org
         target: branch2_associated
       - type: cloudify.versa.router_connected_to_router
-        target: parent_router
+        target: parent_routing
 
   #####################
   # DHCP configuration
@@ -681,7 +681,7 @@ node_templates:
     relationships:
       - type: cloudify.versa.firewall_connected_to_org
         target: branch2_routing
-      - type: cloudify.versa.firewall_connected_to_outer
+      - type: cloudify.versa.firewall_connected_to_router
         target: parent_routing
 
   #####################

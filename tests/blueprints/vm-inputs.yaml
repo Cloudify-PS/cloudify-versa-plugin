@@ -1,0 +1,12 @@
+management_network_name: "Versa Internal"
+external_network_name: VersaManagement
+hq_network_name: hq_network
+branch1_network_name: branch1_network
+branch2_network_name: branch2_network
+catalog: tdc
+flexvnf_template: VersaFlexVNF
+template: CentOSWithoutNic
+flex_vm_name: test_flex
+hq_vm_name: test_hq
+branch1_vm_name: test_branch1
+branch2_vm_name: test_branch2

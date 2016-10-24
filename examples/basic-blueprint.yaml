@@ -476,11 +476,14 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: hq_org_name }
       name: { get_input: hq_routing_name }
+      parent_router_name: { get_input: parent_routing_name }
       networks:
         - { get_input: hq_network_name }
     relationships:
       - type: cloudify.versa.router_connected_to_org
         target: hq_associated
+      - type: cloudify.versa.router_connected_to_router
+        target: parent_routing
 
   branch1_routing:
     type: cloudify.versa.nodes.Router
@@ -489,11 +492,14 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch1_org_name }
       name: { get_input: branch1_routing_name }
+      parent_router_name: { get_input: parent_routing_name }
       networks:
         - { get_input: branch1_network_name }
     relationships:
       - type: cloudify.versa.router_connected_to_org
         target: branch1_associated
+      - type: cloudify.versa.router_connected_to_router
+        target: parent_routing
 
   branch2_routing:
     type: cloudify.versa.nodes.Router
@@ -502,11 +508,14 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch2_org_name }
       name: { get_input: branch2_routing_name }
+      parent_router_name: { get_input: parent_routing_name }
       networks:
         - { get_input: branch2_network_name }
     relationships:
       - type: cloudify.versa.router_connected_to_org
         target: branch2_associated
+      - type: cloudify.versa.router_connected_to_router
+        target: parent_routing
 
   #####################
   # DHCP configuration
@@ -625,11 +634,13 @@ node_templates:
             networks:
               - { get_input: hq_network_name }
         - untrust:
-            routing_instance:
+            routing_instances:
               - { get_input: parent_routing_name }
     relationships:
       - type: cloudify.versa.firewall_connected_to_org
-        target: hq_associated
+        target: hq_routing
+      - type: cloudify.versa.firewall_connected_to_router
+        target: parent_routing
 
   branch1_firewall:
     type: cloudify.versa.nodes.Firewall
@@ -644,11 +655,13 @@ node_templates:
             networks:
               - { get_input: branch1_network_name }
         - untrust:
-            routing_instance:
+            routing_instances:
               - { get_input: parent_routing_name }
     relationships:
       - type: cloudify.versa.firewall_connected_to_org
-        target: branch1_associated
+        target: branch1_routing
+      - type: cloudify.versa.firewall_connected_to_router
+        target: parent_routing
 
   branch2_firewall:
     type: cloudify.versa.nodes.Firewall
@@ -663,11 +676,13 @@ node_templates:
             networks:
               - { get_input: branch2_network_name }
         - untrust:
-            routing_instance:
+            routing_instances:
               - { get_input: parent_routing_name }
     relationships:
       - type: cloudify.versa.firewall_connected_to_org
-        target: branch2_associated
+        target: branch2_routing
+      - type: cloudify.versa.firewall_connected_to_router
+        target: parent_routing
 
   #####################
   # NAT configuration

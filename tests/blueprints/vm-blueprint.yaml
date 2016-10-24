@@ -21,9 +21,6 @@ inputs:
   branch2_network_name:
     type: string
 
-  server_name:
-    type: string
-
   catalog:
     type: string
 
@@ -101,7 +98,7 @@ node_templates:
       port:
         network: {get_property: [external_network, resource_id] }
         ip_allocation_mode: POOL
-        primary_interface: true
+        primary_interface: false
         nic_order: 1
     relationships:
       - target: external_network
@@ -113,7 +110,7 @@ node_templates:
       port:
         network: {get_property: [hq_network, resource_id] }
         ip_allocation_mode: POOL
-        primary_interface: true
+        primary_interface: false
         nic_order: 2
     relationships:
       - target: hq_network
@@ -125,7 +122,7 @@ node_templates:
       port:
         network: {get_property: [branch1_network, resource_id] }
         ip_allocation_mode: POOL
-        primary_interface: true
+        primary_interface: false
         nic_order: 3
     relationships:
       - target: branch1_network
@@ -137,48 +134,15 @@ node_templates:
       port:
         network: {get_property: [branch2_network, resource_id] }
         ip_allocation_mode: POOL
-        primary_interface: true
+        primary_interface: false
         nic_order: 4
     relationships:
       - target: branch2_network
         type: cloudify.vcloud.port_connected_to_network
-  vm_branch1_port:
-    type: cloudify.vcloud.nodes.Port
-    properties:
-      port:
-        network: {get_property: [branch1_network, resource_id] }
-        ip_allocation_mode: POOL
-        primary_interface: true
-        nic_order: 0
-    relationships:
-      - target: branch1_network
-        type: cloudify.vcloud.port_connected_to_network
-  vm_hq_port:
-    type: cloudify.vcloud.nodes.Port
-    properties:
-      port:
-        network: {get_property: [hq_network, resource_id] }
-        ip_allocation_mode: POOL
-        primary_interface: true
-        nic_order: 0
-    relationships:
-      - target: hq_network
-        type: cloudify.vcloud.port_connected_to_network
 
-  vm_branch2_port:
-    type: cloudify.vcloud.nodes.Port
-    properties:
-      port:
-        network: {get_property: [branch2_network, resource_id] }
-        ip_allocation_mode: POOL
-        primary_interface: true
-        nic_order: 0
-    relationships:
-      - target: branch2_network
-        type: cloudify.vcloud.port_connected_to_network
-#
-# VMs
-#
+##
+## VMs
+##
   flexvm:
     type: cloudify.vcloud.nodes.Server
     properties:
@@ -207,6 +171,7 @@ node_templates:
     type: cloudify.vcloud.nodes.Server
     properties:
       install_agent: false
+      management_network: { get_input: management_network_name }
       server:
         name: { get_input: hq_vm_name }
         catalog: { get_input: catalog }
@@ -215,13 +180,14 @@ node_templates:
           cpu: 2
           memory: 2048
     relationships:
-      - target: vm_hq_port
-        type: cloudify.vcloud.server_connected_to_port
+      - target: hq_network
+        type: cloudify.vcloud.server_connected_to_network
 
   branch1_vm:
     type: cloudify.vcloud.nodes.Server
     properties:
       install_agent: false
+      management_network: { get_input: management_network_name }
       server:
         name: { get_input: branch1_vm_name }
         catalog: { get_input: catalog }
@@ -230,13 +196,14 @@ node_templates:
           cpu: 2
           memory: 2048
     relationships:
-      - target: vm_branch2_port
-        type: cloudify.vcloud.server_connected_to_port
+      - target: branch2_network
+        type: cloudify.vcloud.server_connected_to_network
 
   branch2_vm:
     type: cloudify.vcloud.nodes.Server
     properties:
       install_agent: false
+      management_network: { get_input: management_network_name }
       server:
         name: { get_input: branch2_vm_name }
         catalog: { get_input: catalog }
@@ -245,6 +212,6 @@ node_templates:
           cpu: 2
           memory: 2048
     relationships:
-      - target: vm_branch2_port
-        type: cloudify.vcloud.server_connected_to_port
+      - target: branch1_network
+        type: cloudify.vcloud.server_connected_to_network
 
