@@ -23,8 +23,11 @@ def is_use_existing():
 def create_resource_pool(versa_client, **kwargs):
     if is_use_existing():
         return
+    if kwargs.get('ip_address'):
+        resource_address = kwargs['ip_address']
+    else:
+        resource_address = ctx.node.properties['ip_address']
     resource = ctx.node.properties['name']
-    resource_address = ctx.node.properties['ip_address']
     versa_plugin.connectors.add_resource_pool(versa_client, resource,
                                               resource_address)
 
@@ -94,7 +97,10 @@ def create_appliance(versa_client, **kwargs):
     if is_use_existing():
         return
     name = ctx.node.properties['appliance_name']
-    management_ip = ctx.node.properties['management_ip']
+    if kwargs.get('management_ip'):
+        management_ip = kwargs['management_ip']
+    else:
+        management_ip = ctx.node.properties['management_ip']
     config = ctx.node.properties['appliance_owner']
     nms_org_name = config['nms_org_name']
     cms_org_name = config['cms_org_name']

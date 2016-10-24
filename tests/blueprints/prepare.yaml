@@ -280,6 +280,11 @@ node_templates:
     relationships:
       - type: cloudify.versa.associated
         target: flexvm
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            ip_address: { get_attribute: [flexvnf, ip] }
 
   cms_organization:
     type: cloudify.versa.nodes.CMSLocalOrganization
@@ -366,7 +371,6 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      management_ip: { get_input: pool_ip_address }
       appliance_owner:
         nms_org_name: { get_input: parent_org_name }
         cms_org_name: { get_input: cms_org_name }
@@ -374,6 +378,11 @@ node_templates:
           - name: { get_input: parent_network_name }
             ip_address: { get_input: ext_address }
             interface: { get_input: ext_interface }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            management_ip: { get_attribute: [flexvnf, ip] }
     relationships:
       - type: cloudify.versa.organization_connected_to_appliance
         target: parent_organization
