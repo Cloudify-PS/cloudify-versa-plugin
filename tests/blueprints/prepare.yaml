@@ -276,7 +276,6 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       name: { get_input: pool_name }
-      ip_address: { get_input: pool_ip_address }
     relationships:
       - type: cloudify.versa.associated
         target: flexvm
