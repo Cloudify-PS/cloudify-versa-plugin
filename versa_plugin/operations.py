@@ -104,7 +104,8 @@ def create_appliance(versa_client, **kwargs):
     config = ctx.node.properties['appliance_owner']
     nms_org_name = config['nms_org_name']
     cms_org_name = config['cms_org_name']
-    networks = config['networks']
+    networks_inputs = kwargs.get('appliance_owner', {}).get('networks')
+    networks = networks_inputs if networks_inputs else config['networks']
     app_networks = [ApplianceInterface(net['name'],
                                        net['ip_address'],
                                        net['interface']) for net in networks]
@@ -134,7 +135,8 @@ def associate_organization(versa_client, **kwargs):
     appliance = ctx.node.properties['appliance_name']
     org = ctx.node.properties['organization']
     nms_org_name = org['nms_org_name']
-    net = org['networks'][0]
+    networks_inputs = kwargs.get('organization', {}).get('networks')
+    net = networks_inputs[0] if networks_inputs else org['networks'][0]
     net_info = NetworkInfo(net['name'], net['parent_interface'],
                            net['ip_address'], net['mask'],
                            net['unit'])

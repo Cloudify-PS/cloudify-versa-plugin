@@ -283,7 +283,7 @@ node_templates:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            ip_address: { get_attribute: [flexvnf, ip] }
+            ip_address: { get_attribute: [flexvm, ip] }
 
   cms_organization:
     type: cloudify.versa.nodes.CMSLocalOrganization
@@ -373,15 +373,17 @@ node_templates:
       appliance_owner:
         nms_org_name: { get_input: parent_org_name }
         cms_org_name: { get_input: cms_org_name }
-        networks:
-          - name: { get_input: parent_network_name }
-            ip_address: { get_input: ext_address }
-            interface: { get_input: ext_interface }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            management_ip: { get_attribute: [flexvnf, ip] }
+            management_ip: { get_attribute: [flexvm, ip] }
+            appliance_owner:
+              networks:
+                - name: { get_input: parent_network_name }
+                  ip_address: { get_attribute: [flexvm, networks, VersaManagement, ip] }
+                  interface: { get_input: ext_interface }
+                
     relationships:
       - type: cloudify.versa.organization_connected_to_appliance
         target: parent_organization
@@ -400,12 +402,17 @@ node_templates:
       organization:
         nms_org_name: { get_input: hq_org_name }
         parent: { get_input: parent_org_name }
-        networks:
-          - name: { get_input: hq_network_name }
-            parent_interface: { get_input: hq_interface }
-            ip_address: { get_input: hq_address }
-            mask: { get_input: hq_network_mask }
-            unit: { get_input: unit }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            organization:
+              networks:
+                - name: { get_input: hq_network_name }
+                  parent_interface: { get_input: hq_interface }
+                  ip_address: { get_attribute: [flexvm, networks, hq_network, ip] }
+                  mask: { get_input: hq_network_mask }
+                  unit: { get_input: unit }
     relationships:
       - type: cloudify.versa.associated
         target: appliance
@@ -418,12 +425,17 @@ node_templates:
       organization:
         nms_org_name: { get_input: branch1_org_name }
         parent: { get_input: parent_org_name }
-        networks:
-          - name: { get_input: branch1_network_name }
-            parent_interface: { get_input: branch1_interface }
-            ip_address: { get_input: branch1_address }
-            mask: { get_input: branch1_network_mask }
-            unit: { get_input: unit }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            organization:
+              networks:
+                - name: { get_input: branch1_network_name }
+                  parent_interface: { get_input: branch1_interface }
+                  ip_address: { get_attribute: [flexvm, networks, branch1_network, ip] }
+                  mask: { get_input: branch1_network_mask }
+                  unit: { get_input: unit }
     relationships:
       - type: cloudify.versa.associated
         target: hq_associated
@@ -436,12 +448,17 @@ node_templates:
       organization:
         nms_org_name: { get_input: branch2_org_name }
         parent: { get_input: parent_org_name }
-        networks:
-          - name: { get_input: branch2_network_name }
-            parent_interface: { get_input: branch2_interface }
-            ip_address: { get_input: branch2_address }
-            mask: { get_input: branch2_network_mask }
-            unit: { get_input: unit }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            organization:
+              networks:
+                - name: { get_input: branch2_network_name }
+                  parent_interface: { get_input: branch2_interface }
+                  ip_address: { get_attribute: [flexvm, networks, branch2_network, ip] }
+                  mask: { get_input: branch2_network_mask }
+                  unit: { get_input: unit }
     relationships:
       - type: cloudify.versa.associated
         target: branch1_associated

@@ -157,7 +157,6 @@ node_templates:
     type: cloudify.vcloud.nodes.Server
     properties:
       install_agent: false
-      management_network: { get_input: management_network_name }
       server:
         name: { get_input: hq_vm_name }
         catalog: { get_input: catalog }
@@ -168,12 +167,13 @@ node_templates:
     relationships:
       - target: hq_network
         type: cloudify.vcloud.server_connected_to_network
+      - target: management_network
+        type: cloudify.vcloud.server_connected_to_network
 
   branch1_vm:
     type: cloudify.vcloud.nodes.Server
     properties:
       install_agent: false
-      management_network: { get_input: management_network_name }
       server:
         name: { get_input: branch1_vm_name }
         catalog: { get_input: catalog }
@@ -184,12 +184,13 @@ node_templates:
     relationships:
       - target: branch2_network
         type: cloudify.vcloud.server_connected_to_network
+      - target: management_network
+        type: cloudify.vcloud.server_connected_to_network
 
   branch2_vm:
     type: cloudify.vcloud.nodes.Server
     properties:
       install_agent: false
-      management_network: { get_input: management_network_name }
       server:
         name: { get_input: branch2_vm_name }
         catalog: { get_input: catalog }
@@ -199,6 +200,8 @@ node_templates:
           memory: 2048
     relationships:
       - target: branch1_network
+        type: cloudify.vcloud.server_connected_to_network
+      - target: management_network
         type: cloudify.vcloud.server_connected_to_network
 
 outputs:
