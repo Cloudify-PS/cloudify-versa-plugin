@@ -706,7 +706,7 @@ node_templates:
           - name: { get_input: nat_range_name }
             low: { get_input: hq_range_low }
             hight: { get_input: hq_range_hight }
-        routing_instance: { get_input: hq_routing_name }
+        routing_instance: { get_input: parent_routing_name }
         provider_org: { get_input: parent_org_name }
       rule:
         name: { get_input: nat_rule_name }
@@ -730,7 +730,7 @@ node_templates:
           - name: { get_input: nat_range_name }
             low: { get_input: branch1_range_low }
             hight: { get_input: branch1_range_hight }
-        routing_instance: { get_input: branch1_routing_name }
+        routing_instance: { get_input: parent_routing_name }
         provider_org: { get_input: parent_org_name }
       rule:
         name: { get_input: nat_rule_name }
@@ -754,7 +754,7 @@ node_templates:
           - name: { get_input: nat_range_name }
             low: { get_input: branch2_range_low }
             hight: { get_input: branch2_range_hight }
-        routing_instance: { get_input: branch2_routing_name }
+        routing_instance: { get_input: parent_routing_name }
         provider_org: { get_input: parent_org_name }
       rule:
         name: { get_input: nat_rule_name }
