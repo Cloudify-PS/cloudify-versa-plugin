@@ -8,9 +8,6 @@ hq_vm_name: test_hq
 branch1_vm_name: test_branch1
 branch2_vm_name: test_branch2
 
-
-
-
 #
 # Versa configuration
 #
@@ -23,7 +20,6 @@ password: "versa123"
 # CMS configuration
 #
 pool_name: tdcpool
-pool_ip_address: 192.168.200.204
 cms_org_name: tdccms
 #
 # Networks configuration
@@ -36,10 +32,10 @@ hq_network_subnet: 10.1.0.0
 hq_network_mask: 255.255.255.0
 branch1_network_name: branch1_network
 branch1_network_subnet: 10.2.0.0
-branch1_network_mask: 255.255.255.128
+branch1_network_mask: 255.255.255.0
 branch2_network_name: branch2_network
 branch2_network_subnet: 10.3.0.0
-branch2_network_mask: 255.255.255.128
+branch2_network_mask: 255.255.255.0
 #
 # Organization configuration
 #
@@ -51,10 +47,6 @@ branch2_org_name: branch2_org
 # Appliance configuration
 #
 appliance_name: tdcappliance
-ext_address: 172.19.0.203
-hq_address: 10.1.0.10
-branch1_address: 10.2.0.10
-branch2_address: 10.3.0.10
 ext_interface: vni-0/0
 hq_interface: vni-0/1
 branch1_interface: vni-0/2

@@ -381,7 +381,7 @@ node_templates:
             appliance_owner:
               networks:
                 - name: { get_input: parent_network_name }
-                  ip_address: { get_attribute: [flexvm, networks, VersaManagement, ip] }
+                  ip_address: { get_attribute: [flexvm, networks, VersaManagement] }
                   interface: { get_input: ext_interface }
                 
     relationships:
@@ -410,7 +410,7 @@ node_templates:
               networks:
                 - name: { get_input: hq_network_name }
                   parent_interface: { get_input: hq_interface }
-                  ip_address: { get_attribute: [flexvm, networks, hq_network, ip] }
+                  ip_address: { get_attribute: [flexvm, networks, hq_network] }
                   mask: { get_input: hq_network_mask }
                   unit: { get_input: unit }
     relationships:
@@ -433,7 +433,7 @@ node_templates:
               networks:
                 - name: { get_input: branch1_network_name }
                   parent_interface: { get_input: branch1_interface }
-                  ip_address: { get_attribute: [flexvm, networks, branch1_network, ip] }
+                  ip_address: { get_attribute: [flexvm, networks, branch1_network] }
                   mask: { get_input: branch1_network_mask }
                   unit: { get_input: unit }
     relationships:
@@ -456,7 +456,7 @@ node_templates:
               networks:
                 - name: { get_input: branch2_network_name }
                   parent_interface: { get_input: branch2_interface }
-                  ip_address: { get_attribute: [flexvm, networks, branch2_network, ip] }
+                  ip_address: { get_attribute: [flexvm, networks, branch2_network] }
                   mask: { get_input: branch2_network_mask }
                   unit: { get_input: unit }
     relationships:
