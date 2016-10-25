@@ -25,9 +25,6 @@ inputs:
   pool_name:
     default: ""
 
-  pool_ip_address:
-    default: ""
-
   cms_org_name:
     default: ""
 
@@ -88,18 +85,6 @@ inputs:
 # Appliance configuration
 #
   appliance_name:
-    default: ""
-
-  ext_address:
-    default: ""
-
-  hq_address:
-    default: ""
-
-  branch1_address:
-    default: ""
-
-  branch2_address:
     default: ""
 
   ext_interface:
@@ -277,7 +262,7 @@ node_templates:
       versa_config: { get_property: [versa_configuration, versa_config] }
       name: { get_input: pool_name }
     relationships:
-      - type: cloudify.versa.associated
+      - type: cloudify.versa.pool_connected_to_vm
         target: flexvm
     interfaces:
       cloudify.interfaces.lifecycle:
