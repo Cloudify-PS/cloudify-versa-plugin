@@ -230,7 +230,7 @@ node_types:
           inputs: {}
 
 relationships:
-    cloudify.versa.cms_connected_to_vm:
+    cloudify.versa.pool_connected_to_vm:
       derived_from: cloudify.relationships.connected_to
 
     cloudify.versa.dhcp_profile_connected_to_appliance:
