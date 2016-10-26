@@ -260,8 +260,8 @@ relationships:
     cloudify.versa.router_connected_to_router:
       derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.router_connected_in_org:
-      derived_from: cloudify.relationships.connected_in
+    cloudify.versa.router_connected_to_org:
+      derived_from: cloudify.relationships.connected_to
 
     cloudify.versa.associated:
       derived_from: cloudify.relationships.connected_to
