@@ -233,47 +233,47 @@ relationships:
     cloudify.versa.pool_contained_in_vm:
       derived_from: cloudify.relationships.contained_in
 
-    cloudify.versa.dhcp_profile_contained_in_appliance:
-      derived_from: cloudify.relationships.contained_in
+    cloudify.versa.dhcp_profile_connected_to_appliance:
+      derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.dhcp_contained_in_routing:
-      derived_from: cloudify.relationships.contained_in
+    cloudify.versa.dhcp_connected_to_routing:
+      derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.dhcp_contained_in_organization:
-      derived_from: cloudify.relationships.contained_in
+    cloudify.versa.dhcp_connected_to_organization:
+      derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.dhcp_contained_in_profile:
-      derived_from: cloudify.relationships.contained_in
+    cloudify.versa.dhcp_connected_to_profile:
+      derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.firewall_contained_in_router:
-      derived_from: cloudify.relationships.contained_in
+    cloudify.versa.firewall_connected_to_router:
+      derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.firewall_contained_in_org:
-      derived_from: cloudify.relationships.contained_in
+    cloudify.versa.firewall_connected_to_org:
+      derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.cgnat_contained_in_routing:
-      derived_from: cloudify.relationships.contained_in
+    cloudify.versa.cgnat_connected_to_routing:
+      derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.cgnat_contained_in_org:
-      derived_from: cloudify.relationships.contained_in
+    cloudify.versa.cgnat_connected_to_org:
+      derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.router_contained_in_router:
-      derived_from: cloudify.relationships.contained_in
+    cloudify.versa.router_connected_to_router:
+      derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.router_contained_in_org:
-      derived_from: cloudify.relationships.contained_in
+    cloudify.versa.router_connected_in_org:
+      derived_from: cloudify.relationships.connected_in
 
     cloudify.versa.associated:
-      derived_from: cloudify.relationships.contained_in
+      derived_from: cloudify.relationships.connected_to
 
     cloudify.versa.parent:
-      derived_from: cloudify.relationships.contained_in
+      derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.cms_org_contained_in_pool:
-      derived_from: cloudify.relationships.contained_in
+    cloudify.versa.cms_org_connected_to_pool:
+      derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.nms_org_contained_in_cms_org:
-      derived_from: cloudify.relationships.contained_in
+    cloudify.versa.nms_org_connected_to_cms_org:
+      derived_from: cloudify.relationships.connected_to
 
-    cloudify.versa.organization_contained_in_appliance:
-      derived_from: cloudify.relationships.contained_in
+    cloudify.versa.organization_connected_to_appliance:
+      derived_from: cloudify.relationships.connected_to

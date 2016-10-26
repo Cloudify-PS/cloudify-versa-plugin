@@ -3,10 +3,10 @@ external_network_name: VersaManagement
 catalog: tdc
 flexvnf_template: FlexVMnonic
 template: CentOSWithoutNic
-flex_vm_name: test_flex
-hq_vm_name: test_hq
-branch1_vm_name: test_branch1
-branch2_vm_name: test_branch2
+flex_vm_name: test_flex_heal
+hq_vm_name: test_hq_heal
+branch1_vm_name: test_branch1_heal
+branch2_vm_name: test_branch2_heal
 
 #
 # Versa configuration
@@ -19,8 +19,8 @@ password: "versa123"
 #
 # CMS configuration
 #
-pool_name: tdcpool
-cms_org_name: tdccms
+pool_name: tdcpool_heal
+cms_org_name: tdccms_heal
 #
 # Networks configuration
 #
@@ -39,14 +39,14 @@ branch2_network_mask: 255.255.255.0
 #
 # Organization configuration
 #
-parent_org_name: parent_org
-hq_org_name: hq_org
-branch1_org_name: branch1_org
-branch2_org_name: branch2_org
+parent_org_name: parent_org_heal
+hq_org_name: hq_org_heal
+branch1_org_name: branch1_org_heal
+branch2_org_name: branch2_org_heal
 #
 # Appliance configuration
 #
-appliance_name: tdcappliance
+appliance_name: tdcappliance_heal
 ext_interface: vni-0/0
 hq_interface: vni-0/1
 branch1_interface: vni-0/2

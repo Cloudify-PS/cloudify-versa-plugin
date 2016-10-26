@@ -262,7 +262,7 @@ node_templates:
       versa_config: { get_property: [versa_configuration, versa_config] }
       name: { get_input: pool_name }
     relationships:
-      - type: cloudify.versa.pool_connected_to_vm
+      - type: cloudify.versa.pool_contained_in_vm
         target: flexvm
     interfaces:
       cloudify.interfaces.lifecycle:
