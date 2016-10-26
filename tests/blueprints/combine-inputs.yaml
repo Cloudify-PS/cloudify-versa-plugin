@@ -46,7 +46,7 @@ branch2_org_name: branch2_org_heal
 #
 # Appliance configuration
 #
-appliance_name: tdcappliance_heal
+appliance_name: tdcapplianceheal
 ext_interface: vni-0/0
 hq_interface: vni-0/1
 branch1_interface: vni-0/2
