@@ -58,7 +58,7 @@ class VersaClient():
             return True
         return False
 
-    def save_tokens_to_file(self):
+    def save_token_to_file(self):
         with open(self.key_file, "w") as file:
             file.write(self.access_token)
 
@@ -78,8 +78,8 @@ class VersaClient():
         try:
             result = json.loads(result.content)
             self.access_token = result['access_token']
-            self.save_tokens_to_file()
-        except (KeyError, TypeError):
+            self.save_token_to_file()
+        except (KeyError, TypeError, ValueError):
             raise cfy_exc.NonRecoverableError(
                 "Incorrect reply: {}".format(result))
 

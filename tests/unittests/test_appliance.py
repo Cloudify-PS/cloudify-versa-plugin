@@ -23,15 +23,12 @@ class ApplianceMockTestCase(unittest.TestCase):
 
     def test_add_organisation(self):
         fake_uuid = mock.MagicMock()
-        fake_uuid.uuid4 = mock.MagicMock(return_value="1234")
+        fake_uuid = mock.MagicMock(return_value="1234")
         client = mock.MagicMock()
         client.post = mock.MagicMock()
-        with mock.patch('versa_plugin.appliance.uuid', fake_uuid):
+        with mock.patch('versa_plugin.connectors.get_organization_uuid',
+                        fake_uuid):
             uuid = versa_plugin.appliance.add_organization(client, "org",
-                                                            "uuid",
-                                                            "org")
-            self.assertEqual(uuid, "org:vcpe:1234")
-
-    def test_delete_organisation(self):
-        client = mock.MagicMock()
-        versa_plugin.appliance.delete_organization(client, "uuid")
+                                                           "uuid",
+                                                           "org")
+            self.assertTrue(uuid)

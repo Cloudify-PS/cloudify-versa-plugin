@@ -43,12 +43,8 @@ class ConnectorsMockTestCase(unittest.TestCase):
             versa_plugin.connectors.add_organization(client, "org", networks,
                                                      resource)
         sample = """{"organization": {"resource-pool": {"instances":\
- "Resource"}, "description": "Created by cloudify", "uuid": "cms:org:1234",\
+ "Resource"}, "description": "Created by cloudify", "uuid": "1234",\
  "org-networks": {"org-network": [{"ipaddress-allocation-mode": "manual",\
  "subnet": "subnet", "mask": "mask", "uuid": "1234", "name": "name"}]},\
  "name": "org"}}"""
         self.assertEqual(client.post.call_args[0][1], sample)
-
-    def test_delete_organisation(self):
-        client = mock.MagicMock()
-        versa_plugin.connectors.delete_organization(client, "org")
