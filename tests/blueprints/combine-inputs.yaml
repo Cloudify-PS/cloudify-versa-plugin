@@ -25,8 +25,8 @@ cms_org_name: tdccms
 # Networks configuration
 #
 parent_network_name: versamanagement
-ext_network_subnet: 172.19.0.0
-ext_network_mask: 255.255.255.128
+ext_network_subnet: 87.53.86.8
+ext_network_mask: 255.255.255.252
 hq_network_name: hq_network
 hq_network_subnet: 10.1.0.0
 hq_network_mask: 255.255.255.0
@@ -47,6 +47,7 @@ branch2_org_name: branch2_org
 # Appliance configuration
 #
 appliance_name: tdcappliance
+external_ip: 87.53.86.10
 ext_interface: vni-0/0
 hq_interface: vni-0/1
 branch1_interface: vni-0/2
@@ -54,7 +55,7 @@ branch2_interface: vni-0/3
 #
 # Routing Configuration
 #
-gateway_address: 172.19.0.254
+gateway_address: 87.53.86.9
 gateway_interface: vni-0/0.0
 parent_routing_name: parent_router
 hq_routing_name: hq_router
@@ -93,12 +94,12 @@ firewall_rule_name: tdc_firewall_rule
 nat_pool_name: tdc_nat_pool
 nat_range_name: tdc_nat_range
 nat_rule_name: tdc_nat_rule
-hq_range_low: 10.4.0.10
-hq_range_hight: 10.4.0.20
+hq_range_low: 87.53.87.1
+hq_range_hight: 87.53.87.4
 hq_nat_rule_source_address: 10.1.0.0/24
-branch1_range_low: 10.4.0.30
-branch1_range_hight: 10.4.0.40
+branch1_range_low: 87.53.87.7
+branch1_range_hight: 87.53.87.10
 branch1_nat_rule_source_address: 10.2.0.0/24
-branch2_range_low: 10.4.0.50
-branch2_range_hight: 10.4.0.60
+branch2_range_low: 87.53.87.13
+branch2_range_hight: 87.53.87.16
 branch2_nat_rule_source_address: 10.3.0.0/24

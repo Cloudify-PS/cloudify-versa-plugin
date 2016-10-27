@@ -90,6 +90,9 @@ inputs:
   ext_interface:
     default: ""
 
+  external_ip:
+    default: ""
+
   hq_interface:
     default: ""
 
@@ -366,7 +369,7 @@ node_templates:
             appliance_owner:
               networks:
                 - name: { get_input: parent_network_name }
-                  ip_address: { get_attribute: [flexvm, networks, VersaManagement] }
+                  ip_address: { get_input: external_ip }
                   interface: { get_input: ext_interface }
                 
     relationships:
