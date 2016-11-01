@@ -1,0 +1,31 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - imports.yaml
+  - networks.yaml
+ 
+inputs:
+
+  edge_gateway:
+    type: string
+
+  use_existing_networks:
+    type: boolean
+    default: true
+
+  management_network_name:
+    type: string
+
+  external_network_name:
+    default: ""
+
+  hq_network_name:
+    default: ""
+
+  branch1_network_name:
+    default: ""
+
+  branch2_network_name:
+    default: ""
+
+

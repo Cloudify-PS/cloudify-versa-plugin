@@ -1,0 +1,59 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - imports.yaml
+  - networks.yaml
+  - vm-blueprint.yaml
+ 
+inputs:
+#
+# Network configuration
+#
+  edge_gateway:
+    type: string
+
+  use_existing_networks:
+    type: boolean
+    default: true
+
+  management_network_name:
+    type: string
+
+  external_network_name:
+    default: ""
+
+  hq_network_name:
+    default: ""
+
+  branch1_network_name:
+    default: ""
+
+  branch2_network_name:
+    default: ""
+#
+# VMs configuration
+#
+  catalog:
+    type: string
+
+  flexvnf_template:
+    type: string
+
+  template:
+    type: string
+
+  flex_vm_name:
+    type: string
+
+  hq_vm_name:
+    type: string
+
+  branch1_vm_name:
+    type: string
+
+  branch2_vm_name:
+    type: string
+
+  use_existing_vms:
+    type: boolean
+
