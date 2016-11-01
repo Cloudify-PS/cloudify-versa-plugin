@@ -1,243 +1,5 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
-inputs:
-#
-# Versa configuration
-#
-  versa_url:
-    default: ""
-
-  client_id:
-    default: ""
-
-  client_secret:
-    default: ""
-
-  username:
-    default: ""
-
-  password:
-    default: ""
-
-#
-# CMS configuration
-#
-  pool_name:
-    default: ""
-
-  cms_org_name:
-    default: ""
-
-#
-# Networks configuration
-#
-  parent_network_name:
-    default: ""
-
-  ext_network_subnet:
-    default: ""
-
-  ext_network_mask:
-    default: ""
-
-  hq_network_name:
-    default: ""
-
-  hq_network_subnet:
-    default: ""
-
-  hq_network_mask:
-    default: ""
-
-  branch1_network_name:
-    default: ""
-
-  branch1_network_subnet:
-    default: ""
-
-  branch1_network_mask:
-    default: ""
-
-  branch2_network_name:
-    default: ""
-
-  branch2_network_subnet:
-    default: ""
-
-  branch2_network_mask:
-    default: ""
-
-#
-# Organization configuration
-#
-  parent_org_name:
-    default: ""
-
-  hq_org_name:
-    default: ""
-
-  branch1_org_name:
-    default: ""
-
-  branch2_org_name:
-    default: ""
-#
-# Appliance configuration
-#
-  appliance_name:
-    default: ""
-
-  ext_interface:
-    default: ""
-
-  external_ip:
-    default: ""
-
-  hq_interface:
-    default: ""
-
-  branch1_interface:
-    default: ""
-
-  branch2_interface:
-    default: ""
-
-  unit:
-    default: 0
-#
-# Routing Configuration
-#
-  default_address:
-    default: "0.0.0.0/0"
-
-  gateway_address:
-    default: ""
-
-  routing_preference:
-    default: 1
-
-  routing_tag:
-    default: 0
-
-  gateway_interface:
-    default: ""
-
-  parent_routing_name:
-    default: ""
-
-  hq_routing_name:
-    default: ""
-
-  branch1_routing_name:
-    default: ""
-
-  branch2_routing_name:
-    default: ""
-#
-# DHCP Configuration
-#
-  dhcp_profile_name :
-    default: ""
-
-  dhcp_options_profile_name:
-    default: ""
-
-  dhcp_lease_profile_name:
-    default: ""
-
-  dhcp_pool_name: 
-    default: ""
-
-  dhcp_range_name:
-    default: ""
-
-  dhcp_server_name:
-    default: ""
-
-  dns_server:
-    default: ""
-
-  hq_domain_name:
-    default: ""
-
-  branch1_domain_name:
-    default: ""
-
-  branch2_domain_name:
-    default: ""
-        
-  hq_dhcp_pool_mask:
-    default: ""
-        
-  hq_dhcp_begin_address:
-    default: ""
-        
-  hq_dhcp_end_address:
-    default: ""
-
-  branch1_dhcp_pool_mask:
-    default: ""
-        
-  branch1_dhcp_begin_address:
-    default: ""
-        
-  branch1_dhcp_end_address:
-    default: ""
-        
-  branch2_dhcp_pool_mask:
-    default: ""
-        
-  branch2_dhcp_begin_address:
-    default: ""
-        
-  branch2_dhcp_end_address:
-    default: ""
-#
-# Firewall configuration
-#
-  firewall_policy_name:
-    default: ""
-
-  firewall_rule_name:
-    default: ""
-#
-# NAT configuration
-#
-  nat_pool_name:
-    default: ""
-
-  nat_range_name:
-    default: ""
-
-  nat_rule_name:
-    default: ""
-
-  hq_range_low:
-    default: ""
-
-  hq_range_hight:
-    default: ""
-
-  hq_nat_rule_source_address:
-    default: ""
-
-  branch1_range_low:
-    default: ""
-
-  branch1_range_hight:
-    default: ""
-
-  branch1_nat_rule_source_address:
-    default: ""
-
-  branch2_range_low:
-    default: ""
-
-  branch2_range_hight:
-    default: ""
-
-  branch2_nat_rule_source_address:
-    default: ""
 #
 # Node templates
 #
@@ -279,7 +41,7 @@ node_templates:
       versa_config: { get_property: [versa_configuration, versa_config] }
       name: { get_input: cms_org_name }
       networks:
-        - name: { get_input: parent_network_name }
+        - name: { get_input: external_network_name }
           subnet: { get_input: ext_network_subnet }
           mask: { get_input: ext_network_mask }
         - name: { get_input: hq_network_name }
@@ -368,7 +130,7 @@ node_templates:
             management_ip: { get_attribute: [flexvm, ip] }
             appliance_owner:
               networks:
-                - name: { get_input: parent_network_name }
+                - name: { get_input: external_network_name }
                   ip_address: { get_input: external_ip }
                   interface: { get_input: ext_interface }
                 
@@ -398,7 +160,7 @@ node_templates:
               networks:
                 - name: { get_input: hq_network_name }
                   parent_interface: { get_input: hq_interface }
-                  ip_address: { get_attribute: [flexvm, networks, hq_network] }
+                  ip_address: { get_attribute: [flexvm, networks, { get_input: hq_network_name } ] }
                   mask: { get_input: hq_network_mask }
                   unit: { get_input: unit }
     relationships:
@@ -421,7 +183,7 @@ node_templates:
               networks:
                 - name: { get_input: branch1_network_name }
                   parent_interface: { get_input: branch1_interface }
-                  ip_address: { get_attribute: [flexvm, networks, branch1_network] }
+                  ip_address: { get_attribute: [flexvm, networks, { get_input: branch1_network_name } ] }
                   mask: { get_input: branch1_network_mask }
                   unit: { get_input: unit }
     relationships:
@@ -444,7 +206,7 @@ node_templates:
               networks:
                 - name: { get_input: branch2_network_name }
                   parent_interface: { get_input: branch2_interface }
-                  ip_address: { get_attribute: [flexvm, networks, branch2_network] }
+                  ip_address: { get_attribute: [flexvm, networks, { get_input: branch2_network_name } ] }
                   mask: { get_input: branch2_network_mask }
                   unit: { get_input: unit }
     relationships:
@@ -462,7 +224,7 @@ node_templates:
       org_name: { get_input: parent_org_name }
       name: { get_input: parent_routing_name }
       networks:
-        - { get_input: parent_network_name }
+        - { get_input: external_network_name }
       routings:
         - ip_prefix: { get_input: default_address }
           next_hop: { get_input: gateway_address }

@@ -1,5 +1,5 @@
 management_network_name: "Versa Internal"
-external_network_name: VersaManagement
+external_network_name: vlan100
 catalog: tdc
 flexvnf_template: FlexVMnonic
 template: CentOSWithoutNic
@@ -7,6 +7,7 @@ flex_vm_name: test_flex
 hq_vm_name: test_hq
 branch1_vm_name: test_branch1
 branch2_vm_name: test_branch2
+use_existing_vms: true
 
 #
 # Versa configuration
@@ -24,18 +25,19 @@ cms_org_name: tdccms
 #
 # Networks configuration
 #
-parent_network_name: versamanagement
 ext_network_subnet: 87.53.86.8
 ext_network_mask: 255.255.255.252
-hq_network_name: hq_network
+hq_network_name: test_hq_network
 hq_network_subnet: 10.1.0.0
 hq_network_mask: 255.255.255.0
-branch1_network_name: branch1_network
+branch1_network_name: test_branch1_network
 branch1_network_subnet: 10.2.0.0
 branch1_network_mask: 255.255.255.0
-branch2_network_name: branch2_network
+branch2_network_name: test_branch2_network
 branch2_network_subnet: 10.3.0.0
 branch2_network_mask: 255.255.255.0
+edge_gateway: VersaCfy
+use_existing_networks: true
 #
 # Organization configuration
 #
@@ -70,7 +72,7 @@ dhcp_lease_profile_name: tdc_dhcp_lease
 dhcp_pool_name: tdc_dhcp_pool
 dhcp_range_name: tdc_dhcp_range
 dhcp_server_name: tdc_dhcp_server
-dns_server: 8.8.8.8
+dns_server: 193.162.159.194
 hq_domain_name: hq.org
 branch1_domain_name: br1.org
 branch2_domain_name: br2.org

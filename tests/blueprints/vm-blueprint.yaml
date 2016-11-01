@@ -1,68 +1,6 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
-inputs:
-
-  management_network_name:
-    type: string
-
-  external_network_name:
-    type: string
-
-  catalog:
-    type: string
-
-  flexvnf_template:
-    type: string
-
-  template:
-    type: string
-
-  flex_vm_name:
-    type: string
-
-  hq_vm_name:
-    type: string
-
-  branch1_vm_name:
-    type: string
-
-  branch2_vm_name:
-    type: string
-
-
 node_templates:
-#
-# Networks
-#
-  management_network:
-    type: cloudify.vcloud.nodes.Network
-    properties:
-      use_external_resource: true
-      resource_id: { get_input: management_network_name }
-
-  external_network:
-    type: cloudify.vcloud.nodes.Network
-    properties:
-      use_external_resource: true
-      resource_id: { get_input: external_network_name }
-
-  hq_network:
-    type: cloudify.vcloud.nodes.Network
-    properties:
-      use_external_resource: true
-      resource_id: { get_input: hq_network_name }
-
-  branch1_network:
-    type: cloudify.vcloud.nodes.Network
-    properties:
-      use_external_resource: true
-      resource_id: { get_input: branch1_network_name }
-
-  branch2_network:
-    type: cloudify.vcloud.nodes.Network
-    properties:
-      use_external_resource: true
-      resource_id: { get_input: branch2_network_name }
 
 #
 # Ports
@@ -126,12 +64,47 @@ node_templates:
     relationships:
       - target: external_network
         type: cloudify.vcloud.port_connected_to_network
+
+  hqvm_port:
+    type: cloudify.vcloud.nodes.Port
+    properties:
+      port:
+        network: {get_property: [hq_network, resource_id] }
+        ip_allocation_mode: DHCP
+        primary_interface: true
+    relationships:
+      - target: hq_network
+        type: cloudify.vcloud.port_connected_to_network
+
+  branch1vm_port:
+    type: cloudify.vcloud.nodes.Port
+    properties:
+      port:
+        network: {get_property: [branch1_network, resource_id] }
+        ip_allocation_mode: DHCP
+        primary_interface: true
+    relationships:
+      - target: branch1_network
+        type: cloudify.vcloud.port_connected_to_network
+
+  branch2vm_port:
+    type: cloudify.vcloud.nodes.Port
+    properties:
+      port:
+        network: {get_property: [branch2_network, resource_id] }
+        ip_allocation_mode: DHCP
+        primary_interface: true
+    relationships:
+      - target: branch2_network
+        type: cloudify.vcloud.port_connected_to_network
 ##
 ## VMs
 ##
   flexvm:
     type: cloudify.vcloud.nodes.Server
     properties:
+      use_external_resource: { get_input: use_existing_vms }
+      resource_id: { get_input: flex_vm_name }
       install_agent: false
       server:
         name: { get_input: flex_vm_name }
@@ -156,6 +129,8 @@ node_templates:
   hqvm:
     type: cloudify.vcloud.nodes.Server
     properties:
+      use_external_resource: { get_input: use_existing_vms }
+      resource_id: { get_input: hq_vm_name }
       install_agent: false
       server:
         name: { get_input: hq_vm_name }
@@ -165,14 +140,16 @@ node_templates:
           cpu: 2
           memory: 2048
     relationships:
-      - target: hq_network
-        type: cloudify.vcloud.server_connected_to_network
+      - target: hqvm_port
+        type: cloudify.vcloud.server_connected_to_port
       - target: management_network
         type: cloudify.vcloud.server_connected_to_network
 
   branch1_vm:
     type: cloudify.vcloud.nodes.Server
     properties:
+      use_external_resource: { get_input: use_existing_vms }
+      resource_id: { get_input: branch1_vm_name }
       install_agent: false
       server:
         name: { get_input: branch1_vm_name }
@@ -182,14 +159,16 @@ node_templates:
           cpu: 2
           memory: 2048
     relationships:
-      - target: branch2_network
-        type: cloudify.vcloud.server_connected_to_network
+      - target: branch1vm_port
+        type: cloudify.vcloud.server_connected_to_port
       - target: management_network
         type: cloudify.vcloud.server_connected_to_network
 
   branch2_vm:
     type: cloudify.vcloud.nodes.Server
     properties:
+      use_external_resource: { get_input: use_existing_vms }
+      resource_id: { get_input: branch2_vm_name }
       install_agent: false
       server:
         name: { get_input: branch2_vm_name }
@@ -199,8 +178,8 @@ node_templates:
           cpu: 2
           memory: 2048
     relationships:
-      - target: branch1_network
-        type: cloudify.vcloud.server_connected_to_network
+      - target: branch2vm_port
+        type: cloudify.vcloud.server_connected_to_port
       - target: management_network
         type: cloudify.vcloud.server_connected_to_network
 
