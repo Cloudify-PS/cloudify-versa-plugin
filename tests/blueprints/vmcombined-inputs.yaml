@@ -2,14 +2,14 @@ edge_gateway: VersaCfy
 use_existing_networks: true
 management_network_name: "Versa Internal"
 external_network_name: vlan100
-hq_network_name: test_hq_network
-branch1_network_name: test_branch1_network
-branch2_network_name: test_branch2_network
+hq_network_name: vcpe1_hq_network
+branch1_network_name: vcpe1_branch1_network
+branch2_network_name: vcpe1_branch2_network
 catalog: tdc
 flexvnf_template: FlexVMnonic
 template: CentOSWithoutNic
-flex_vm_name: test_flex
-hq_vm_name: test_hq
-branch1_vm_name: test_branch1
-branch2_vm_name: test_branch2
+flex_vm_name: vcpe1_flex
+hq_vm_name: vcpe1_hq
+branch1_vm_name: vcpe1_branch1
+branch2_vm_name: vcpe1_branch2
 use_existing_vms: false

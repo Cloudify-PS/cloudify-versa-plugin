@@ -1,7 +1,7 @@
 #
 # Versa configuration
 #
-versa_url: "https://172.19.0.201:9183"
+versa_url: "https://172.19.0.210:9183"
 client_id: "voae_rest"
 client_secret: "asrevnet_123"
 username: "Administrator"
@@ -19,13 +19,13 @@ parent_network_name: versamanagement
 ext_network_subnet: 172.19.0.0
 ext_network_mask: 255.255.255.128
 hq_network_name: hq_network
-hq_network_subnet: 10.1.0.0
+hq_network_subnet: 10.11.0.0
 hq_network_mask: 255.255.255.0
-branch1_network_name: branch1_network
-branch1_network_subnet: 10.2.0.0
+branch1_network_name: vcpe1_branch1_network
+branch1_network_subnet: 10.12.0.0
 branch1_network_mask: 255.255.255.128
-branch2_network_name: branch2_network
-branch2_network_subnet: 10.3.0.0
+branch2_network_name: vcpe1_branch2_network
+branch2_network_subnet: 10.13.0.0
 branch2_network_mask: 255.255.255.128
 #
 # Organization configuration
@@ -39,9 +39,9 @@ branch2_org_name: branch2_org
 #
 appliance_name: tdcappliance
 ext_address: 172.19.0.203
-hq_address: 10.1.0.10
-branch1_address: 10.2.0.10
-branch2_address: 10.3.0.10
+hq_address: 10.11.0.10
+branch1_address: 10.12.0.10
+branch2_address: 10.13.0.10
 ext_interface: vni-0/0
 hq_interface: vni-0/1
 branch1_interface: vni-0/2
@@ -69,14 +69,14 @@ hq_domain_name: hq.org
 branch1_domain_name: br1.org
 branch2_domain_name: br2.org
 hq_dhcp_pool_mask: 255.255.255.128
-hq_dhcp_begin_address: 10.1.0.30
-hq_dhcp_end_address: 10.1.0.40
+hq_dhcp_begin_address: 10.11.0.30
+hq_dhcp_end_address: 10.11.0.40
 branch1_dhcp_pool_mask: 255.255.255.0
-branch1_dhcp_begin_address: 10.2.0.30
-branch1_dhcp_end_address: 10.20.0.40
+branch1_dhcp_begin_address: 10.12.0.30
+branch1_dhcp_end_address: 10.12.0.40
 branch2_dhcp_pool_mask: 255.255.255.0
-branch2_dhcp_begin_address: 10.3.0.30
-branch2_dhcp_end_address: 10.4.0.49
+branch2_dhcp_begin_address: 10.13.0.30
+branch2_dhcp_end_address: 10.13.0.40
 ##
 ## Firewall configuration
 ##
@@ -88,12 +88,12 @@ firewall_rule_name: tdc_firewall_rule
 nat_pool_name: tdc_nat_pool
 nat_range_name: tdc_nat_range
 nat_rule_name: tdc_nat_rule
-hq_range_low: 10.4.0.10
-hq_range_hight: 10.4.0.20
-hq_nat_rule_source_address: 10.1.0.0/24
-branch1_range_low: 10.4.0.30
-branch1_range_hight: 10.4.0.40
-branch1_nat_rule_source_address: 10.2.0.0/24
-branch2_range_low: 10.4.0.50
-branch2_range_hight: 10.4.0.60
-branch2_nat_rule_source_address: 10.3.0.0/24
+hq_range_low: 10.14.0.10
+hq_range_hight: 10.14.0.20
+hq_nat_rule_source_address: 10.11.0.0/24
+branch1_range_low: 10.14.0.30
+branch1_range_hight: 10.14.0.40
+branch1_nat_rule_source_address: 10.12.0.0/24
+branch2_range_low: 10.14.0.50
+branch2_range_hight: 10.14.0.60
+branch2_nat_rule_source_address: 10.13.0.0/24
