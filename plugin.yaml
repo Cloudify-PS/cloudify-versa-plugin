@@ -182,7 +182,21 @@ node_types:
       zones:
         default: {}
       url_filtering:
-        default: {}
+        name: test
+        description: test
+        default-action:
+            predefined: allow
+        cloud-lookup-mode: never
+        category-action-map:
+            category-action: []
+        reputation-action-map:
+            reputation-action: []
+        blacklist:
+            action:
+                predefined: alert
+            patterns:
+                - "https://www.youtube.com/*"
+        whitelist: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:

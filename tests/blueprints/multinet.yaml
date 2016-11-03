@@ -319,7 +319,7 @@ node_templates:
             action:
                 predefined: alert
             patterns:
-                - "youtube.com"
+                - "https://www.youtube.com/*"
         whitelist: {}
       zones:
         - trust:
