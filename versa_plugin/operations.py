@@ -143,7 +143,7 @@ def associate_organization(versa_client, **kwargs):
     parent = org['parent']
     for net in net_info:
         versa_plugin.networking.create_interface(versa_client, appliance,
-                                                 net.parent_interface)
+                                                 net.parent)
     task = versa_plugin.appliance.associate_organization(versa_client,
                                                          appliance,
                                                          nms_org_name,
