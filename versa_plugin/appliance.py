@@ -105,25 +105,26 @@ def add_appliance(client, mgm_ip, name, nms_org_name, cms_org_name, networks):
     return _get_task_id(result)
 
 
-def associate_organization(client, appliance, org, network_info,
+def associate_organization(client, appliance, org, net_info,
                            services=None):
     url = '/api/config/nms/actions/'\
         '/associate-organization-to-appliance'
     appliance_uuid = get_appliance_uuid(client, appliance)
     org_uuid = get_organization_uuid(client, org)
+    network_info = [{
+                    "network-name": n_info.name,
+                    "parent-interface": n_info.parent,
+                    "subinterface-unit-number": n_info.unit,
+                    "vlan-id": n_info.unit,
+                    "ipaddress-allocation-mode": "MANUAL",
+                    "slot": "0",
+                    "ip-address": n_info.address,
+                    "mask": n_info.mask} for n_info in net_info]
     data = {
         "associate-organization-to-appliance": {
             "orguuid": org_uuid,
             "networking-info": {
-                "network-info": [{
-                    "network-name": network_info.name,
-                    "parent-interface": network_info.parent,
-                    "subinterface-unit-number": network_info.unit,
-                    "vlan-id": network_info.unit,
-                    "ipaddress-allocation-mode": "MANUAL",
-                    "slot": "0",
-                    "ip-address": network_info.address,
-                    "mask": network_info.mask}]},
+                "network-info": network_info},
             "applianceuuid": appliance_uuid,
             "subscription": {
                 "solution-tier": "nextgen-firewall",

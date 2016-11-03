@@ -3,16 +3,16 @@ external_network_name: vlan100
 catalog: tdc
 flexvnf_template: FlexVMnonic
 template: CentOSWithoutNic
-flex_vm_name: test_flex
-hq_vm_name: test_hq
-branch1_vm_name: test_branch1
-branch2_vm_name: test_branch2
+flex_vm_name: vcpe1_flexvnf
+hq_vm_name: vcpe1_hq
+branch1_vm_name: vcpe1_branch1
+branch2_vm_name: vcpe1_branch2
 use_existing_vms: true
 
 #
 # Versa configuration
 #
-versa_url: "https://172.19.0.201:9183"
+versa_url: "https://172.19.0.210:9183"
 client_id: "voae_rest"
 client_secret: "asrevnet_123"
 username: "Administrator"
@@ -20,20 +20,20 @@ password: "versa123"
 #
 # CMS configuration
 #
-pool_name: tdcpool
-cms_org_name: tdccms
+pool_name: vcpe1_tdcpool
+cms_org_name: vcpe1_tdccms
 #
 # Networks configuration
 #
 ext_network_subnet: 87.53.86.8
 ext_network_mask: 255.255.255.252
-hq_network_name: test_hq_network
+hq_network_name: vcpe1_hq_network
 hq_network_subnet: 10.1.0.0
 hq_network_mask: 255.255.255.0
-branch1_network_name: test_branch1_network
+branch1_network_name: vcpe1_branch1_network
 branch1_network_subnet: 10.2.0.0
 branch1_network_mask: 255.255.255.0
-branch2_network_name: test_branch2_network
+branch2_network_name: vcpe1_branch2_network
 branch2_network_subnet: 10.3.0.0
 branch2_network_mask: 255.255.255.0
 edge_gateway: VersaCfy
@@ -41,14 +41,14 @@ use_existing_networks: true
 #
 # Organization configuration
 #
-parent_org_name: parent_org
-hq_org_name: hq_org
-branch1_org_name: branch1_org
-branch2_org_name: branch2_org
+parent_org_name: vcpe1_parent_org
+hq_org_name: vcpe1_hq_org
+branch1_org_name: vcpe1_branch1_org
+branch2_org_name: vcpe1_branch2_org
 #
 # Appliance configuration
 #
-appliance_name: tdcappliance
+appliance_name: vcpe1tdcappliance
 external_ip: 87.53.86.10
 ext_interface: vni-0/0
 hq_interface: vni-0/1
@@ -81,10 +81,10 @@ hq_dhcp_begin_address: 10.1.0.30
 hq_dhcp_end_address: 10.1.0.40
 branch1_dhcp_pool_mask: 255.255.255.0
 branch1_dhcp_begin_address: 10.2.0.30
-branch1_dhcp_end_address: 10.20.0.40
+branch1_dhcp_end_address: 10.2.0.40
 branch2_dhcp_pool_mask: 255.255.255.0
 branch2_dhcp_begin_address: 10.3.0.30
-branch2_dhcp_end_address: 10.4.0.49
+branch2_dhcp_end_address: 10.3.0.40
 ##
 ## Firewall configuration
 ##

@@ -162,7 +162,7 @@ node_types:
           implementation: versa.versa_plugin.operations.create_cgnat
           inputs: {}
 
-  cloudify.versa.nodes.Firewall:
+  cloudify.versa.nodes.NGFirewall:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
       use_existing: 

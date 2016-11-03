@@ -16,6 +16,7 @@ def delete_policy(client, appliance, org, policy):
                                                                     org, policy)
     client.delete(url, None, None, codes.no_content)
 
+
 def add_rule(client, appliance, org, policy, rule_name):
     url = '/api/config/devices/device/{}/config/orgs'\
         '/org-services/{}/security/access-policies/'\
@@ -28,11 +29,11 @@ def add_rule(client, appliance, org, policy, rule_name):
                     "zone": {
                         "zone-list": ["trust"]}},
                 "destination": {
-                    "zone":{
+                    "zone": {
                         "zone-list": ["untrust"]}}},
             "set": {
-                "lef" :{
-                    "event":"end",
+                "lef": {
+                    "event": "end",
                     "options": {
                         "send-pcap-data": {
                             "enable": False}}},
@@ -47,3 +48,23 @@ def delete_rule(client, appliance, org, policy, rule):
                                                                 org, policy,
                                                                 rule)
     client.delete(url, None, None, codes.no_content)
+
+
+def add_url_filer(client, appliance, org, name, action, patterns, strings):
+    url = '/api/config/devices/device/{}/config/orgs/org-services/{}'\
+          '/security/profiles/url-filtering'.format(appliance, org)
+    data = {
+        "url-filtering-profile": {
+            "name": name,
+            "cloud-lookup-mode": "never",
+            "category-action-map": {
+                "category-action": []},
+            "reputation-action-map": {
+                "reputation-action": []},
+            "blacklist": {
+                "action": {
+                    "predefined": action},
+                "patterns": patterns,
+                "strings": strings},
+            "whitelist": {}}}
+    client.post(url, json.dumps(data), JSON, codes.created)

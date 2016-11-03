@@ -394,7 +394,7 @@ node_templates:
   #####################
 
   hq_firewall:
-    type: cloudify.versa.nodes.Firewall
+    type: cloudify.versa.nodes.NGFirewall
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
@@ -415,7 +415,7 @@ node_templates:
         target: parent_routing
 
   branch1_firewall:
-    type: cloudify.versa.nodes.Firewall
+    type: cloudify.versa.nodes.NGFirewall
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
@@ -436,7 +436,7 @@ node_templates:
         target: parent_routing
 
   branch2_firewall:
-    type: cloudify.versa.nodes.Firewall
+    type: cloudify.versa.nodes.NGFirewall
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
