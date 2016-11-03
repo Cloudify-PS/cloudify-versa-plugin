@@ -351,7 +351,7 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: hq_org_name }
       pool:
-        name: { get_input: nat_pool_name }
+        name: { get_input: natbranch1_pool_name }
         ranges:
           - name: { get_input: nat_range_name }
             low: { get_input: branch1_range_low }
@@ -359,7 +359,7 @@ node_templates:
         routing_instance: { get_input: parent_routing_name }
         provider_org: { get_input: parent_org_name }
       rule:
-        name: { get_input: nat_rule_name }
+        name: { get_input: natbranch1_rule_name }
         addresses:
           - { get_input: branch1_nat_rule_source_address }
     relationships:
@@ -375,7 +375,7 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: hq_org_name }
       pool:
-        name: { get_input: nat_pool_name }
+        name: { get_input: natbranch2_pool_name }
         ranges:
           - name: { get_input: nat_range_name }
             low: { get_input: branch2_range_low }
@@ -383,7 +383,7 @@ node_templates:
         routing_instance: { get_input: parent_routing_name }
         provider_org: { get_input: parent_org_name }
       rule:
-        name: { get_input: nat_rule_name }
+        name: { get_input: natbranch2_rule_name }
         addresses:
           - { get_input: branch2_nat_rule_source_address }
     relationships:
