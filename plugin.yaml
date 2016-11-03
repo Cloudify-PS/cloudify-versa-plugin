@@ -175,9 +175,11 @@ node_types:
         default: ""
       policy_name:
         default: ""
-      rule_name:
-        default: ""
+      rules:
+        default: {}
       zones:
+        default: {}
+      url_filtering:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:

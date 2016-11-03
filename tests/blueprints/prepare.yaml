@@ -400,7 +400,8 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: hq_org_name }
       policy_name: { get_input: firewall_policy_name }
-      rule_name: { get_input: firewall_rule_name }
+      rules:
+        - name: { get_input: firewall_rule_name }
       zones:
         - trust:
             networks:
@@ -421,7 +422,8 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch1_org_name }
       policy_name: { get_input: firewall_policy_name }
-      rule_name: { get_input: firewall_rule_name }
+      rules:
+        - name: { get_input: firewall_rule_name }
       zones:
         - trust:
             networks:
@@ -442,7 +444,8 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: branch2_org_name }
       policy_name: { get_input: firewall_policy_name }
-      rule_name: { get_input: firewall_rule_name }
+      rules: 
+        - name: { get_input: firewall_rule_name }
       zones:
         - trust:
             networks:

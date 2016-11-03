@@ -9,6 +9,7 @@ import versa_plugin.tasks
 import versa_plugin.networking
 import versa_plugin.dhcp
 import versa_plugin.firewall
+from versa_plugin.firewall import Rule
 import versa_plugin.cgnat
 from versa_plugin.networking import Routing
 from versa_plugin.cgnat import AddressRange
@@ -216,7 +217,7 @@ def create_firewall(versa_client, **kwargs):
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
     policy_name = ctx.node.properties['policy_name']
-    rule_name = ctx.node.properties['rule_name']
+    rules = [Rule(r['name']) for r in ctx.node.properties['rules']]
     zones = ctx.node.properties.get('zones')
     url_filter = ctx.node.properties.get('url_filter')
     if zones:
@@ -232,15 +233,15 @@ def create_firewall(versa_client, **kwargs):
     versa_plugin.firewall.add_policy(versa_client, appliance_name,
                                      org_name, policy_name)
     versa_plugin.firewall.add_rule(versa_client, appliance_name,
-                                   org_name, policy_name, rule_name)
-    if url_filter:
-        filter_name = url_filter['name']
-        action = url_filter['action']
-        patterns = url_filter.get('patterns', [])
-        strings = url_filter.get('strings', [])
-        versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
-                                             org_name, filter_name, action,
-                                             patterns, strings)
+                                   org_name, policy_name, rules)
+    # if url_filter:
+        # filter_name = url_filter['name']
+        # action = url_filter['action']
+        # patterns = url_filter.get('patterns', [])
+        # strings = url_filter.get('strings', [])
+        # versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
+                                             # org_name, filter_name, action,
+                                             # patterns, strings)
 
 
 @operation
