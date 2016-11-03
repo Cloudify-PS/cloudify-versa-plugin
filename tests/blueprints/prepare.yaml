@@ -403,21 +403,21 @@ node_templates:
       rules:
         - name: { get_input: firewall_rule_name }
       url_filtering:
-        name: test
-        description: test
-        default-action:
-            predefined: allow
-        cloud-lookup-mode: never
-        category-action-map:
-            category-action: []
-        reputation-action-map:
-            reputation-action: []
-        blacklist:
-            action:
-                predefined: alert
-            patterns:
-                - "https://www.youtube.com/*"
-        whitelist: {}
+        - name: test
+          description: test
+          default-action:
+             predefined: allow
+          cloud-lookup-mode: never
+          category-action-map:
+             category-action: []
+          reputation-action-map:
+             reputation-action: []
+          blacklist:
+             action:
+               predefined: alert
+             patterns:
+               - "https://www.youtube.com/*"
+          whitelist: {}
       zones:
         - trust:
             networks:
