@@ -66,10 +66,18 @@ branch2_routing_name: branch2_router
 ##
 dhcp_profile_name : tdc_dhcp_profile
 dhcp_options_profile_name: tdc_dhcp_options
+dhcp_options_profile_name1: tdc_dhcp_options1
+dhcp_options_profile_name2: tdc_dhcp_options2
 dhcp_lease_profile_name: tdc_dhcp_lease
+dhcp_lease_profile_name1: tdc_dhcp_lease1
+dhcp_lease_profile_name2: tdc_dhcp_lease2
 dhcp_pool_name: tdc_dhcp_pool
+dhcp_pool_name1: tdc_dhcp_pool1
+dhcp_pool_name2: tdc_dhcp_pool2
 dhcp_range_name: tdc_dhcp_range
 dhcp_server_name: tdc_dhcp_server
+dhcp_server_name1: tdc_dhcp_server1
+dhcp_server_name2: tdc_dhcp_server2
 dns_server: 193.162.159.194
 hq_domain_name: hq.org
 branch1_domain_name: br1.org
@@ -92,8 +100,13 @@ firewall_rule_name: tdc_firewall_rule
 ## NAT configuration
 ##
 nat_pool_name: tdc_nat_pool
+natbranch1_pool_name: tdc_nat_pool1
+natbranch2_pool_name: tdc_nat_pool2
+nat_range_name: tdc_nat_range
 nat_range_name: tdc_nat_range
 nat_rule_name: tdc_nat_rule
+natbranch1_rule_name: tdc_nat_rule1
+natbranch2_rule_name: tdc_nat_rule2
 hq_range_low: 87.53.87.1
 hq_range_hight: 87.53.87.4
 hq_nat_rule_source_address: 10.11.0.0/24

@@ -198,16 +198,40 @@ inputs:
   dhcp_options_profile_name:
     default: ""
 
+  dhcp_options_profile_name1:
+    default: ""
+
+  dhcp_options_profile_name2:
+    default: ""
+
   dhcp_lease_profile_name:
     default: ""
 
+  dhcp_lease_profile_name1:
+    default: ""
+
+  dhcp_lease_profile_name2:
+    default: ""
+
   dhcp_pool_name: 
+    default: ""
+
+  dhcp_pool_name1: 
+    default: ""
+
+  dhcp_pool_name2: 
     default: ""
 
   dhcp_range_name:
     default: ""
 
   dhcp_server_name:
+    default: ""
+
+  dhcp_server_name1:
+    default: ""
+
+  dhcp_server_name2:
     default: ""
 
   dns_server:

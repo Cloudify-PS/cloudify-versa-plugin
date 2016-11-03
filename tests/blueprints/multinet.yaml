@@ -235,22 +235,22 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      org_name: { get_input: branch1_org_name }
+      org_name: { get_input: hq_org_name }
       profile_name: { get_input: dhcp_profile_name }
-      lease_profile: { get_input: dhcp_lease_profile_name }
+      lease_profile: { get_input: dhcp_lease_profile_name1 }
       options_profile:
-        name: { get_input: dhcp_options_profile_name }
+        name: { get_input: dhcp_options_profile_name1 }
         domain: { get_input: branch1_domain_name}
         servers:
           - { get_input: dns_server}
       pool:
-          name: { get_input: dhcp_pool_name }
+          name: { get_input: dhcp_pool_name1 }
           mask: { get_input: branch1_dhcp_pool_mask }
           range_name: { get_input: dhcp_range_name }
           begin_address: { get_input: branch1_dhcp_begin_address }
           end_address: { get_input: branch1_dhcp_end_address }
       server:
-        name: { get_input: dhcp_server_name }
+        name: { get_input: dhcp_server_name1 }
         networks:
           - { get_input: branch1_network_name }
     relationships:
@@ -266,22 +266,22 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      org_name: { get_input: branch2_org_name }
+      org_name: { get_input: hq_org_name }
       profile_name: { get_input: dhcp_profile_name }
-      lease_profile: { get_input: dhcp_lease_profile_name }
+      lease_profile: { get_input: dhcp_lease_profile_name2 }
       options_profile:
-        name: { get_input: dhcp_options_profile_name }
+        name: { get_input: dhcp_options_profile_name2 }
         domain: { get_input: branch2_domain_name}
         servers:
           - { get_input: dns_server}
       pool:
-          name: { get_input: dhcp_pool_name }
+          name: { get_input: dhcp_pool_name2 }
           mask: { get_input: branch2_dhcp_pool_mask }
           range_name: { get_input: dhcp_range_name }
           begin_address: { get_input: branch2_dhcp_begin_address }
           end_address: { get_input: branch2_dhcp_end_address }
       server:
-        name: { get_input: dhcp_server_name }
+        name: { get_input: dhcp_server_name2 }
         networks:
           - { get_input: branch2_network_name }
     relationships:
