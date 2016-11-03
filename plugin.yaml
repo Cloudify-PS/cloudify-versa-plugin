@@ -1,7 +1,7 @@
 plugins:
   versa:
     executor: central_deployment_agent
-    source: http://github.com/Cloudify-PS/cloudify-versa-plugin/archive/firewall_with_filtering.zip
+    source: http://github.com/Cloudify-PS/cloudify-versa-plugin/archive/filtering.zip
     package_name: cloudify-versa-plugin
     package_version: '1.0'
 
