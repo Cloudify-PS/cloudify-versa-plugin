@@ -177,6 +177,8 @@ node_types:
         default: ""
       rule_name:
         default: ""
+      url_filtering:
+        default: {}
       zones:
         default: {}
     interfaces:

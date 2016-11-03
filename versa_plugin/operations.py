@@ -141,8 +141,9 @@ def associate_organization(versa_client, **kwargs):
                             net['ip_address'], net['mask'],
                             net['unit']) for net in nets]
     parent = org['parent']
-    versa_plugin.networking.create_interface(versa_client, appliance,
-                                             net['parent_interface'])
+    for net in net_info:
+        versa_plugin.networking.create_interface(versa_client, appliance,
+                                                 net.parent_interface)
     task = versa_plugin.appliance.associate_organization(versa_client,
                                                          appliance,
                                                          nms_org_name,
@@ -218,7 +219,6 @@ def create_firewall(versa_client, **kwargs):
     policy_name = ctx.node.properties['policy_name']
     rule_name = ctx.node.properties['rule_name']
     zones = ctx.node.properties.get('zones')
-    url_filter = ctx.node.properties.get('url_filter')
     if zones:
         for zone in zones:
             for zone_name in zone:
@@ -233,14 +233,6 @@ def create_firewall(versa_client, **kwargs):
                                      org_name, policy_name)
     versa_plugin.firewall.add_rule(versa_client, appliance_name,
                                    org_name, policy_name, rule_name)
-    if url_filter:
-        filter_name = url_filter['name']
-        action = url_filter['action']
-        patterns = url_filter.get('patterns', [])
-        strings = url_filter.get('strings', [])
-        versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
-                                             org_name, filter_name, action,
-                                             patterns, strings)
 
 
 @operation
