@@ -349,7 +349,7 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      org_name: { get_input: branch1_org_name }
+      org_name: { get_input: hq_org_name }
       pool:
         name: { get_input: nat_pool_name }
         ranges:
@@ -373,7 +373,7 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      org_name: { get_input: branch2_org_name }
+      org_name: { get_input: hq_org_name }
       pool:
         name: { get_input: nat_pool_name }
         ranges:
