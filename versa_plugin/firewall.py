@@ -65,8 +65,8 @@ def delete_rule(client, appliance, org, policy, rule):
     client.delete(url, None, None, codes.no_content)
 
 
-def add_url_filer(client, appliance, org, name, blacklist=None, whitelist=None,
-                  categories=None, reputations=None):
+def add_url_filter(client, appliance, org, name, blacklist=None, whitelist=None,
+                   categories=None, reputations=None):
     """
         :param appliance (str)
         :param org (str)
