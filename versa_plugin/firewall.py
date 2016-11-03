@@ -2,7 +2,7 @@ import json
 from requests import codes
 from versa_plugin.versaclient import JSON
 from collections import namedtuple
-
+from cloudify import ctx
 
 Rule = namedtuple("Rule", "name")
 BlackList = namedtuple("BlackList", "name, actions, patterns, strings")
@@ -65,34 +65,20 @@ def delete_rule(client, appliance, org, policy, rule):
     client.delete(url, None, None, codes.no_content)
 
 
-def add_url_filter(client, appliance, org, name, blacklist=None, whitelist=None,
-                   categories=None, reputations=None):
+def add_url_filter(client, appliance, org, url_filter):
     """
         :param appliance (str)
         :param org (str)
-        :param policy (str)
-        :param name (str)
-        :param blacklist (BlackList):
-        :param whitelist (WhiteList):
-        :param categories (CategoryAction):
-        :param reputations (ReputationAction):
+        :url_filter (dict)
     """
     url = '/api/config/devices/device/{}/config/orgs/org-services/{}'\
           '/security/profiles/url-filtering'.format(appliance, org)
-    blacklist_params = _prepare_blacklist(blacklist)
-    whitelist_params = _prepare_whitelist(whitelist)
-    category_action = _prepare_categories(categories)
-    reputatin_action = _prepare_reputations(reputations)
     data = {
-        "url-filtering-profile": {
-            "name": name,
-            "cloud-lookup-mode": "never",
-            "category-action-map": {
-                "category-action": category_action},
-            "reputation-action-map": {
-                "reputation-action": reputatin_action},
-            "blacklist": blacklist_params,
-            "whitelist": whitelist_params}}
+        "url-filtering-profile": url_filter
+    }
+
+    ctx.logger.info("Filter:" + json.dumps(data))
+
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
