@@ -192,6 +192,7 @@ node_types:
           inputs:
             url_filters:
               description: list of url filters to apply
+              default: {}
 
   cloudify.versa.nodes.DHCPProfile:
     derived_from: cloudify.nodes.SoftwareComponent
