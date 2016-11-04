@@ -186,6 +186,12 @@ node_types:
         create:
           implementation: versa.versa_plugin.operations.create_firewall
           inputs: {}
+      versa.interfaces.actions:
+        add_url_filter:
+          implementation: versa.versa_plugin.operations.create_firewall
+          inputs:
+            url_filters:
+              description: list of url filters to apply
 
   cloudify.versa.nodes.DHCPProfile:
     derived_from: cloudify.nodes.SoftwareComponent
