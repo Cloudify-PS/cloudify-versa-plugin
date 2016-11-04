@@ -1,0 +1,66 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - imports.yaml
+
+inputs:
+    versa_url:
+        default: "https://172.19.0.210:9183"
+    client_id:
+        default: "voae_rest"
+    client_secret:
+        default: "asrevnet_123"
+    username:
+        default: "Administrator"
+    password:
+        default: "versa123"
+    appliance_name:
+        default: vcpe1tdcappliance
+    hq_org_name:
+        default: vcpe1_hq_org
+
+    rule_name:
+        type: string
+
+    block_url:
+        type: string
+
+#
+# Node templates
+#
+node_templates:
+  #####################
+  # Versa config
+  #####################
+  versa_configuration:
+    type: cloudify.versa.nodes.versa_configuration
+    properties:
+      versa_config:
+        username: { get_input: username }
+        password: { get_input: password }
+        versa_url: { get_input: versa_url}
+        client_id: { get_input: client_id}
+        client_secret: { get_input: client_secret}
+
+  hq_firewall:
+    type: cloudify.versa.nodes.NGFirewall
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: hq_org_name }
+      url_filtering:
+        - name: { get_input: rule_name }
+          description: { get_input: rule_name }
+          default-action:
+             predefined: allow
+          cloud-lookup-mode: never
+          category-action-map:
+             category-action: []
+          reputation-action-map:
+             reputation-action: []
+          blacklist:
+             action:
+               predefined: alert
+             patterns:
+               - { get_input: block_url }
+          whitelist: {}

@@ -231,10 +231,11 @@ def create_firewall(versa_client, **kwargs):
                                                      org_name, zone_name,
                                                      networks,
                                                      routing_instances)
-    versa_plugin.firewall.add_policy(versa_client, appliance_name,
-                                     org_name, policy_name)
-    versa_plugin.firewall.add_rule(versa_client, appliance_name,
-                                   org_name, policy_name, rules)
+    if policy_name:
+        versa_plugin.firewall.add_policy(versa_client, appliance_name,
+                                         org_name, policy_name)
+        versa_plugin.firewall.add_rule(versa_client, appliance_name,
+                                       org_name, policy_name, rules)
     if url_filters:
         for url_filter in url_filters:
             versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
