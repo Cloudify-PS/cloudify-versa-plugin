@@ -240,6 +240,17 @@ def create_firewall(versa_client, **kwargs):
             versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
                                                  org_name, url_filter)
 
+@operation
+@with_versa_client
+def add_url_filters(versa_client, **kwargs):
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    additional_url_filters = kwargs.get('url_filters', {})
+    if additional_url_filters:
+        for url_filter in additional_url_filters:
+            versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
+                                                 org_name, url_filter)
+        ctx.instance.runtime_properties[additional_url_filters] = additional_url_filters
 
 @operation
 @with_versa_client
