@@ -29,6 +29,10 @@ hq_name: hq
 branch1_name: branch1
 branch2_name: branch2
 
+hq_network_name: vcpe1_hq_network
+branch1_network_name: vcpe1_branch1_network
+branch2_network_name: vcpe1_branch2_network
+
 ext_network_subnet: 87.53.86.8
 ext_network_mask: 255.255.255.252
 hq_network_subnet: 10.11.0.0
@@ -43,7 +47,6 @@ use_existing_networks: true
 # Organization configuration
 #
 parent_org_name: vcpe1_parent_org
-hq_org_name: vcpe1_hq_org
 #
 # Appliance configuration
 #
@@ -84,11 +87,7 @@ firewall_rule_name: tdc_firewall_rule
 ##
 ## NAT configuration
 ##
-nat_pool_name: tdc_nat_pool
-natbranch1_pool_name: tdc_nat_pool1
-natbranch2_pool_name: tdc_nat_pool2
-nat_range_name: tdc_nat_range
-nat_range_name: tdc_nat_range
+
 nat_rule_name: tdc_nat_rule
 natbranch1_rule_name: tdc_nat_rule1
 natbranch2_rule_name: tdc_nat_rule2
