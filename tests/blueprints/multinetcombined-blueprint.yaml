@@ -129,13 +129,13 @@ inputs:
   parent_org_name:
     default: ""
 
-  hq_org_name:
+  hq_name:
     default: ""
 
-  branch1_org_name:
+  branch1_name:
     default: ""
 
-  branch2_org_name:
+  branch2_name:
     default: ""
 #
 # Appliance configuration
@@ -180,15 +180,6 @@ inputs:
 
   parent_routing_name:
     default: ""
-
-  hq_routing_name:
-    default: ""
-
-  branch1_routing_name:
-    default: ""
-
-  branch2_routing_name:
-    default: ""
 #
 # DHCP Configuration
 #
@@ -198,52 +189,13 @@ inputs:
   dhcp_options_profile_name:
     default: ""
 
-  dhcp_options_profile_name1:
-    default: ""
-
-  dhcp_options_profile_name2:
-    default: ""
 
   dhcp_lease_profile_name:
     default: ""
-
-  dhcp_lease_profile_name1:
-    default: ""
-
-  dhcp_lease_profile_name2:
-    default: ""
-
-  dhcp_pool_name: 
-    default: ""
-
-  dhcp_pool_name1: 
-    default: ""
-
-  dhcp_pool_name2: 
-    default: ""
-
-  dhcp_range_name:
-    default: ""
-
-  dhcp_server_name:
-    default: ""
-
-  dhcp_server_name1:
-    default: ""
-
-  dhcp_server_name2:
-    default: ""
-
   dns_server:
     default: ""
 
   hq_domain_name:
-    default: ""
-
-  branch1_domain_name:
-    default: ""
-
-  branch2_domain_name:
     default: ""
         
   hq_dhcp_pool_mask:
@@ -283,11 +235,6 @@ inputs:
 #
 # NAT configuration
 #
-  nat_pool_name:
-    default: ""
-
-  nat_range_name:
-    default: ""
 
   nat_rule_name:
     default: ""
@@ -295,7 +242,7 @@ inputs:
   hq_range_low:
     default: ""
 
-  hq_range_hight:
+  hq_range_high:
     default: ""
 
   hq_nat_rule_source_address:
@@ -304,7 +251,7 @@ inputs:
   branch1_range_low:
     default: ""
 
-  branch1_range_hight:
+  branch1_range_high:
     default: ""
 
   branch1_nat_rule_source_address:
@@ -313,16 +260,10 @@ inputs:
   branch2_range_low:
     default: ""
 
-  branch2_range_hight:
+  branch2_range_high:
     default: ""
 
   branch2_nat_rule_source_address:
-    default: ""
-
-  natbranch1_pool_name: 
-    default: ""
-
-  natbranch2_pool_name: 
     default: ""
 
   natbranch1_rule_name: 

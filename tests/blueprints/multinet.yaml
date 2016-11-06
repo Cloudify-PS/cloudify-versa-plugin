@@ -41,16 +41,16 @@ node_templates:
       versa_config: { get_property: [versa_configuration, versa_config] }
       name: { get_input: cms_org_name }
       networks:
-        - name: { get_input: external_network_name }
+        - name: { get_property: [external_network, resource_id] }
           subnet: { get_input: ext_network_subnet }
           mask: { get_input: ext_network_mask }
-        - name: { get_input: hq_network_name }
+        - name: { get_property: [hq_network, resource_id] }
           subnet: { get_input: hq_network_subnet }
           mask: { get_input: hq_network_mask }
-        - name: { get_input: branch1_network_name }
+        - name: { get_property: [branch1_network, resource_id] }
           subnet: { get_input: branch1_network_subnet }
           mask: { get_input: branch1_network_mask }
-        - name: { get_input: branch2_network_name }
+        - name: { get_property: [branch2_network, resource_id] }
           subnet: { get_input: branch2_network_subnet }
           mask: { get_input: branch2_network_mask }
       resources:
@@ -77,7 +77,7 @@ node_templates:
     type: cloudify.versa.nodes.Organization
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      name: { get_input: hq_org_name }
+      name: { concat:[get_input: hq_name, "_org"] }
       parent: { get_input: parent_org_name }
       cms_org_name: { get_input: cms_org_name }
     relationships:
@@ -104,7 +104,7 @@ node_templates:
             management_ip: { get_attribute: [flexvm, ip] }
             appliance_owner:
               networks:
-                - name: { get_input: external_network_name }
+                - name: { get_property: [external_network, resource_id] }
                   ip_address: { get_input: external_ip }
                   interface: { get_input: ext_interface }
     relationships:
@@ -119,7 +119,7 @@ node_templates:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       organization:
-        nms_org_name: { get_input: hq_org_name }
+        nms_org_name: { get_property: [hq_organization, name]}
         parent: { get_input: parent_org_name }
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -127,19 +127,19 @@ node_templates:
           inputs:
             organization:
               networks:
-                - name: { get_input: hq_network_name }
+                - name: { get_property: [hq_network, resource_id] }
                   parent_interface: { get_input: hq_interface }
-                  ip_address: { get_attribute: [flexvm, networks, { get_input: hq_network_name } ] }
+                  ip_address: { get_attribute: [flexvm, networks, get_property:[hq_network, resource_id] ] }
                   mask: { get_input: hq_network_mask }
                   unit: { get_input: unit }
-                - name: { get_input: branch1_network_name }
+                - name: { get_property: [branch1_network, resource_id] }
                   parent_interface: { get_input: branch1_interface }
-                  ip_address: { get_attribute: [flexvm, networks, { get_input: branch1_network_name } ] }
+                  ip_address: { get_attribute: [flexvm, networks, get_property:[branch1_network, resource_id] ] }
                   mask: { get_input: branch1_network_mask }
                   unit: { get_input: unit }
-                - name: { get_input: branch2_network_name }
+                - name: { get_property: [branch2_network, resource_id] }
                   parent_interface: { get_input: branch2_interface }
-                  ip_address: { get_attribute: [flexvm, networks, { get_input: branch2_network_name } ] }
+                  ip_address: { get_attribute: [flexvm, networks, get_property:[branch2_network, resource_id]] }
                   mask: { get_input: branch2_network_mask }
                   unit: { get_input: unit }
     relationships:
@@ -157,7 +157,7 @@ node_templates:
       org_name: { get_input: parent_org_name }
       name: { get_input: parent_routing_name }
       networks:
-        - { get_input: external_network_name }
+        - { get_property: [external_network, resource_id] }
       routings:
         - ip_prefix: { get_input: default_address }
           next_hop: { get_input: gateway_address }
@@ -173,13 +173,13 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      org_name: { get_input: hq_org_name }
-      name: { get_input: hq_routing_name }
+      org_name: { get_property: [hq_organization, name]}
+      name: { concat: [get_input: hq_name, "_router"] }
       parent_router_name: { get_input: parent_routing_name }
       networks:
-        - { get_input: hq_network_name }
-        - { get_input: branch1_network_name }
-        - { get_input: branch2_network_name }
+        - { get_property: [hq_network, resource_id] }
+        - { get_property: [branch1_network, resource_id] }
+        - { get_property: [branch2_network, resource_id] }
     relationships:
       - type: cloudify.versa.router_connected_to_org
         target: hq_associated
@@ -204,7 +204,7 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      org_name: { get_input: hq_org_name }
+      org_name: { get_property: [hq_organization, name]}
       profile_name: { get_input: dhcp_profile_name }
       lease_profile: { get_input: dhcp_lease_profile_name }
       options_profile:
@@ -213,15 +213,15 @@ node_templates:
         servers:
           - { get_input: dns_server}
       pool:
-        name: { get_input: dhcp_pool_name }
+        name: { concat: [get_input: hq_name, "_pool"] }
         mask: { get_input: hq_dhcp_pool_mask }
-        range_name: { get_input: dhcp_range_name }
+        range_name: { concat: [get_input: hq_name, "_range"] }
         begin_address: { get_input: hq_dhcp_begin_address }
         end_address: { get_input: hq_dhcp_end_address }
       server:
-        name: { get_input: dhcp_server_name }
+        name: { concat: [get_input: hq_name, "_dhcp_server"] }
         networks:
-          - { get_input: hq_network_name }
+          - { get_property: [hq_network, resource_id] }
     relationships:
       - type: cloudify.versa.dhcp_connected_to_profile
         target: dhcp_profile
@@ -235,24 +235,24 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      org_name: { get_input: hq_org_name }
+      org_name: { get_property: [hq_organization, name]}
       profile_name: { get_input: dhcp_profile_name }
-      lease_profile: { get_input: dhcp_lease_profile_name1 }
+      lease_profile: { get_input: dhcp_lease_profile_name }
       options_profile:
-        name: { get_input: dhcp_options_profile_name1 }
-        domain: { get_input: branch1_domain_name}
+        name: { get_input: dhcp_options_profile_name }
+        domain: { get_input: hq_domain_name}
         servers:
           - { get_input: dns_server}
       pool:
-          name: { get_input: dhcp_pool_name1 }
+          name: { concat: [get_input: branch1_name, "_pool"] }
           mask: { get_input: branch1_dhcp_pool_mask }
-          range_name: { get_input: dhcp_range_name }
+          range_name: { concat: [get_input: branch1_name, "_range"] }
           begin_address: { get_input: branch1_dhcp_begin_address }
           end_address: { get_input: branch1_dhcp_end_address }
       server:
-        name: { get_input: dhcp_server_name1 }
+        name: { concat: [get_input: branch1_name, "_dhcp_server"] }
         networks:
-          - { get_input: branch1_network_name }
+          - {get_property: branch1_network, resource_id}
     relationships:
       - type: cloudify.versa.dhcp_connected_to_profile
         target: dhcp_profile
@@ -266,24 +266,24 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      org_name: { get_input: hq_org_name }
+      org_name: { get_property: [hq_organization, name]}
       profile_name: { get_input: dhcp_profile_name }
-      lease_profile: { get_input: dhcp_lease_profile_name2 }
+      lease_profile: { get_input: dhcp_lease_profile_name }
       options_profile:
-        name: { get_input: dhcp_options_profile_name2 }
-        domain: { get_input: branch2_domain_name}
+        name: { get_input: dhcp_options_profile_name }
+        domain: { get_input: hq_domain_name}
         servers:
           - { get_input: dns_server}
       pool:
-          name: { get_input: dhcp_pool_name2 }
+          name: { concat: [get_input: branch2_name, "_pool"] }
           mask: { get_input: branch2_dhcp_pool_mask }
-          range_name: { get_input: dhcp_range_name }
+          range_name: { concat: [get_input: branch2_name, "_range"] }
           begin_address: { get_input: branch2_dhcp_begin_address }
           end_address: { get_input: branch2_dhcp_end_address }
       server:
-        name: { get_input: dhcp_server_name2 }
+        name: { concat: [get_input: branch2_name, "_dhcp_server"] }
         networks:
-          - { get_input: branch2_network_name }
+          - {get_property: branch2_network, resource_id}
     relationships:
       - type: cloudify.versa.dhcp_connected_to_profile
         target: dhcp_profile
@@ -301,13 +301,15 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      org_name: { get_input: hq_org_name }
+      org_name: { get_property: [hq_organization, name]}
       policy_name: { get_input: firewall_policy_name }
       rule_name: { get_input: firewall_rule_name }
       zones:
         - trust:
             networks:
-              - { get_input: hq_network_name }
+              - {get_property: hq_network, resource_id}
+              - {get_property: branch1_network, resource_id}
+              - {get_property: branch2_network, resource_id}
         - untrust:
             routing_instances:
               - { get_input: parent_routing_name }
@@ -325,13 +327,13 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      org_name: { get_input: hq_org_name }
+      org_name: { get_property: [hq_organization, name]}
       pool:
-        name: { get_input: nat_pool_name }
+        name: { concat:[get_input: hq_name, "_nat_pool"] }
         ranges:
-          - name: { get_input: nat_range_name }
+          - name: { concat:[get_input: hq_name, "_nat_range"] }
             low: { get_input: hq_range_low }
-            hight: { get_input: hq_range_hight }
+            hight: { get_input: hq_range_high }
         routing_instance: { get_input: parent_routing_name }
         provider_org: { get_input: parent_org_name }
       rule:
@@ -349,13 +351,13 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      org_name: { get_input: hq_org_name }
+      org_name: { get_property: [hq_organization, name]}
       pool:
-        name: { get_input: natbranch1_pool_name }
+        name: { concat:[get_input: branch1_name, "_nat_pool"] }
         ranges:
-          - name: { get_input: nat_range_name }
+          - name: { concat:[get_input: branch1_name, "_nat_range"] }
             low: { get_input: branch1_range_low }
-            hight: { get_input: branch1_range_hight }
+            hight: { get_input: branch1_range_high }
         routing_instance: { get_input: parent_routing_name }
         provider_org: { get_input: parent_org_name }
       rule:
@@ -373,13 +375,13 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      org_name: { get_input: hq_org_name }
+      org_name: { get_property: [hq_organization, name]}
       pool:
-        name: { get_input: natbranch2_pool_name }
+        name: { concat:[get_input: branch2_name, "_nat_pool"] }
         ranges:
-          - name: { get_input: nat_range_name }
+          - name: { concat:[get_input: branch2_name, "_nat_range"] }
             low: { get_input: branch2_range_low }
-            hight: { get_input: branch2_range_hight }
+            hight: { get_input: branch2_range_high }
         routing_instance: { get_input: parent_routing_name }
         provider_org: { get_input: parent_org_name }
       rule:

@@ -25,15 +25,16 @@ cms_org_name: vcpe1_tdccms
 #
 # Networks configuration
 #
+hq_name: hq
+branch1_name: branch1
+branch2_name: branch2
+
 ext_network_subnet: 87.53.86.8
 ext_network_mask: 255.255.255.252
-hq_network_name: vcpe1_hq_network
 hq_network_subnet: 10.11.0.0
 hq_network_mask: 255.255.255.0
-branch1_network_name: vcpe1_branch1_network
 branch1_network_subnet: 10.12.0.0
 branch1_network_mask: 255.255.255.0
-branch2_network_name: vcpe1_branch2_network
 branch2_network_subnet: 10.13.0.0
 branch2_network_mask: 255.255.255.0
 edge_gateway: VersaCfy
@@ -58,30 +59,14 @@ branch2_interface: vni-0/3
 gateway_address: 87.53.86.9
 gateway_interface: vni-0/0.0
 parent_routing_name: parent_router
-hq_routing_name: hq_router
-branch1_routing_name: branch1_router
-branch2_routing_name: branch2_router
 ##
 ## DHCP Configuration
 ##
 dhcp_profile_name : tdc_dhcp_profile
 dhcp_options_profile_name: tdc_dhcp_options
-dhcp_options_profile_name1: tdc_dhcp_options1
-dhcp_options_profile_name2: tdc_dhcp_options2
 dhcp_lease_profile_name: tdc_dhcp_lease
-dhcp_lease_profile_name1: tdc_dhcp_lease1
-dhcp_lease_profile_name2: tdc_dhcp_lease2
-dhcp_pool_name: tdc_dhcp_pool
-dhcp_pool_name1: tdc_dhcp_pool1
-dhcp_pool_name2: tdc_dhcp_pool2
-dhcp_range_name: tdc_dhcp_range
-dhcp_server_name: tdc_dhcp_server
-dhcp_server_name1: tdc_dhcp_server1
-dhcp_server_name2: tdc_dhcp_server2
 dns_server: 193.162.159.194
 hq_domain_name: hq.org
-branch1_domain_name: br1.org
-branch2_domain_name: br2.org
 hq_dhcp_pool_mask: 255.255.255.128
 hq_dhcp_begin_address: 10.11.0.30
 hq_dhcp_end_address: 10.11.0.40
@@ -108,11 +93,11 @@ nat_rule_name: tdc_nat_rule
 natbranch1_rule_name: tdc_nat_rule1
 natbranch2_rule_name: tdc_nat_rule2
 hq_range_low: 87.53.87.1
-hq_range_hight: 87.53.87.4
+hq_range_high: 87.53.87.4
 hq_nat_rule_source_address: 10.11.0.0/24
 branch1_range_low: 87.53.87.7
-branch1_range_hight: 87.53.87.10
+branch1_range_high: 87.53.87.10
 branch1_nat_rule_source_address: 10.12.0.0/24
 branch2_range_low: 87.53.87.13
-branch2_range_hight: 87.53.87.16
+branch2_range_high: 87.53.87.16
 branch2_nat_rule_source_address: 10.13.0.0/24
