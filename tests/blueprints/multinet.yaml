@@ -252,7 +252,7 @@ node_templates:
       server:
         name: { concat: [get_input: branch1_name, "_dhcp_server"] }
         networks:
-          - {get_property: branch1_network, resource_id}
+          - {get_property: [branch1_network, resource_id]}
     relationships:
       - type: cloudify.versa.dhcp_connected_to_profile
         target: dhcp_profile
@@ -283,7 +283,7 @@ node_templates:
       server:
         name: { concat: [get_input: branch2_name, "_dhcp_server"] }
         networks:
-          - {get_property: branch2_network, resource_id}
+          - {get_property: [branch2_network, resource_id]}
     relationships:
       - type: cloudify.versa.dhcp_connected_to_profile
         target: dhcp_profile
