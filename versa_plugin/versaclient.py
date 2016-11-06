@@ -126,7 +126,10 @@ class VersaClient():
                 self.revoke_token()
                 self.get_token()
             else:
-                return _check_response(response, return_code, accept)
+                response_str = _check_response(response, return_code, accept)
+                ctx.logger.debug("respose code: {0} string:{1}".format(
+                    return_code, response_str))
+                return response_str
 
     def _get_headers(self, content_type, accept):
         content_dict = {'json': 'application/json', 'xml': 'application/xml'}
