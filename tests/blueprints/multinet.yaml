@@ -237,7 +237,7 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_property: [hq_organization, name]}
       profile_name: { get_input: dhcp_profile_name }
-      lease_profile: { get_input: dhcp_lease_profile_name }
+      lease_profile: {concat: [get_input: dhcp_lease_profile_name, "1"] }
       options_profile:
         name: { concat: [get_input: dhcp_options_profile_name, "1"] }
         domain: { get_input: hq_domain_name}
@@ -268,7 +268,7 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_property: [hq_organization, name]}
       profile_name: { get_input: dhcp_profile_name }
-      lease_profile: { get_input: dhcp_lease_profile_name }
+      lease_profile: {concat: [get_input: dhcp_lease_profile_name, "2"] }
       options_profile:
         name: { concat: [get_input: dhcp_options_profile_name, "2"] }
         domain: { get_input: hq_domain_name}
