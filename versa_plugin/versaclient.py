@@ -5,6 +5,7 @@ from os import chmod
 from xml.dom.minidom import parseString
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from cloudify import exceptions as cfy_exc
+from cloudify import ctx
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 JSON = 'json'
 XML = 'xml'
@@ -110,6 +111,8 @@ class VersaClient():
     def _request(self, request_type, path, data, content_type, return_code,
                  accept):
         retry = 0
+        ctx.logger.debug("Sending request to {0} with data {1}".format(
+            self.versa_url + path, str(data))
         while True:
             headers = self._get_headers(content_type, accept)
             response = request_type(
