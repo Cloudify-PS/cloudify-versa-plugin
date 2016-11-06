@@ -307,9 +307,9 @@ node_templates:
       zones:
         - trust:
             networks:
-              - {get_property: hq_network, resource_id}
-              - {get_property: branch1_network, resource_id}
-              - {get_property: branch2_network, resource_id}
+              - { get_property: [hq_network, resource_id]}
+              - { get_property: [branch1_network, resource_id]}
+              - { get_property: [branch2_network, resource_id]}
         - untrust:
             routing_instances:
               - { get_input: parent_routing_name }
