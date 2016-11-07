@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import unittest
+import mock
 import requests
 from versa_plugin.versaclient import VersaClient
 import versa_plugin.appliance
@@ -50,14 +51,16 @@ class ApplianceTestCase(unittest.TestCase):
             versa_plugin.connectors.delete_resource_pool(client, resource)
 
 
-    def notest_add_organization(self):
+    def test_add_organization(self):
         cms_org_name = "testcmsorg"
         nms_org_name = "Testname"
-        with VersaClient(self.config) as client:
-            versa_plugin.appliance.add_organization(client,
-                                                    nms_org_name,
-                                                    None,
-                                                    cms_org_name)
+        with VersaClient(self.config, '/tmp/versakey') as client:
+            with mock.patch('versa_plugin.versaclient.ctx',
+                            mock.MagicMock()):
+                versa_plugin.appliance.add_organization(client,
+                                                        nms_org_name,
+                                                        None,
+                                                        cms_org_name)
 
     def notest_add_delete_appliance(self):
         cms_org_name = "cmsorgname"
@@ -116,7 +119,7 @@ class ApplianceTestCase(unittest.TestCase):
         with VersaClient(self.config) as client:
             versa_plugin.appliance.delete_appliance(client, "")
 
-    def test_get_organizations(self):
+    def notest_get_organizations(self):
         with VersaClient(self.config) as client:
             name = 'org'
             orgs = versa_plugin.appliance.get_organization(client, name)

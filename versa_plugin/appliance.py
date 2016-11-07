@@ -28,6 +28,10 @@ def add_organization(client, org_name, parent, cms_org_name):
                                                                  cms_org_name)
     if not parent:
         parent = 'none'
+    while True:
+        org_id = random.randint(1, 1000)
+        if not is_organization_id_exists(client, org_id):
+            break
     xmldata = """
     <organization>
         <uuid>{0}</uuid>
@@ -41,7 +45,7 @@ def add_organization(client, org_name, parent, cms_org_name):
             <name>{5}</name>
             <cms-connector>local</cms-connector>
         </cms-orgs>
-     </organization>""".format(org_uuid, random.randint(1, 1000), org_name,
+     </organization>""".format(org_uuid, org_id, org_name,
                                parent, cms_org_uuid, cms_org_name)
     client.post(url, xmldata, XML, codes.created)
     return org_uuid
@@ -170,6 +174,17 @@ def delete_appliance(client, name):
             "clean-config": "true"}}
     result = client.post(url, json.dumps(data), JSON, codes.ok)
     return _get_task_id(result)
+
+
+def is_organization_id_exists(client, test_id):
+    url = "/api/config/nms/provider/organizations?deep"
+    result = client.get(url, None, None)
+    if not result:
+        return False
+    for org in result['organizations']['organization']:
+        if test_id == org['id']:
+            return True
+    return False
 
 
 def get_organization(client, name):
