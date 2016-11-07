@@ -5,11 +5,34 @@ from collections import namedtuple
 
 Routing = namedtuple("Routing",
                      "ip_prefix, next_hop, interface, preference, tag")
+Unit = namedtuple("Unit", "name, address, mask")
 
 
-def create_interface(client, appliance, name):
+def _netmask_to_cidr(netmask):
+    return sum([bin(int(x)).count("1") for x in netmask.split(".")])
+
+
+def create_interface(client, appliance, name, units=None):
     url = '/api/config/devices/device/{}/config/interfaces'.format(appliance)
     data = {"vni": {"name": name, "enable": True, "promiscuous": False}}
+    if units:
+        units_list = [{"name": u.name,
+                       "family": {
+                           "inet": {
+                               "address": [{
+                                   "addr": "{}/{}".format(u.address,
+                                                          _netmask_to_cidr(u.mask))}]}},
+                       "enable": True}
+                      for u in units]
+        data['vni'].update({"unit": units_list})
+    client.post(url, json.dumps(data), JSON, codes.created)
+
+
+def create_network(client, appliance, name, interface):
+    url = '/api/config/devices/device/{}/config/networks'.format(appliance)
+    data = {"network": {
+        "name": name,
+        "interfaces": [interface]}}
     client.post(url, json.dumps(data), JSON, codes.created)
 
 

@@ -25,6 +25,8 @@ cms_org_name: vcpe1_tdccms
 #
 # Networks configuration
 #
+hq_name: hq
+
 hq_network_name: vcpe1_hq_network
 branch1_network_name: vcpe1_branch1_network
 branch2_network_name: vcpe1_branch2_network
@@ -43,9 +45,6 @@ use_existing_networks: true
 # Organization configuration
 #
 parent_org_name: vcpe1_parent_org
-hq_name: hq
-branch1_name: branch1
-branch2_name: branch2
 #
 # Appliance configuration
 #
@@ -53,8 +52,6 @@ appliance_name: vcpe1tdcappliance
 external_ip: 87.53.86.10
 ext_interface: vni-0/0
 hq_interface: vni-0/1
-branch1_interface: vni-0/2
-branch2_interface: vni-0/3
 #
 # Routing Configuration
 #
@@ -72,12 +69,6 @@ hq_domain_name: hq.org
 hq_dhcp_pool_mask: 255.255.255.0
 hq_dhcp_begin_address: 10.11.0.30
 hq_dhcp_end_address: 10.11.0.40
-branch1_dhcp_pool_mask: 255.255.255.0
-branch1_dhcp_begin_address: 10.12.0.30
-branch1_dhcp_end_address: 10.12.0.40
-branch2_dhcp_pool_mask: 255.255.255.0
-branch2_dhcp_begin_address: 10.13.0.30
-branch2_dhcp_end_address: 10.13.0.40
 ##
 ## Firewall configuration
 ##
@@ -87,14 +78,6 @@ firewall_rule_name: tdc_firewall_rule
 ## NAT configuration
 ##
 nat_rule_name: tdc_nat_rule
-natbranch1_rule_name: tdc_nat_rule1
-natbranch2_rule_name: tdc_nat_rule2
 hq_range_low: 87.53.87.1
 hq_range_high: 87.53.87.4
 hq_nat_rule_source_address: 10.11.0.0/24
-branch1_range_low: 87.53.87.7
-branch1_range_high: 87.53.87.10
-branch1_nat_rule_source_address: 10.12.0.0/24
-branch2_range_low: 87.53.87.13
-branch2_range_high: 87.53.87.16
-branch2_nat_rule_source_address: 10.13.0.0/24

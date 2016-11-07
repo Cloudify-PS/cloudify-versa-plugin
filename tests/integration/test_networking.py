@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import mock
 import unittest
 import requests
 from versa_plugin.versaclient import VersaClient
@@ -100,13 +101,25 @@ class NetworkingTestCase(unittest.TestCase):
                                                           appliance,
                                                           name)
 
-    def notest_create_interface(self):
-        with VersaClient(self.config) as client:
+    def notest_create_interface_without_address(self):
+        with VersaClient(self.config, '/tmp/versa.key') as client:
             appliance = 'testapp'
             name = 'vni-0/3'
             versa_plugin.networking.create_interface(client,
                                                      appliance,
                                                      name)
+
+    def test_create_interface_with_address(self):
+        with VersaClient(self.config, '/tmp/versa.key') as client:
+            with mock.patch('versa_plugin.versaclient.ctx',
+                            mock.MagicMock()):
+                appliance = 'vcpe1tdcappliance'
+                name = 'vni-0/4'
+                units = [versa_plugin.networking.Unit("0", "10.12.0.2",
+                                                      "255.255.255.0")]
+                versa_plugin.networking.create_interface(client,
+                                                         appliance,
+                                                         name, units)
 
     def notest_delete_interface(self):
         with VersaClient(self.config) as client:

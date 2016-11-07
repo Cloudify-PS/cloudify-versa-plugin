@@ -29,6 +29,20 @@ def create_options_profile(client, appliance, org_name, name, domain, servers):
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
+def is_lease_profile_exsists(client, appliance, org_name, name):
+    url = '/api/config/devices/device/{}'\
+        '/config/orgs/org-services/{}/dhcp/'\
+        'dhcp4-lease-profiles/'\
+        'dhcp4-lease-profile?deep=true'.format(appliance, org_name)
+    result = client.get(url, None, None, codes.ok)
+    if not result:
+        return
+    for lease in result["dhcp4-lease-profile"]:
+        if lease["name"] == name:
+            return True
+    return False
+
+
 def create_lease_profile(client, appliance, org_name, name):
     url = '/api/config/devices/device/{}'\
         '/config/orgs/org-services/{}'\
