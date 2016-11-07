@@ -70,7 +70,7 @@ dhcp_options_profile_name: tdc_dhcp_options
 dhcp_lease_profile_name: tdc_dhcp_lease
 dns_server: 193.162.159.194
 hq_domain_name: hq.org
-hq_dhcp_pool_mask: 255.255.255.128
+hq_dhcp_pool_mask: 255.255.255.0
 hq_dhcp_begin_address: 10.11.0.30
 hq_dhcp_end_address: 10.11.0.40
 branch1_dhcp_pool_mask: 255.255.255.0
@@ -87,7 +87,6 @@ firewall_rule_name: tdc_firewall_rule
 ##
 ## NAT configuration
 ##
-
 nat_rule_name: tdc_nat_rule
 natbranch1_rule_name: tdc_nat_rule1
 natbranch2_rule_name: tdc_nat_rule2
