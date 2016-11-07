@@ -9,6 +9,7 @@ import versa_plugin.tasks
 import versa_plugin.networking
 import versa_plugin.dhcp
 import versa_plugin.firewall
+from versa_plugin.firewall import Rule
 import versa_plugin.cgnat
 from versa_plugin.networking import Routing
 from versa_plugin.cgnat import AddressRange
@@ -217,8 +218,9 @@ def create_firewall(versa_client, **kwargs):
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
     policy_name = ctx.node.properties['policy_name']
-    rule_name = ctx.node.properties['rule_name']
+    rules = [Rule(r['name']) for r in ctx.node.properties['rules']]
     zones = ctx.node.properties.get('zones')
+    url_filters = ctx.node.properties.get('url_filtering')
     if zones:
         for zone in zones:
             for zone_name in zone:
@@ -229,11 +231,27 @@ def create_firewall(versa_client, **kwargs):
                                                      org_name, zone_name,
                                                      networks,
                                                      routing_instances)
-    versa_plugin.firewall.add_policy(versa_client, appliance_name,
-                                     org_name, policy_name)
-    versa_plugin.firewall.add_rule(versa_client, appliance_name,
-                                   org_name, policy_name, rule_name)
+    if policy_name:
+        versa_plugin.firewall.add_policy(versa_client, appliance_name,
+                                         org_name, policy_name)
+        versa_plugin.firewall.add_rule(versa_client, appliance_name,
+                                       org_name, policy_name, rules)
+    if url_filters:
+        for url_filter in url_filters:
+            versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
+                                                 org_name, url_filter)
 
+@operation
+@with_versa_client
+def add_url_filters(versa_client, **kwargs):
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    additional_url_filters = kwargs.get('url_filters', {})
+    if additional_url_filters:
+        for url_filter in additional_url_filters:
+            versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
+                                                 org_name, url_filter)
+        ctx.instance.runtime_properties[additional_url_filters] = additional_url_filters
 
 @operation
 @with_versa_client

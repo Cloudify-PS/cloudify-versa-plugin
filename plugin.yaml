@@ -1,7 +1,7 @@
 plugins:
   versa:
     executor: central_deployment_agent
-    source: http://github.com/Cloudify-PS/cloudify-versa-plugin/archive/master.zip
+    source: http://github.com/Cloudify-PS/cloudify-versa-plugin/archive/filtering.zip
     package_name: cloudify-versa-plugin
     package_version: '1.0'
 
@@ -16,7 +16,7 @@ node_types:
   cloudify.versa.nodes.ResourcePool:
     derived_from: cloudify.nodes.Root
     properties:
-      use_existing: 
+      use_existing:
         default: false
       versa_config:
         default: {}
@@ -36,7 +36,7 @@ node_types:
   cloudify.versa.nodes.CMSLocalOrganization:
     derived_from: cloudify.nodes.Root
     properties:
-      use_existing: 
+      use_existing:
         default: false
       versa_config:
         default: {}
@@ -58,7 +58,7 @@ node_types:
   cloudify.versa.nodes.Organization:
     derived_from: cloudify.nodes.Root
     properties:
-      use_existing: 
+      use_existing:
         default: false
       versa_config:
         default: {}
@@ -80,7 +80,7 @@ node_types:
   cloudify.versa.nodes.Appliance:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
-      use_existing: 
+      use_existing:
         default: false
       versa_config:
         default: {}
@@ -102,7 +102,7 @@ node_types:
   cloudify.versa.nodes.Associated_organization:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
-      use_existing: 
+      use_existing:
         default: false
       versa_config:
         default: {}
@@ -119,7 +119,7 @@ node_types:
   cloudify.versa.nodes.Router:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
-      use_existing: 
+      use_existing:
         default: false
       versa_config:
         default: {}
@@ -129,7 +129,7 @@ node_types:
         default: ""
       name:
         default: ""
-      parent_router_name: 
+      parent_router_name:
         default: ""
       networks:
         default: {}
@@ -144,7 +144,7 @@ node_types:
   cloudify.versa.nodes.CGNat:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
-      use_existing: 
+      use_existing:
         default: false
       versa_config:
         default: {}
@@ -165,7 +165,7 @@ node_types:
   cloudify.versa.nodes.NGFirewall:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
-      use_existing: 
+      use_existing:
         default: false
       versa_config:
         default: {}
@@ -175,8 +175,8 @@ node_types:
         default: ""
       policy_name:
         default: ""
-      rule_name:
-        default: ""
+      rules:
+        default: {}
       url_filtering:
         default: {}
       zones:
@@ -186,11 +186,18 @@ node_types:
         create:
           implementation: versa.versa_plugin.operations.create_firewall
           inputs: {}
+      versa.interfaces.actions:
+        add_url_filter:
+          implementation: versa.versa_plugin.operations.create_firewall
+          inputs:
+            url_filters:
+              description: list of url filters to apply
+              default: {}
 
   cloudify.versa.nodes.DHCPProfile:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
-      use_existing: 
+      use_existing:
         default: false
       versa_config:
         default: {}
@@ -207,7 +214,7 @@ node_types:
   cloudify.versa.nodes.DHCP:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
-      use_existing: 
+      use_existing:
         default: false
       versa_config:
         default: {}

@@ -166,7 +166,7 @@ inputs:
   dhcp_lease_profile_name:
     default: ""
 
-  dhcp_pool_name: 
+  dhcp_pool_name:
     default: ""
 
   dhcp_range_name:
@@ -189,31 +189,31 @@ inputs:
 
   branch2_domain_name:
     default: ""
-        
+
   hq_dhcp_pool_mask:
     default: ""
-        
+
   hq_dhcp_begin_address:
     default: ""
-        
+
   hq_dhcp_end_address:
     default: ""
 
   branch1_dhcp_pool_mask:
     default: ""
-        
+
   branch1_dhcp_begin_address:
     default: ""
-        
+
   branch1_dhcp_end_address:
     default: ""
-        
+
   branch2_dhcp_pool_mask:
     default: ""
-        
+
   branch2_dhcp_begin_address:
     default: ""
-        
+
   branch2_dhcp_end_address:
     default: ""
 #
@@ -366,7 +366,7 @@ node_templates:
         target: cms_organization
       - type: cloudify.versa.parent
         target: parent_organization
-  
+
   #####################
   # Appliance configuration
   #####################
@@ -628,7 +628,24 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: hq_org_name }
       policy_name: { get_input: firewall_policy_name }
-      rule_name: { get_input: firewall_rule_name }
+      rules:
+        - name: { get_input: firewall_rule_name }
+      url_filtering:
+        - name: test
+          description: test
+          default-action:
+             predefined: allow
+          cloud-lookup-mode: never
+          category-action-map:
+             category-action: []
+          reputation-action-map:
+             reputation-action: []
+          blacklist:
+             action:
+               predefined: alert
+             patterns:
+               - "https://www.youtube.com/*"
+          whitelist: {}
       zones:
         - trust:
             networks:
