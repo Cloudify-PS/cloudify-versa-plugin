@@ -1,3 +1,4 @@
+import time
 from cloudify import ctx
 from cloudify.decorators import operation
 import versa_plugin
@@ -296,9 +297,11 @@ def create_dhcp(versa_client, **kwargs):
     versa_plugin.dhcp.create_pool(versa_client, appliance_name, org_name,
                                   pool_name, mask, lease_name, options_name,
                                   range_name, begin_address, end_address)
-    # versa_plugin.dhcp.update_global_configuration(versa_client, appliance_name,
-                                                  # org_name, lease_name,
-                                                  # options_name)
+    time.sleep(5)
+    versa_plugin.dhcp.update_global_configuration(versa_client, appliance_name,
+                                                  org_name, lease_name,
+                                                  options_name)
+    time.sleep(5)
     versa_plugin.dhcp.create_server(versa_client, appliance_name, org_name,
                                     server_name, lease_name, options_name,
                                     networks, pool_name)
