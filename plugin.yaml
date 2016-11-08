@@ -349,6 +349,10 @@ node_types:
         default: ""
       unit:
         default: ""
+      zone:
+        default: ""
+      router:
+        default: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
