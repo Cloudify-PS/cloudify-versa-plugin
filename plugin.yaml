@@ -205,6 +205,8 @@ node_types:
         default: ""
       profile_name:
         default: {}
+      organizations:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -319,8 +321,6 @@ node_types:
       org_name:
         default: ""
       lease_profile:
-        default: ""
-      options_profile:
         default: ""
       pool_name:
         default: {}

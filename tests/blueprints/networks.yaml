@@ -66,12 +66,12 @@ node_templates:
       resource_id: { get_input: branch3_network_name }
       use_external_resource: { get_input: use_existing_networks }
       network:
-        name: { get_input: branch2_network_name }
+        name: { get_input: branch3_network_name }
         edge_gateway: { get_input: edge_gateway }
         netmask: 255.255.255.0
         gateway_ip: 10.14.0.1
         static_range: 10.14.0.2-10.14.0.5
     relationships:
       - type: cloudify.relationships.depends_on
-        target: branch1_network
+        target: branch2_network
 

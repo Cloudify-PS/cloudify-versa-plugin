@@ -266,6 +266,11 @@ def create_dhcp_profile(versa_client, **kwargs):
     profile_name = ctx.node.properties['profile_name']
     versa_plugin.networking.create_dhcp_profile(versa_client, appliance_name,
                                                 profile_name)
+    orgs = ctx.node.properties['organizations']
+    for org_name in orgs:
+        versa_plugin.networking.update_dhcp_profile(versa_client,
+                                                    appliance_name,
+                                                    org_name, profile_name)
 
 
 @operation
@@ -302,11 +307,8 @@ def create_dhcp_global_configuration(versa_client, **kwargs):
         return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
-    dhcp_profile = ctx.node.properties['dhcp_profile']
     lease_profile = ctx.node.properties['lease_profile']
     options_profile = ctx.node.properties['options_profile']
-    versa_plugin.networking.update_dhcp_profile(versa_client, appliance_name,
-                                                org_name, dhcp_profile)
     versa_plugin.dhcp.update_global_configuration(versa_client, appliance_name,
                                                   org_name, lease_profile,
                                                   options_profile)

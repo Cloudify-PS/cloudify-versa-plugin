@@ -195,9 +195,13 @@ node_templates:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       profile_name: { get_input: dhcp_profile_name }
+      organizations:
+        - { get_property: [hq_organization, name]}
     relationships:
       - type: cloudify.versa.dhcp_profile_connected_to_appliance
         target: appliance
+      - type: cloudify.versa.dhcp_connected_to_organization
+        target: hq_associated
 
   dhcp_lease_profile:
     type: cloudify.versa.nodes.DHCPLeaseProfile
