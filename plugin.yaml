@@ -322,6 +322,8 @@ node_types:
         default: ""
       lease_profile:
         default: ""
+      options_profile:
+        default: ""
       pool_name:
         default: {}
       name:
