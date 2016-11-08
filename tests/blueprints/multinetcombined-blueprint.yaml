@@ -7,7 +7,6 @@ imports:
   - multinet.yaml
  
 inputs:
-
 #
 # Network configuration
 #
@@ -33,6 +32,8 @@ inputs:
   branch2_network_name:
     type: string
 
+  branch3_network_name:
+    default: ""
 #
 # VMs configuration
 #
@@ -56,6 +57,9 @@ inputs:
 
   branch2_vm_name:
     type: string
+
+  branch3_vm_name:
+    default: ""
 
   use_existing_vms:
     type: boolean

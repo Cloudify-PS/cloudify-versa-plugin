@@ -5,3 +5,4 @@ external_network_name: vlan100
 hq_network_name: vcpe1_hq_network
 branch1_network_name: vcpe1_branch1_network
 branch2_network_name: vcpe1_branch2_network
+branch3_network_name: vcpe1_branch3_network

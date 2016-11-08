@@ -30,6 +30,9 @@ inputs:
 
   branch2_network_name:
     default: ""
+
+  branch3_network_name:
+    default: ""
 #
 # VMs configuration
 #
@@ -52,6 +55,9 @@ inputs:
     type: string
 
   branch2_vm_name:
+    type: string
+
+  branch3_vm_name:
     type: string
 
   use_existing_vms:

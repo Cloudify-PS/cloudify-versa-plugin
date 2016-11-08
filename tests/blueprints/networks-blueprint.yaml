@@ -28,4 +28,7 @@ inputs:
   branch2_network_name:
     default: ""
 
+  branch3_network_name:
+    default: ""
+
 
