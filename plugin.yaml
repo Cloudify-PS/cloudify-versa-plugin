@@ -224,6 +224,8 @@ node_types:
         default: ""
       name:
         default: ""
+      domain:
+        default: ""
       servers:
         default: {}
     interfaces:
