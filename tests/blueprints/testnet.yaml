@@ -1,0 +1,66 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/tosca-vcloud-plugin/master/plugin.yaml
+  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/dhcp/plugin.yaml
+
+inputs:
+    versa_url:
+        default: "https://172.19.0.210:9183"
+    client_id:
+        default: "voae_rest"
+    client_secret:
+        default: "asrevnet_123"
+    username:
+        default: "Administrator"
+    password:
+        default: "versa123"
+    appliance_name:
+        default: vcpe1tdcappliance
+    hq_org_name:
+        default: hq_org
+    interface_name:
+        default: vni-0/4
+    network_name:
+        default: testnet
+
+node_templates:
+  #####################
+  # Versa config
+  #####################
+  versa_configuration:
+    type: cloudify.versa.nodes.versa_configuration
+    properties:
+      versa_config:
+        username: { get_input: username }
+        password: { get_input: password }
+        versa_url: { get_input: versa_url}
+        client_id: { get_input: client_id}
+        client_secret: { get_input: client_secret}
+
+  interface:
+    type: cloudify.versa.nodes.Interface
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      name: { get_input: interface_name }
+      units:
+        - name: 0
+          address: 10.14.0.2
+          mask: 255.255.255.0
+
+  network:
+    type: cloudify.versa.nodes.Network
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      name: { get_input: network_name }
+      org_name: { get_input: hq_org_name }
+      interface: { _input: interface_name }
+      unit: 0
+      zone: trust
+      router: hq_router
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: interface
