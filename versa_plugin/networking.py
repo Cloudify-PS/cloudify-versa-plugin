@@ -21,7 +21,8 @@ def create_interface(client, appliance, name, units=None):
                            "inet": {
                                "address": [{
                                    "addr": "{}/{}".format(u.address,
-                                                          _netmask_to_cidr(u.mask))}]}},
+                                                          _netmask_to_cidr(
+                                                              u.mask))}]}},
                        "enable": True}
                       for u in units]
         data['vni'].update({"unit": units_list})
@@ -71,6 +72,15 @@ def delete_virtual_router(client, appliance, name):
           '/config/routing-instances/routing-instance/{}'.format(appliance,
                                                                  name)
     client.delete(url, codes.no_content)
+
+
+def add_network_to_router(client, appliance, name, network):
+    url = '/api/config/devices/device/{}'\
+          '/config/routing-instances/'\
+          'routing-instance/{}'.format(appliance, name)
+    result = client.get(url, None, None, codes.ok, JSON)
+    result["routing-instance"]["networks"].append(network)
+    client.put(url, json.dumps(result), JSON, codes.no_content)
 
 
 def create_dhcp_profile(client, appliance, name):
@@ -135,6 +145,19 @@ def update_provider_organization(client, appliance, org, provider):
     client.put(url, xmldata, XML, codes.no_content)
 
 
+def update_traffic_identification_networks(client, appliance, org, network):
+    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
+                                                                    org)
+    limits = get_organization_limits(client, appliance, org)
+    traffic_node = limits.getElementsByTagName('traffic-identification')[0]
+    node = limits.createElement("using-networks")
+    value = limits.createTextNode(network)
+    node.appendChild(value)
+    traffic_node.appendChild(node)
+    xmldata = limits.toxml()
+    client.put(url, xmldata, XML, codes.no_content)
+
+
 def update_zones(client, appliance, org, zone, networks, routing_instances):
     url = '/api/config/devices/device/{}'\
           '/config/orgs/org-services/{}/objects/zones/zone/{}'.format(appliance,
@@ -144,3 +167,20 @@ def update_zones(client, appliance, org, zone, networks, routing_instances):
                  "networks": networks,
                  "routing-instance": routing_instances}}
     client.put(url, json.dumps(data), JSON, codes.ok)
+
+
+def get_zone(client, appliance, org, zone):
+    url = '/api/config/devices/device/{}'\
+        '/config/orgs/org-services/{}'\
+        '/objects/zones/zone'.format(appliance, org)
+    result = client.get(url, None, None, codes.ok, JSON)
+    for zone in result['zones']:
+        if zone['name'] == zone:
+            return zone
+    return None
+
+
+def add_network_to_zone(client, appliance, org, zone, network):
+    zone = get_zone(client, appliance, org, zone)
+    new_networks = zone['networks'] + [network]
+    update_zones(client, appliance, org, zone, new_networks)

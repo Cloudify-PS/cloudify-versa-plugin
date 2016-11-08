@@ -112,7 +112,7 @@ class VersaClient():
                  accept):
         retry = 0
         ctx.logger.debug("Sending {0} request to {1} with data {2}".format(
-            request_type.__name__ ,self.versa_url + path, str(data)))
+            request_type.__name__, self.versa_url+path, str(data)))
         while True:
             headers = self._get_headers(content_type, accept)
             response = request_type(

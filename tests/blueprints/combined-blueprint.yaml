@@ -4,7 +4,7 @@ imports:
   - imports.yaml
   - networks.yaml
   - vm-blueprint.yaml
-  - prepare.yaml
+  - appliance.yaml
  
 inputs:
 

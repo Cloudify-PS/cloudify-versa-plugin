@@ -211,7 +211,7 @@ node_types:
           implementation: versa.versa_plugin.operations.create_dhcp_profile
           inputs: {}
 
-  cloudify.versa.nodes.DHCP:
+  cloudify.versa.nodes.DHCPOptionsProfile:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
       use_existing:
@@ -222,21 +222,158 @@ node_types:
         default: ""
       org_name:
         default: ""
-      profile_name:
-        default: {}
-      options_profile:
-        default: {}
-      lease_profile:
+      name:
         default: ""
-      pool:
-        default: {}
-      server:
+      servers:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: versa.versa_plugin.operations.create_dhcp
+          implementation: versa.versa_plugin.operations.create_dhcp_options_profile
           inputs: {}
+
+  cloudify.versa.nodes.DHCPLeaseProfile:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      lease_profile:
+        default: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_dhcp_lease_profile
+          inputs: {}
+
+  cloudify.versa.nodes.DHCPGlobalConfiguration:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      dhcp_profile:
+        default: ""
+      lease_profile:
+        default: ""
+      options_profile:
+        default: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_dhcp_global_configuration
+          inputs: {}
+
+  cloudify.versa.nodes.DHCPPool:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      lease_profile:
+        default: ""
+      options_profile:
+        default: ""
+      name:
+        default: {}
+      mask:
+        default: ""
+      range_name:
+        default: ""
+      begin_address:
+        default: ""
+      end_address:
+        default: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_dhcp_pool
+          inputs: {}
+
+  cloudify.versa.nodes.DHCPServer:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      lease_profile:
+        default: ""
+      options_profile:
+        default: ""
+      pool_name:
+        default: {}
+      name:
+        default: ""
+      networks:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_dhcp_server
+          inputs: {}
+
+  cloudify.versa.nodes.Network:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      name:
+        default: {}
+      interface:
+        default: ""
+      unit:
+        default: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_network
+          inputs: {}
+
+  cloudify.versa.nodes.Interface:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      name:
+        default: ""
+      units:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_interface
+          inputs: {}
+
 
 relationships:
     cloudify.versa.pool_connected_to_vm:

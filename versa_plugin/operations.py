@@ -1,19 +1,19 @@
-import time
 from cloudify import ctx
 from cloudify.decorators import operation
 import versa_plugin
 
-from versa_plugin.connectors import Network
-from versa_plugin.appliance import ApplianceInterface, NetworkInfo
 from versa_plugin import with_versa_client
 import versa_plugin.tasks
 import versa_plugin.networking
 import versa_plugin.dhcp
 import versa_plugin.firewall
-from versa_plugin.firewall import Rule
 import versa_plugin.cgnat
 from versa_plugin.networking import Routing
+from versa_plugin.networking import Unit
 from versa_plugin.cgnat import AddressRange
+from versa_plugin.firewall import Rule
+from versa_plugin.connectors import Network
+from versa_plugin.appliance import ApplianceInterface, NetworkInfo
 
 
 def is_use_existing():
@@ -242,6 +242,7 @@ def create_firewall(versa_client, **kwargs):
             versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
                                                  org_name, url_filter)
 
+
 @operation
 @with_versa_client
 def add_url_filters(versa_client, **kwargs):
@@ -252,7 +253,9 @@ def add_url_filters(versa_client, **kwargs):
         for url_filter in additional_url_filters:
             versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
                                                  org_name, url_filter)
-        ctx.instance.runtime_properties[additional_url_filters] = additional_url_filters
+        ctx.instance.runtime_properties[additional_url_filters] =\
+            additional_url_filters
+
 
 @operation
 @with_versa_client
@@ -267,41 +270,122 @@ def create_dhcp_profile(versa_client, **kwargs):
 
 @operation
 @with_versa_client
-def create_dhcp(versa_client, **kwargs):
+def create_dhcp_lease_profile(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
-    profile_name = ctx.node.properties['profile_name']
-    options = ctx.node.properties['options_profile']
-    options_name = options['name']
-    domain = options['domain']
-    servers = options['servers']
     lease_name = ctx.node.properties['lease_profile']
-    pool = ctx.node.properties['pool']
-    pool_name = pool['name']
-    mask = pool['mask']
-    range_name = pool['range_name']
-    begin_address = pool['begin_address']
-    end_address = pool['end_address']
-    server = ctx.node.properties['server']
-    server_name = server['name']
-    networks = server['networks']
-    versa_plugin.networking.update_dhcp_profile(versa_client, appliance_name,
-                                                org_name, profile_name)
+    versa_plugin.dhcp.create_lease_profile(versa_client, appliance_name,
+                                           org_name, lease_name)
+
+
+@operation
+@with_versa_client
+def create_dhcp_options_profile(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    options_name = ctx.node.properties['name']
+    domain = ctx.node.properties['domain']
+    servers = ctx.node.properties['servers']
     versa_plugin.dhcp.create_options_profile(versa_client, appliance_name,
                                              org_name, options_name,
                                              domain, servers)
-    versa_plugin.dhcp.create_lease_profile(versa_client, appliance_name,
-                                           org_name, lease_name)
-    versa_plugin.dhcp.create_pool(versa_client, appliance_name, org_name,
-                                  pool_name, mask, lease_name, options_name,
-                                  range_name, begin_address, end_address)
-    time.sleep(5)
+
+
+@operation
+@with_versa_client
+def create_dhcp_global_configuration(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    dhcp_profile = ctx.node.properties['dhcp_profile']
+    lease_profile = ctx.node.properties['lease_profile']
+    options_profile = ctx.node.properties['options_profile']
+    versa_plugin.networking.update_dhcp_profile(versa_client, appliance_name,
+                                                org_name, dhcp_profile)
     versa_plugin.dhcp.update_global_configuration(versa_client, appliance_name,
-                                                  org_name, lease_name,
-                                                  options_name)
-    time.sleep(5)
+                                                  org_name, lease_profile,
+                                                  options_profile)
+
+
+@operation
+@with_versa_client
+def create_dhcp_pool(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    lease_profile = ctx.node.properties['lease_profile']
+    options_profile = ctx.node.properties['options_profile']
+    pool_name = ctx.node.properties['name']
+    mask = ctx.node.properties['mask']
+    range_name = ctx.node.properties['range_name']
+    begin_address = ctx.node.properties['begin_address']
+    end_address = ctx.node.properties['end_address']
+    versa_plugin.dhcp.create_pool(versa_client, appliance_name, org_name,
+                                  pool_name, mask, lease_profile,
+                                  options_profile,
+                                  range_name, begin_address, end_address)
+
+
+@operation
+@with_versa_client
+def create_dhcp_server(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    lease_profile = ctx.node.properties['lease_profile']
+    options_profile = ctx.node.properties['options_profile']
+    pool_name = ctx.node.properties['pool_name']
+    server_name = ctx.node.properties['name']
+    networks = ctx.node.properties['networks']
     versa_plugin.dhcp.create_server(versa_client, appliance_name, org_name,
-                                    server_name, lease_name, options_name,
+                                    server_name, lease_profile, options_profile,
                                     networks, pool_name)
+
+
+@operation
+@with_versa_client
+def create_interface(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    name = ctx.node.properties['name']
+    units = ctx.node.properties['units']
+    if units:
+        unitlist = [Unit(unit['name'], unit['address'], unit['mask'])
+                    for unit in units]
+    else:
+        unitlist = []
+    versa_plugin.networking.create_interface(versa_client, appliance_name,
+                                             name, unitlist)
+
+
+@operation
+@with_versa_client
+def create_network(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    name = ctx.node.properties['name']
+    interface = ctx.node.properties['interface']
+    unit = ctx.node.properties['unit']
+    full_interface = "{}.{}".format(interface, unit)
+    versa_plugin.networking.create_network(versa_client, appliance_name,
+                                           org_name, name, full_interface)
+    versa_plugin.networking.update_traffic_identification_networks(
+        versa_client, appliance_name, org_name, name)
+    zone = ctx.node.properties['zone']
+    if zone:
+        versa_plugin.networking.add_network_to_zone(
+            versa_client, appliance_name, org_name, zone, name)
+    router = ctx.node.properties['router']
+    if router:
+        versa_plugin.networking.add_network_to_router(
+            versa_client, appliance_name, router, name)

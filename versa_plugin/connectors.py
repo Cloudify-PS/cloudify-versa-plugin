@@ -79,6 +79,9 @@ def get_organization(client, name):
 
 
 def get_network_information(client, org_uuid):
-    url = '/api/config/cms/local/organizations/organization/{0}/org-networks/org-network?select=uuid;ipaddress-allocation-mode;name;subnet;mask;vxlan'.format(org_uuid)
+    url = '/api/config/cms/local/organizations/'\
+        'organization/{0}/org-networks/'\
+        'org-network?select=uuid;ipaddress-allocation-mode;'\
+        'name;subnet;mask;vxlan'.format(org_uuid)
     result = client.get(url, None, None, codes.ok)
     return result
