@@ -129,7 +129,7 @@ class NetworkingTestCase(unittest.TestCase):
                                                      appliance,
                                                      name)
 
-    def test_create_network(self):
+    def notest_create_network(self):
         with VersaClient(self.config, '/tmp/versa.key') as client:
             with mock.patch('versa_plugin.versaclient.ctx',
                             mock.MagicMock()):
@@ -139,3 +139,35 @@ class NetworkingTestCase(unittest.TestCase):
                 versa_plugin.networking.create_network(client,
                                                        appliance,
                                                        name, interface)
+
+    def notest_add_network_to_router(self):
+        with VersaClient(self.config, '/tmp/versa.key') as client:
+            with mock.patch('versa_plugin.versaclient.ctx',
+                            mock.MagicMock()):
+                appliance = 'vcpe1tdcappliance'
+                router = 'hq_router'
+                name = 'testnet'
+                versa_plugin.networking.add_network_to_router(client,
+                                                              appliance, router,
+                                                              name)
+
+    def notest_update_traffic_identification_networks(self):
+        with VersaClient(self.config, '/tmp/versa.key') as client:
+            with mock.patch('versa_plugin.versaclient.ctx',
+                            mock.MagicMock()):
+                appliance = 'vcpe1tdcappliance'
+                org = 'hq_org'
+                name = 'testnet'
+                versa_plugin.networking.update_traffic_identification_networks(
+                    client, appliance, org, name)
+
+    def test_add_network_to_zone(self):
+        with VersaClient(self.config, '/tmp/versa.key') as client:
+            with mock.patch('versa_plugin.versaclient.ctx',
+                            mock.MagicMock()):
+                appliance = 'vcpe1tdcappliance'
+                org = 'hq_org'
+                zone = 'trust'
+                name = 'testnet'
+                versa_plugin.networking.add_network_to_zone(
+                    client, appliance, org, zone, name)

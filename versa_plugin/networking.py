@@ -169,18 +169,21 @@ def update_zones(client, appliance, org, zone, networks, routing_instances):
     client.put(url, json.dumps(data), JSON, codes.ok)
 
 
-def get_zone(client, appliance, org, zone):
+def get_zone(client, appliance, org, zone_name):
     url = '/api/config/devices/device/{}'\
         '/config/orgs/org-services/{}'\
         '/objects/zones/zone'.format(appliance, org)
     result = client.get(url, None, None, codes.ok, JSON)
-    for zone in result['zones']:
-        if zone['name'] == zone:
+    for zone in result['zone']:
+        if zone['name'] == zone_name:
             return zone
     return None
 
 
-def add_network_to_zone(client, appliance, org, zone, network):
-    zone = get_zone(client, appliance, org, zone)
-    new_networks = zone['networks'] + [network]
-    update_zones(client, appliance, org, zone, new_networks)
+def add_network_to_zone(client, appliance, org, zone_name, network):
+    zone = get_zone(client, appliance, org, zone_name)
+    if zone:
+        new_networks = zone.get('networks', []) + [network]
+        routing_instance = zone.get('routing-instance', None)
+        update_zones(client, appliance, org, zone_name, new_networks,
+                     routing_instance)
