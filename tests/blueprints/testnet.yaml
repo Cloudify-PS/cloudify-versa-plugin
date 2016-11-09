@@ -77,7 +77,7 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       name: { get_input: network_name }
       org_name: { get_input: hq_org_name }
-      interface: { _input: interface_name }
+      interface: { get_input: interface_name }
       unit: 0
       zone: trust
       router: hq_router
