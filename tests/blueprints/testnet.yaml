@@ -29,11 +29,11 @@ inputs:
     dhcp_lease_profile_name:
         default: tdc_dhcp_lease
     dhcp_pool_name:
-        default: test_dhcp_pool
+        default: newbranch_dhcp_pool
     nat_pool_name:
-        default: test_nat_pool
+        default: newbranch_nat_pool
     nat_rule_name:
-        default: test_nat_rule
+        default: newbranch_nat_rule
     range_low:
         default: 87.53.87.17
     range_high:
@@ -95,7 +95,7 @@ node_templates:
       options_profile: { get_input: dhcp_options_profile_name }
       name: { get_input: dhcp_pool_name }
       mask: 255.255.255.0
-      range_name: test_range
+      range_name: newbranch_range
       begin_address: 10.14.0.30
       end_address: 10.14.0.40
     relationships:
@@ -111,7 +111,7 @@ node_templates:
       lease_profile: { get_input: dhcp_lease_profile_name }
       options_profile: { get_input: dhcp_options_profile_name }
       pool_name: { get_input: dhcp_pool_name }
-      name: test_dhcp_server
+      name: newbranch_dhcp_server
       networks:
         - { get_input: network_name }
     relationships:
