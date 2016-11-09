@@ -191,7 +191,7 @@ node_types:
           inputs: {}
       versa.interfaces.actions:
         add_url_filter:
-          implementation: versa.versa_plugin.operations.create_firewall
+          implementation: versa.versa_plugin.operations.add_url_filters
           inputs:
             url_filters:
               description: list of url filters to apply
