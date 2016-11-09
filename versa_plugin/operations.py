@@ -230,48 +230,100 @@ def delete_cgnat(versa_client, **kwargs):
 
 @operation
 @with_versa_client
-def create_firewall(versa_client, **kwargs):
+def create_zone(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    zone_name = ctx.node.properties['name']
+    networks = ctx.node.properties.get('networks', [])
+    routing_instances = ctx.node.properties.get('routing_instances', [])
+    versa_plugin.networking.add_network_to_zone(versa_client,
+                                                appliance_name,
+                                                org_name, zone_name,
+                                                networks,
+                                                routing_instances)
+
+
+@operation
+@with_versa_client
+def delete_zone(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    zone_name = ctx.node.properties['name']
+    networks = ctx.node.properties.get('networks', [])
+    routing_instances = ctx.node.properties.get('routing_instances', [])
+    versa_plugin.networking.remove_network_from_zone(versa_client,
+                                                     appliance_name,
+                                                     org_name, zone_name,
+                                                     networks,
+                                                     routing_instances)
+
+
+@operation
+@with_versa_client
+def create_firewall_policy(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    policy_name = ctx.node.properties['name']
+    versa_plugin.firewall.add_policy(versa_client, appliance_name,
+                                     org_name, policy_name)
+
+
+@operation
+@with_versa_client
+def delete_firewall_policy(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    policy_name = ctx.node.properties['name']
+    versa_plugin.firewall.delete_policy(versa_client, appliance_name,
+                                        org_name, policy_name)
+
+
+@operation
+@with_versa_client
+def create_firewall_rule(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
     policy_name = ctx.node.properties['policy_name']
     rules = [Rule(r['name']) for r in ctx.node.properties['rules']]
-    zones = ctx.node.properties.get('zones')
-    url_filters = ctx.node.properties.get('url_filtering')
-    if zones:
-        for zone in zones:
-            for zone_name in zone:
-                networks = zone[zone_name].get('networks', [])
-                routing_instances = zone[zone_name].get('routing_instances', [])
-                versa_plugin.networking.update_zones(versa_client,
-                                                     appliance_name,
-                                                     org_name, zone_name,
-                                                     networks,
-                                                     routing_instances)
-    if policy_name:
-        versa_plugin.firewall.add_policy(versa_client, appliance_name,
-                                         org_name, policy_name)
+    for rule in rules:
         versa_plugin.firewall.add_rule(versa_client, appliance_name,
-                                       org_name, policy_name, rules)
-    if url_filters:
-        for url_filter in url_filters:
-            versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
-                                                 org_name, url_filter)
+                                       org_name, policy_name, rule)
 
 
 @operation
 @with_versa_client
-def add_url_filters(versa_client, **kwargs):
+def delete_firewall_rule(versa_client, **kwargs):
+    if is_use_existing():
+        return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
-    additional_url_filters = kwargs.get('url_filters', {})
-    if additional_url_filters:
-        for url_filter in additional_url_filters:
-            versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
-                                                 org_name, url_filter)
-        ctx.instance.runtime_properties[additional_url_filters] =\
-            additional_url_filters
+    policy_name = ctx.node.properties['policy_name']
+    rules = [Rule(r['name']) for r in ctx.node.properties['rules']]
+    for rule in rules:
+        versa_plugin.firewall.delete_rule(versa_client, appliance_name,
+                                       org_name, policy_name, rule.name)
+
+
+@operation
+@with_versa_client
+def create_url_filters(versa_client, **kwargs):
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    url_filters = kwargs.get('filters', [])
+    for url_filter in url_filters:
+        ctx.logger.info("Filter:" + url_filter)
+        versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
+                                             org_name, url_filter)
 
 
 @operation
@@ -349,6 +401,18 @@ def create_dhcp_pool(versa_client, **kwargs):
                                   pool_name, mask, lease_profile,
                                   options_profile,
                                   range_name, begin_address, end_address)
+
+
+@operation
+@with_versa_client
+def delete_dhcp_pool(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    pool_name = ctx.node.properties['name']
+    versa_plugin.dhcp.delete_pool(versa_client, appliance_name, org_name,
+                                  pool_name)
 
 
 @operation

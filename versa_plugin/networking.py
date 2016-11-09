@@ -158,10 +158,12 @@ def update_traffic_identification_networks(client, appliance, org, network):
     client.put(url, xmldata, XML, codes.no_content)
 
 
-def update_zones(client, appliance, org, zone, networks, routing_instances):
+def update_zone(client, appliance, org, zone, networks, routing_instances):
     url = '/api/config/devices/device/{}'\
           '/config/orgs/org-services/{}/objects/zones/zone/{}'.format(appliance,
                                                                       org, zone)
+    networks = networks if networks else None
+    routing_instances = routing_instances if routing_instances else None
     data = {
         "zone": {"name": zone,
                  "networks": networks,
@@ -180,10 +182,22 @@ def get_zone(client, appliance, org, zone_name):
     return None
 
 
-def add_network_to_zone(client, appliance, org, zone_name, network):
+def add_network_to_zone(client, appliance, org, zone_name, networks, instances):
     zone = get_zone(client, appliance, org, zone_name)
     if zone:
-        new_networks = zone.get('networks', []) + [network]
-        routing_instance = zone.get('routing-instance', None)
-        update_zones(client, appliance, org, zone_name, new_networks,
-                     routing_instance)
+        new_networks = zone.get('networks', []) + networks
+        routing_instance = zone.get('routing-instance', []) + instances
+        update_zone(client, appliance, org, zone_name, new_networks,
+                    routing_instance)
+
+
+def remove_networks_from_zone(client, appliance, org, zone_name, networks,
+                              instances):
+    zone = get_zone(client, appliance, org, zone_name)
+    if zone:
+        new_networks = [net for net in zone.get('networks', [])
+                        if net not in networks]
+        routing_instance = [inst for inst in zone.get('routing-instance', None)
+                            if inst not in instances]
+        update_zone(client, appliance, org, zone_name, new_networks,
+                    routing_instance)

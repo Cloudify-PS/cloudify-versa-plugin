@@ -80,6 +80,14 @@ def create_pool(client, appliance, org_name, pool_name, mask,
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
+def delete_pool(client, appliance, org_name, pool_name):
+    url = '/api/config/devices/device/{}'\
+        '/config/orgs/org-services/{}'\
+        '/dhcp/dhcp4-dynamic-pools'\
+        '/dhcp4-dynamic-pool/{}'.format(appliance, org_name, pool_name)
+    client.delete(url, codes.no_content)
+
+
 def create_server(client, appliance, org_name, server_name,
                   lease_profile, options_profile, networks, pool):
     url = '/api/config/devices/device/{}'\
