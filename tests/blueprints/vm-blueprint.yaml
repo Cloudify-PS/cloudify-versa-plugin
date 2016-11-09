@@ -36,7 +36,7 @@ node_templates:
         network: {get_property: [branch1_network, resource_id] }
         ip_allocation_mode: POOL
         primary_interface: false
-        nic_order: 2
+        nic_order: 5
     relationships:
       - target: branch1_network
         type: cloudify.vcloud.port_connected_to_network
@@ -48,7 +48,7 @@ node_templates:
         network: {get_property: [branch2_network, resource_id] }
         ip_allocation_mode: POOL
         primary_interface: false
-        nic_order: 3
+        nic_order: 2
     relationships:
       - target: branch2_network
         type: cloudify.vcloud.port_connected_to_network
@@ -60,7 +60,7 @@ node_templates:
         network: {get_property: [branch3_network, resource_id] }
         ip_allocation_mode: POOL
         primary_interface: false
-        nic_order: 4
+        nic_order: 3
     relationships:
       - target: branch3_network
         type: cloudify.vcloud.port_connected_to_network
@@ -72,7 +72,7 @@ node_templates:
         network: {get_property: [external_network, resource_id] }
         ip_allocation_mode: POOL
         primary_interface: false
-        nic_order: 5
+        nic_order: 4
     relationships:
       - target: external_network
         type: cloudify.vcloud.port_connected_to_network

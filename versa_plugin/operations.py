@@ -380,7 +380,7 @@ def create_network(versa_client, **kwargs):
     unit = ctx.node.properties['unit']
     full_interface = "{}.{}".format(interface, unit)
     versa_plugin.networking.create_network(versa_client, appliance_name,
-                                           org_name, name, full_interface)
+                                           name, full_interface)
     versa_plugin.networking.update_traffic_identification_networks(
         versa_client, appliance_name, org_name, name)
     zone = ctx.node.properties['zone']
