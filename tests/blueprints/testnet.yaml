@@ -23,7 +23,7 @@ inputs:
     interface_name:
         default: vni-0/4
     network_name:
-        default: testnet
+        default: newbranch_net
     dhcp_options_profile_name:
         default: tdc_dhcp_options
     dhcp_lease_profile_name:
