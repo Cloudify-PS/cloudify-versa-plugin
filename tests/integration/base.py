@@ -14,6 +14,8 @@
 import unittest
 import mock
 import configuration
+import yaml
+from string import Template
 
 
 class BaseTest(unittest.TestCase):
@@ -31,3 +33,11 @@ class BaseTest(unittest.TestCase):
 
     def tearDown(self):
         mock.patch.stopall()
+
+    def update_node_properties(self, template, fields):
+        kwargs = {}
+        nc = configuration.Node
+        for field in fields.split():
+            kwargs[field] = getattr(nc, field)
+        node_config = Template(template).substitute(kwargs)
+        self.fake_ctx.node.properties.update(yaml.load(node_config))

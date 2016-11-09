@@ -14,7 +14,6 @@
 import base
 import requests
 import versa_plugin.operations
-import yaml
 import configuration
 requests.packages.urllib3.disable_warnings()
 
@@ -37,6 +36,6 @@ class DHCPTestCase(base.BaseTest):
                    nc.org_name,
                    nc.lease_profile,
                    nc.options_profile)
-        self.fake_ctx.node.properties.update(yaml.load(node_config))
+        self.update_node_properties(node_config)
         versa_plugin.operations.create_dhcp_pool()
         versa_plugin.operations.delete_dhcp_pool()

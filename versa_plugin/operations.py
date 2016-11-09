@@ -11,7 +11,6 @@ import versa_plugin.cgnat
 from versa_plugin.networking import Routing
 from versa_plugin.networking import Unit
 from versa_plugin.cgnat import AddressRange
-from versa_plugin.firewall import Rule
 from versa_plugin.connectors import Network
 from versa_plugin.appliance import ApplianceInterface, NetworkInfo
 
@@ -269,9 +268,9 @@ def create_firewall_policy(versa_client, **kwargs):
         return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
-    policy_name = ctx.node.properties['name']
+    policy = ctx.node.properties['policy']
     versa_plugin.firewall.add_policy(versa_client, appliance_name,
-                                     org_name, policy_name)
+                                     org_name, policy)
 
 
 @operation
@@ -281,20 +280,20 @@ def delete_firewall_policy(versa_client, **kwargs):
         return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
-    policy_name = ctx.node.properties['name']
+    policy = ctx.node.properties['policy']
     versa_plugin.firewall.delete_policy(versa_client, appliance_name,
-                                        org_name, policy_name)
+                                        org_name, policy['name'])
 
 
 @operation
 @with_versa_client
-def create_firewall_rule(versa_client, **kwargs):
+def create_firewall_rules(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
     policy_name = ctx.node.properties['policy_name']
-    rules = [Rule(r['name']) for r in ctx.node.properties['rules']]
+    rules = ctx.node.properties['rules']
     for rule in rules:
         versa_plugin.firewall.add_rule(versa_client, appliance_name,
                                        org_name, policy_name, rule)
@@ -302,16 +301,16 @@ def create_firewall_rule(versa_client, **kwargs):
 
 @operation
 @with_versa_client
-def delete_firewall_rule(versa_client, **kwargs):
+def delete_firewall_rules(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
     policy_name = ctx.node.properties['policy_name']
-    rules = [Rule(r['name']) for r in ctx.node.properties['rules']]
+    rules = ctx.node.properties['rules']
     for rule in rules:
         versa_plugin.firewall.delete_rule(versa_client, appliance_name,
-                                       org_name, policy_name, rule.name)
+                                          org_name, policy_name, rule['name'])
 
 
 @operation
@@ -319,11 +318,23 @@ def delete_firewall_rule(versa_client, **kwargs):
 def create_url_filters(versa_client, **kwargs):
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
-    url_filters = kwargs.get('filters', [])
+    url_filters = ctx.node.properties['filters']
     for url_filter in url_filters:
-        ctx.logger.info("Filter:" + url_filter)
+        ctx.logger.info("Filter: {}".format(url_filter))
         versa_plugin.firewall.add_url_filter(versa_client, appliance_name,
                                              org_name, url_filter)
+
+
+@operation
+@with_versa_client
+def delete_url_filters(versa_client, **kwargs):
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    url_filters = ctx.node.properties['filters']
+    for url_filter in url_filters:
+        ctx.logger.info("Filter: {}".format(url_filter))
+        versa_plugin.firewall.delete_url_filter(versa_client, appliance_name,
+                                                org_name, url_filter)
 
 
 @operation

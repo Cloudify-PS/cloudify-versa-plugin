@@ -11,20 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import mock
-import unittest
+import base
 import requests
-from versa_plugin.versaclient import VersaClient
-import versa_plugin.networking
-import configuration
+import versa_plugin.operations
 requests.packages.urllib3.disable_warnings()
 
+zone = """
+    use_existing: false
+    appliance_name: $appliance_name
+    org_name: $org_name
+    zone:
+        name: test_zone_name
+        description: zone description
+    """
 
-class NetworkingTestCase(unittest.TestCase):
-    def setUp(self):
-        self.config = configuration.data
-
+class NetworkingTestCase(base.BaseTest):
     def notest_create_dhcp_profile(self):
         with VersaClient(self.config) as client:
             appliance = 'testapp'
@@ -161,7 +162,7 @@ class NetworkingTestCase(unittest.TestCase):
                 versa_plugin.networking.update_traffic_identification_networks(
                     client, appliance, org, name)
 
-    def test_add_network_to_zone(self):
+    def notest_add_network_to_zone(self):
         with VersaClient(self.config, '/tmp/versa.key') as client:
             with mock.patch('versa_plugin.versaclient.ctx',
                             mock.MagicMock()):
@@ -171,3 +172,9 @@ class NetworkingTestCase(unittest.TestCase):
                 name = 'testnet'
                 versa_plugin.networking.add_network_to_zone(
                     client, appliance, org, zone, name)
+
+    def test_add_zone(self):
+        self.update_node_properties(zone,
+                                    "appliance_name org_name")
+        versa_plugin.operations.create_zone()
+        versa_plugin.operations.delete_zone()

@@ -201,3 +201,17 @@ def remove_networks_from_zone(client, appliance, org, zone_name, networks,
                             if inst not in instances]
         update_zone(client, appliance, org, zone_name, new_networks,
                     routing_instance)
+
+
+def create_zone(client, appliance, org, zone):
+    url = '/api/config/devices/device/{}'\
+        '/config/orgs/org-services/{}/objects/zones'.format(appliance, org)
+    data = {"zone": zone}
+    client.post(url, json.dumps(data), JSON, codes.created)
+
+
+def delete_zone(client, appliance, org, zone_name):
+    url = '/api/config/devices/device/{}'\
+        '/config/orgs/org-services/{}'\
+        '/objects/zones/zone/{}'.format(appliance, org, zone_name)
+    client.delete(url)

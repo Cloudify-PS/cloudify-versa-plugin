@@ -178,9 +178,11 @@ node_types:
         default: ""
       name:
         default: ""
-      networks:
+      zone:
         default: {}
-      routing_instances:
+      update_networks:
+        default: {}
+      update_routing_instances:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -253,10 +255,10 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: versa.versa_plugin.operations.create_firewall_rule
+          implementation: versa.versa_plugin.operations.create_firewall_rules
           inputs: {}
         delete:
-          implementation: versa.versa_plugin.operations.delete_firewall_rule
+          implementation: versa.versa_plugin.operations.delete_firewall_rules
           inputs: {}
 
   cloudify.versa.nodes.DHCPProfile:
