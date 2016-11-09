@@ -161,6 +161,9 @@ node_types:
         create:
           implementation: versa.versa_plugin.operations.create_cgnat
           inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_cgnat
+          inputs: {}
 
   cloudify.versa.nodes.NGFirewall:
     derived_from: cloudify.nodes.SoftwareComponent

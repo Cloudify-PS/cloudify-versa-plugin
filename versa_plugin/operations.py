@@ -213,6 +213,23 @@ def create_cgnat(versa_client, **kwargs):
 
 @operation
 @with_versa_client
+def delete_cgnat(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    pool = ctx.node.properties['pool']
+    pool_name = pool['name']
+    rule = ctx.node.properties['rule']
+    rule_name = rule['name']
+    versa_plugin.cgnat.delete_rule(versa_client, appliance_name,
+                                   org_name, rule_name)
+    versa_plugin.cgnat.delete_pool(versa_client, appliance_name,
+                                   org_name, pool_name)
+
+
+@operation
+@with_versa_client
 def create_firewall(versa_client, **kwargs):
     if is_use_existing():
         return
