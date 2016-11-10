@@ -266,7 +266,7 @@ node_types:
           implementation: versa.versa_plugin.operations.update_firewall_rule
           inputs:
             rule:
-              description: 
+              default: {}
 
 
   cloudify.versa.nodes.DHCPProfile:
