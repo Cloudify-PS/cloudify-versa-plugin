@@ -18,12 +18,11 @@ inputs:
         default: vcpe1tdcappliance
     hq_org_name:
         default: hq_org
-
+    firewall_policy:
+        default: tdc_firewall_policy
     rule_name:
-        type: string
+        default: test_firewall_rule
 
-    block_url:
-        type: string
 
 #
 # Node templates
@@ -43,24 +42,27 @@ node_templates:
         client_secret: { get_input: client_secret}
 
   hq_firewall:
-    type: cloudify.versa.nodes.NGFirewall
+    type: cloudify.versa.nodes.NGFirewallRule
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: hq_org_name }
-      url_filtering:
+      policy_name: { get_input: firewall_policy }
+      rules:
         - name: { get_input: rule_name }
-          description: { get_input: rule_name }
-          default-action:
-             predefined: allow
-          cloud-lookup-mode: never
-          category-action-map:
-             category-action: []
-          reputation-action-map:
-             reputation-action: []
-          blacklist:
-             action:
-               predefined: alert
-             patterns:
-               - { get_input: block_url }
-          whitelist: {}
+          match:
+            source:
+              zone:
+                zone-list:
+                  - trust
+            destination:
+              zone:
+                zone-list:
+                  - untrust
+          set:
+            lef:
+              event: end
+              options:
+                send-pcap-data:
+                    enable: False
+            action: allow
