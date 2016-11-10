@@ -79,8 +79,6 @@ node_templates:
       org_name: { get_input: hq_org_name }
       interface: { get_input: interface_name }
       unit: 0
-      zone: trust
-      router: hq_router
     relationships:
       - type: cloudify.relationships.connected_to
         target: interface

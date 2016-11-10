@@ -13,6 +13,7 @@
 # limitations under the License.
 import base
 import requests
+import unittest
 import versa_plugin.operations
 requests.packages.urllib3.disable_warnings()
 
@@ -20,6 +21,7 @@ zone = """
     use_existing: false
     appliance_name: $appliance_name
     org_name: $org_name
+    update: false
     zone:
         name: test_zone_name
         description: zone description
@@ -29,168 +31,94 @@ zone_update = """
     use_existing: false
     appliance_name: $appliance_name
     org_name: $org_name
+    update: true
     zone:
         name: host
         routing-instance:
             - parent_router
     """
 
+interface = """
+    use_existing: false
+    appliance_name: $appliance_name
+    org_name: $org_name
+    name: vni-0/5
+    """
+
+interface_with_address = """
+    use_existing: false
+    appliance_name: $appliance_name
+    org_name: $org_name
+    name: vni-0/5
+    units:
+      - name: 0
+        address: 14.14.0.2
+        mask: 255.255.255.0
+    """
+
+network = """
+    use_existing: false
+    appliance_name: $appliance_name
+    org_name: $org_name
+    name: test_network
+    interface: vni-0/5
+    unit: 0
+    """
+
+router = """
+    use_existing: false
+    appliance_name: $appliance_name
+    org_name: $org_name
+    update: false
+    name: test_router
+    """
+
+
 class NetworkingTestCase(base.BaseTest):
-    def notest_create_dhcp_profile(self):
-        with VersaClient(self.config) as client:
-            appliance = 'testapp'
-            name = 'testdhcpprofile'
-            versa_plugin.networking.create_dhcp_profile(client,
-                                                        appliance,
-                                                        name)
-
-    def notest_delete_dhcp_profile(self):
-        with VersaClient(self.config) as client:
-            appliance = 'testapp'
-            name = 'testdhcpprofile'
-            versa_plugin.networking.delete_dhcp_profile(client,
-                                                        appliance,
-                                                        name)
-
-    def notest_get_organization_limits(self):
-        with VersaClient(self.config) as client:
-            appliance = 'testapp'
-            org = 'mytestorg'
-            print versa_plugin.networking.get_organization_limits(client,
-                                                                  appliance,
-                                                                  org).toxml()
-
-    def notest_update_dhcp_profile(self):
-        with VersaClient(self.config) as client:
-            appliance = 'testapp'
-            org = 'mytestorg'
-            profile = 'testdhcpprofile'
-            versa_plugin.networking.update_dhcp_profile(client,
-                                                        appliance,
-                                                        org,
-                                                        profile)
-
-    def notest_update_routing_instances(self):
-        with VersaClient(self.config) as client:
-            appliance = 'testapp'
-            org = 'mytestorg'
-            instance = 'testrouter'
-            versa_plugin.networking.update_routing_instance(client,
-                                                            appliance,
-                                                            org,
-                                                            instance)
-
-    def notest_update_provider_organization(self):
-        with VersaClient(self.config) as client:
-            appliance = 'testapp'
-            org = 'child3'
-            provider = 'mytestorg'
-            versa_plugin.networking.update_provider_orranization(client,
-                                                                 appliance,
-                                                                 org,
-                                                                 provider)
-
-    def notest_create_virtual_router(self):
-        with VersaClient(self.config) as client:
-            appliance = 'testapp'
-            name = 'testrouter'
-            networks = ['versa2']
-            routing = [versa_plugin.networking.Routing("1.2.3.0/24",
-                                                       "5.6.7.8", "vni-0/0.0",
-                                                       None, 1)]
-            versa_plugin.networking.create_virtual_router(client,
-                                                          appliance,
-                                                          name,
-                                                          networks,
-                                                          routing)
-
-    def notest_delete_virtual_router(self):
-        with VersaClient(self.config) as client:
-            appliance = 'testapp'
-            name = 'testrouter'
-            versa_plugin.networking.delete_virtual_router(client,
-                                                          appliance,
-                                                          name)
-
-    def notest_create_interface_without_address(self):
-        with VersaClient(self.config, '/tmp/versa.key') as client:
-            appliance = 'testapp'
-            name = 'vni-0/3'
-            versa_plugin.networking.create_interface(client,
-                                                     appliance,
-                                                     name)
-
-    def notest_create_interface_with_address(self):
-        with VersaClient(self.config, '/tmp/versa.key') as client:
-            with mock.patch('versa_plugin.versaclient.ctx',
-                            mock.MagicMock()):
-                appliance = 'vcpe1tdcappliance'
-                name = 'vni-0/4'
-                units = [versa_plugin.networking.Unit("0", "10.12.0.2",
-                                                      "255.255.255.0")]
-                versa_plugin.networking.create_interface(client,
-                                                         appliance,
-                                                         name, units)
-
-    def notest_delete_interface(self):
-        with VersaClient(self.config) as client:
-            appliance = 'testapp'
-            name = 'vni-0/3'
-            versa_plugin.networking.delete_interface(client,
-                                                     appliance,
-                                                     name)
-
-    def notest_create_network(self):
-        with VersaClient(self.config, '/tmp/versa.key') as client:
-            with mock.patch('versa_plugin.versaclient.ctx',
-                            mock.MagicMock()):
-                appliance = 'vcpe1tdcappliance'
-                interface = 'vni-0/4.0'
-                name = 'testnet'
-                versa_plugin.networking.create_network(client,
-                                                       appliance,
-                                                       name, interface)
-
-    def notest_add_network_to_router(self):
-        with VersaClient(self.config, '/tmp/versa.key') as client:
-            with mock.patch('versa_plugin.versaclient.ctx',
-                            mock.MagicMock()):
-                appliance = 'vcpe1tdcappliance'
-                router = 'hq_router'
-                name = 'testnet'
-                versa_plugin.networking.add_network_to_router(client,
-                                                              appliance, router,
-                                                              name)
-
-    def notest_update_traffic_identification_networks(self):
-        with VersaClient(self.config, '/tmp/versa.key') as client:
-            with mock.patch('versa_plugin.versaclient.ctx',
-                            mock.MagicMock()):
-                appliance = 'vcpe1tdcappliance'
-                org = 'hq_org'
-                name = 'testnet'
-                versa_plugin.networking.update_traffic_identification_networks(
-                    client, appliance, org, name)
-
-    def notest_add_network_to_zone(self):
-        with VersaClient(self.config, '/tmp/versa.key') as client:
-            with mock.patch('versa_plugin.versaclient.ctx',
-                            mock.MagicMock()):
-                appliance = 'vcpe1tdcappliance'
-                org = 'hq_org'
-                zone = 'trust'
-                name = 'testnet'
-                versa_plugin.networking.add_network_to_zone(
-                    client, appliance, org, zone, name)
-
-    def notest_add_zone(self):
+    @unittest.skip("")
+    def test_add_zone(self):
         self.update_node_properties(zone,
                                     "appliance_name org_name")
         versa_plugin.operations.create_zone()
         versa_plugin.operations.delete_zone()
 
+    @unittest.skip("")
     def test_update_zone(self):
         self.update_node_properties(zone_update,
                                     "appliance_name org_name")
         versa_plugin.operations.create_zone()
-        # versa_plugin.operations.delete_zone()
+        versa_plugin.operations.delete_zone()
+
+    @unittest.skip("")
+    def test_create_interface_without_address(self):
+        self.update_node_properties(interface,
+                                    "appliance_name org_name")
+        versa_plugin.operations.create_interface()
+        versa_plugin.operations.delete_interface()
+
+    @unittest.skip("")
+    def test_create_interface_with_address(self):
+        self.update_node_properties(interface_with_address,
+                                    "appliance_name org_name")
+        versa_plugin.operations.create_interface()
+        versa_plugin.operations.delete_interface()
+
+    @unittest.skip("")
+    def test_create_network(self):
+        self.update_node_properties(interface_with_address,
+                                    "appliance_name org_name")
+        versa_plugin.operations.create_interface()
+        self.save_properties()
+        self.update_node_properties(network,
+                                    "appliance_name org_name")
+        versa_plugin.operations.create_network()
+        versa_plugin.operations.delete_network()
+        self.restore_properties()
+        versa_plugin.operations.delete_interface()
+
+    @unittest.skip("")
+    def test_create_router(self):
+        self.update_node_properties(router,
+                                    "appliance_name org_name")
+        versa_plugin.operations.create_router()
+        versa_plugin.operations.delete_router()

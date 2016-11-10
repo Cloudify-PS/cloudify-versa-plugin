@@ -12,6 +12,23 @@ def _netmask_to_cidr(netmask):
     return sum([bin(int(x)).count("1") for x in netmask.split(".")])
 
 
+def _find_node_by_name(limits, name, value):
+    node = None
+    for item in limits.getElementsByTagName(name):
+        if item.firstChild.data == value:
+            node = item
+            break
+    return node
+
+
+def _add_organization_child(xml, tagname, text):
+    org_node = xml.lastChild
+    node = xml.createElement(tagname)
+    value = xml.createTextNode(text)
+    node.appendChild(value)
+    org_node.appendChild(node)
+
+
 def create_interface(client, appliance, name, units=None):
     url = '/api/config/devices/device/{}/config/interfaces'.format(appliance)
     data = {"vni": {"name": name, "enable": True, "promiscuous": False}}
@@ -29,6 +46,12 @@ def create_interface(client, appliance, name, units=None):
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
+def delete_interface(client, appliance, name):
+    url = '/api/config/devices/device/{}'\
+          '/config/interfaces/vni/%22{}%22'.format(appliance, name)
+    client.delete(url, codes.no_content)
+
+
 def create_network(client, appliance, name, interface):
     url = '/api/config/devices/device/{}/config/networks'.format(appliance)
     data = {"network": {
@@ -37,9 +60,9 @@ def create_network(client, appliance, name, interface):
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
-def delete_interface(client, appliance, name):
+def delete_network(client, appliance, name):
     url = '/api/config/devices/device/{}'\
-          '/config/interfaces/vni/%22{}%22'.format(appliance, name)
+          '/config/networks/network/{}'.format(appliance, name)
     client.delete(url, codes.no_content)
 
 
@@ -83,6 +106,15 @@ def add_network_to_router(client, appliance, name, network):
     client.put(url, json.dumps(result), JSON, codes.no_content)
 
 
+def delete_network_to_router(client, appliance, name, network):
+    url = '/api/config/devices/device/{}'\
+          '/config/routing-instances/'\
+          'routing-instance/{}'.format(appliance, name)
+    result = client.get(url, None, None, codes.ok, JSON)
+    result["routing-instance"]["networks"].remove(network)
+    client.put(url, json.dumps(result), JSON, codes.no_content)
+
+
 def create_dhcp_profile(client, appliance, name):
     url = '/api/config/devices/device/{}/config/dhcp-profiles'.format(appliance)
     data = {
@@ -110,42 +142,56 @@ def get_organization_limits(client, appliance, org):
     return result
 
 
-def add_organization_child(xml, tagname, text):
-    org_node = xml.lastChild
-    node = xml.createElement(tagname)
-    value = xml.createTextNode(text)
-    node.appendChild(value)
-    org_node.appendChild(node)
-
-
 def update_dhcp_profile(client, appliance, org, profile):
     url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
                                                                     org)
     limits = get_organization_limits(client, appliance, org)
-    add_organization_child(limits, 'dhcp-profile', profile)
+    _add_organization_child(limits, 'dhcp-profile', profile)
     xmldata = limits.toxml()
     client.put(url, xmldata, XML, codes.no_content)
 
 
-def update_routing_instance(client, appliance, org, instance):
+def add_routing_instance(client, appliance, org, instance):
     url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
                                                                     org)
     limits = get_organization_limits(client, appliance, org)
-    add_organization_child(limits, "available-routing-instances", instance)
+    _add_organization_child(limits, "available-routing-instances", instance)
     xmldata = limits.toxml()
     client.put(url, xmldata, XML, codes.no_content)
 
 
-def update_provider_organization(client, appliance, org, provider):
+def delete_routing_instance(client, appliance, org, instance):
     url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
                                                                     org)
     limits = get_organization_limits(client, appliance, org)
-    add_organization_child(limits, "available-provider-orgs", provider)
+    node = _find_node_by_name(limits, "available-routing-instances", instance)
+    if node:
+        limits.removeChild(node)
+        xmldata = limits.toxml()
+        client.put(url, xmldata, XML, codes.no_content)
+
+
+def add_provider_organization(client, appliance, org, provider):
+    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
+                                                                    org)
+    limits = get_organization_limits(client, appliance, org)
+    _add_organization_child(limits, "available-provider-orgs", provider)
     xmldata = limits.toxml()
     client.put(url, xmldata, XML, codes.no_content)
 
 
-def update_traffic_identification_networks(client, appliance, org, network):
+def delete_provider_organization(client, appliance, org, provider):
+    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
+                                                                    org)
+    limits = get_organization_limits(client, appliance, org)
+    node = _find_node_by_name(limits, "available-provider-orgs", provider)
+    if node:
+        limits.removeChild(node)
+        xmldata = limits.toxml()
+        client.put(url, xmldata, XML, codes.no_content)
+
+
+def add_traffic_identification_networks(client, appliance, org, network):
     url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
                                                                     org)
     limits = get_organization_limits(client, appliance, org)
@@ -156,6 +202,22 @@ def update_traffic_identification_networks(client, appliance, org, network):
     traffic_node.appendChild(node)
     xmldata = limits.toxml()
     client.put(url, xmldata, XML, codes.no_content)
+
+
+def delete_traffic_identification_networks(client, appliance, org, network):
+    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
+                                                                    org)
+    limits = get_organization_limits(client, appliance, org)
+    traffic_node = limits.getElementsByTagName('traffic-identification')[0]
+    node = None
+    for net in limits.getElementsByTagName("using-networks"):
+        if net.firstChild.data == network:
+            node = net
+            break
+    if node:
+        traffic_node.removeChild(node)
+        xmldata = limits.toxml()
+        client.put(url, xmldata, XML, codes.no_content)
 
 
 def update_zone(client, appliance, org, zone):

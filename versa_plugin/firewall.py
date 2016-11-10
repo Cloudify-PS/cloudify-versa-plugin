@@ -47,7 +47,9 @@ def update_rule(client, appliance, org, policy, rule):
     """
     url = '/api/config/devices/device/{}/config/orgs'\
         '/org-services/{}/security/access-policies/'\
-        'access-policy-group/{}/rules'.format(appliance, org, policy)
+        'access-policy-group/{}/rules/access-policy/{}'.format(appliance,
+                                                               org, policy,
+                                                               rule['name'])
     data = {
         "access-policy": rule}
     client.put(url, json.dumps(data), JSON, codes.no_content)

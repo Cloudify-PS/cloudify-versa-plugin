@@ -16,6 +16,7 @@ import mock
 import configuration
 import yaml
 from string import Template
+from copy import deepcopy
 
 
 class BaseTest(unittest.TestCase):
@@ -29,6 +30,7 @@ class BaseTest(unittest.TestCase):
         patcher_ctx1.start()
         patcher_ctx2.start()
         patcher_ctx3.start()
+        self.prop = []
 
     def tearDown(self):
         mock.patch.stopall()
@@ -42,3 +44,17 @@ class BaseTest(unittest.TestCase):
         self.fake_ctx.node.properties = {'versa_config': self.config}
         self.fake_ctx.node.properties.update(yaml.load(node_config))
         self.fake_ctx.instance.runtime_properties = {}
+
+    def save_properties(self):
+        self.prop.append(deepcopy(self.fake_ctx.node.properties))
+
+    def restore_properties(self):
+        self.fake_ctx.node.properties.clear()
+        self.fake_ctx.node.properties.update(self.prop.pop())
+
+    def set_runtime(self, fields):
+        kwargs = {}
+        nc = configuration.Node
+        for field in fields.split():
+            kwargs[field] = getattr(nc, field)
+        self.fake_ctx.instance.runtime_properties.update(kwargs)

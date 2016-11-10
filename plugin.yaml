@@ -127,6 +127,8 @@ node_types:
         default: ""
       org_name:
         default: ""
+      update:
+        default: false
       name:
         default: ""
       parent_router_name:
@@ -139,6 +141,9 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_router
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_router
           inputs: {}
 
   cloudify.versa.nodes.CGNat:
@@ -176,13 +181,9 @@ node_types:
         default: ""
       org_name:
         default: ""
-      name:
-        default: ""
+      update:
+        default: false
       zone:
-        default: {}
-      update_networks:
-        default: {}
-      update_routing_instances:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -265,7 +266,7 @@ node_types:
           implementation: versa.versa_plugin.operations.update_firewall_rule
           inputs:
             rule:
-              default: {}
+              description: 
 
 
   cloudify.versa.nodes.DHCPProfile:
@@ -430,14 +431,13 @@ node_types:
         default: ""
       unit:
         default: ""
-      zone:
-        default: ""
-      router:
-        default: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_network
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_network
           inputs: {}
 
   cloudify.versa.nodes.Interface:
@@ -458,7 +458,35 @@ node_types:
         create:
           implementation: versa.versa_plugin.operations.create_interface
           inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_interface
+          inputs: {}
 
+  cloudify.versa.nodes.Limits:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      dhcp_profile:
+        default: ""
+      routes:
+        default: {}
+      networks:
+        default: {}
+      provider_orgs:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.insert_to_limits
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_from_limits
+          inputs: {}
 
 relationships:
     cloudify.versa.pool_connected_to_vm:

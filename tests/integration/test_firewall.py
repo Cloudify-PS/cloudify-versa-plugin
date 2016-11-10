@@ -13,6 +13,7 @@
 # limitations under the License.
 import base
 import requests
+import unittest
 import versa_plugin.operations
 requests.packages.urllib3.disable_warnings()
 
@@ -102,26 +103,43 @@ rules_with_filter = """
 
 
 class FirewallTestCase(base.BaseTest):
-    def notest_add_url_filter(self):
-        self.update_node_properties(filter,
-                                    "appliance_name org_name")
-        versa_plugin.operations.create_url_filters()
-        versa_plugin.operations.delete_url_filters()
-
-    def notest_add_policy(self):
+    @unittest.skip("")
+    def test_add_policy(self):
         self.update_node_properties(policy,
                                     "appliance_name org_name")
         versa_plugin.operations.create_firewall_policy()
         versa_plugin.operations.delete_firewall_policy()
 
-    def notest_add_rule(self):
+    @unittest.skip("")
+    def test_add_url_filter(self):
+        self.update_node_properties(filter,
+                                    "appliance_name org_name")
+        versa_plugin.operations.create_url_filters()
+        versa_plugin.operations.delete_url_filters()
+
+    @unittest.skip("")
+    def test_add_rule(self):
         self.update_node_properties(rules,
                                     "appliance_name org_name firewall_policy")
         versa_plugin.operations.create_firewall_rules()
         versa_plugin.operations.delete_firewall_rules()
 
-    def notest_add_rule_with_filter(self):
+    @unittest.skip("")
+    def test_add_rule_with_filter(self):
         self.update_node_properties(rules_with_filter,
                                     "appliance_name org_name firewall_policy")
         versa_plugin.operations.create_firewall_rules()
+        versa_plugin.operations.delete_firewall_rules()
+
+    # @unittest.skip("")
+    def test_update_rule(self):
+        self.update_node_properties(rules,
+                                    "appliance_name org_name firewall_policy")
+        versa_plugin.operations.create_firewall_rules()
+        inputrule = {
+          'name': 'test_rule_name',
+          'set': {
+              'security-profile': {
+                  'urlf': 'test'}}}
+        versa_plugin.operations.update_firewall_rule(rule=inputrule)
         versa_plugin.operations.delete_firewall_rules()
