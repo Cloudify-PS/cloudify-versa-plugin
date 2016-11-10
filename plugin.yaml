@@ -210,10 +210,10 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-            implementation: versa.versa_plugin.operations.create_url_filters
+          implementation: versa.versa_plugin.operations.create_url_filters
           inputs: {}
         delete:
-            implementation: versa.versa_plugin.operations.delete_url_filters
+          implementation: versa.versa_plugin.operations.delete_url_filters
           inputs: {}
 
   cloudify.versa.nodes.NGFirewallPolicy:
