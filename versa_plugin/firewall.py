@@ -38,6 +38,21 @@ def add_rule(client, appliance, org, policy, rule):
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
+def update_rule(client, appliance, org, policy, rule):
+    """
+        :param  appliance (str)
+        :param org (str)
+        :param policy (str)
+        :param rule (dict): firewall rule properties
+    """
+    url = '/api/config/devices/device/{}/config/orgs'\
+        '/org-services/{}/security/access-policies/'\
+        'access-policy-group/{}/rules'.format(appliance, org, policy)
+    data = {
+        "access-policy": rule}
+    client.put(url, json.dumps(data), JSON, codes.no_content)
+
+
 def delete_rule(client, appliance, org, policy, rule):
     url = '/api/config/devices/device/{}/config/orgs/org-services/{}/'\
         'security/access-policies'\

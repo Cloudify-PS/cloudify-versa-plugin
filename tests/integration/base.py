@@ -22,7 +22,6 @@ class BaseTest(unittest.TestCase):
     def setUp(self):
         self.config = configuration.versa_config
         self.fake_ctx = mock.MagicMock()
-        self.fake_ctx.node.properties = {'versa_config': self.config}
         self.fake_ctx._context['storage']._storage_dir = '/tmp'
         patcher_ctx1 = mock.patch('versa_plugin.ctx', self.fake_ctx)
         patcher_ctx2 = mock.patch('versa_plugin.operations.ctx', self.fake_ctx)
@@ -40,4 +39,6 @@ class BaseTest(unittest.TestCase):
         for field in fields.split():
             kwargs[field] = getattr(nc, field)
         node_config = Template(template).substitute(kwargs)
+        self.fake_ctx.node.properties = {'versa_config': self.config}
         self.fake_ctx.node.properties.update(yaml.load(node_config))
+        self.fake_ctx.instance.runtime_properties = {}

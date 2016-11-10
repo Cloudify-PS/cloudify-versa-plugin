@@ -260,6 +260,13 @@ node_types:
         delete:
           implementation: versa.versa_plugin.operations.delete_firewall_rules
           inputs: {}
+      versa.interfaces.actions:
+        update:
+          implementation: versa.versa_plugin.operations.update_firewall_rule
+          inputs:
+            rule:
+              default: {}
+
 
   cloudify.versa.nodes.DHCPProfile:
     derived_from: cloudify.nodes.SoftwareComponent

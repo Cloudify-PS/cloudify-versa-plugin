@@ -25,6 +25,16 @@ zone = """
         description: zone description
     """
 
+zone_update = """
+    use_existing: false
+    appliance_name: $appliance_name
+    org_name: $org_name
+    zone:
+        name: host
+        routing-instance:
+            - parent_router
+    """
+
 class NetworkingTestCase(base.BaseTest):
     def notest_create_dhcp_profile(self):
         with VersaClient(self.config) as client:
@@ -173,8 +183,14 @@ class NetworkingTestCase(base.BaseTest):
                 versa_plugin.networking.add_network_to_zone(
                     client, appliance, org, zone, name)
 
-    def test_add_zone(self):
+    def notest_add_zone(self):
         self.update_node_properties(zone,
                                     "appliance_name org_name")
         versa_plugin.operations.create_zone()
         versa_plugin.operations.delete_zone()
+
+    def test_update_zone(self):
+        self.update_node_properties(zone_update,
+                                    "appliance_name org_name")
+        versa_plugin.operations.create_zone()
+        # versa_plugin.operations.delete_zone()
