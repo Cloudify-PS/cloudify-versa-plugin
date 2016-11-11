@@ -161,24 +161,26 @@ node_templates:
       - type: cloudify.versa.router_connected_to_org
         target: limits
 
-  #nat:
-    #type: cloudify.versa.nodes.CGNat
-    #properties:
-      #versa_config: { get_property: [versa_configuration, versa_config] }
-      #appliance_name: { get_input: appliance_name }
-      #org_name: { get_input: hq_org_name }
-      #pool:
-        #name: { get_input: nat_pool_name }
-        #ranges:
-          #- name: nat_range_name
-            #low: { get_input: range_low }
-            #hight: { get_input: range_high }
-        #routing_instance: { get_input: parent_routing_name }
-        #provider_org: { get_input: parent_org_name }
-      #rule:
-        #name: { get_input: nat_rule_name }
-        #addresses:
-          #- { get_input: nat_rule_source_address }
-    #relationships:
-      #- type: cloudify.versa.cgnat_connected_to_org
-        #target: dhcp_server
+  nat:
+    type: cloudify.versa.nodes.CGNat
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: hq_org_name }
+      pool:
+        name: { get_input: nat_pool_name }
+        ranges:
+          - name: nat_range_name
+            low: { get_input: range_low }
+            hight: { get_input: range_high }
+        routing_instance: { get_input: parent_routing_name }
+        provider_org: { get_input: parent_org_name }
+      rule:
+        name: { get_input: nat_rule_name }
+        addresses:
+          - { get_input: nat_rule_source_address }
+    relationships:
+      - type: cloudify.versa.cgnat_connected_to_org
+        target: dhcp_server
+      - type: cloudify.versa.router_connected_to_org
+        target: limits
