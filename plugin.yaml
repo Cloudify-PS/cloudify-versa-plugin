@@ -270,7 +270,8 @@ node_types:
         get:
           implementation: versa.versa_plugin.operations.get_firewall_rule
           inputs:
-            name: {}
+            name: 
+              default: ""
 
 
   cloudify.versa.nodes.DHCPProfile:
