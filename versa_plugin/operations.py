@@ -363,6 +363,21 @@ def update_firewall_rule(versa_client, **kwargs):
 
 @operation
 @with_versa_client
+def get_firewall_rule(versa_client, **kwargs):
+    name = kwargs.get('name')
+    if not name:
+        ctx.logger.info("Key 'name' is absent.")
+        return
+    appliance_name = ctx.instance.runtime_properties['appliance']
+    org_name = ctx.instance.runtime_properties['org']
+    policy_name = ctx.instance.runtime_properties['policy']
+    rule = versa_plugin.firewall.get_rule(versa_client, appliance_name,
+                                          org_name, policy_name, name)
+    ctx.logger.info("Rule '{} is: {}".format(name, rule))
+
+
+@operation
+@with_versa_client
 def delete_firewall_rules(versa_client, **kwargs):
     if is_use_existing():
         return

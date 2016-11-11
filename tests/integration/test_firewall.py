@@ -131,7 +131,7 @@ class FirewallTestCase(base.BaseTest):
         versa_plugin.operations.create_firewall_rules()
         versa_plugin.operations.delete_firewall_rules()
 
-    # @unittest.skip("")
+    @unittest.skip("")
     def test_update_rule(self):
         self.update_node_properties(rules,
                                     "appliance_name org_name firewall_policy")
@@ -142,4 +142,12 @@ class FirewallTestCase(base.BaseTest):
               'security-profile': {
                   'urlf': 'test'}}}
         versa_plugin.operations.update_firewall_rule(rule=inputrule)
+        versa_plugin.operations.delete_firewall_rules()
+
+    # @unittest.skip("")
+    def test_get_rule(self):
+        self.update_node_properties(rules,
+                                    "appliance_name org_name firewall_policy")
+        versa_plugin.operations.create_firewall_rules()
+        versa_plugin.operations.get_firewall_rule(name='test_rule_name')
         versa_plugin.operations.delete_firewall_rules()

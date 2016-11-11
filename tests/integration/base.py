@@ -21,9 +21,12 @@ from copy import deepcopy
 
 class BaseTest(unittest.TestCase):
     def setUp(self):
+        def info(x):
+            print x
         self.config = configuration.versa_config
         self.fake_ctx = mock.MagicMock()
         self.fake_ctx._context['storage']._storage_dir = '/tmp'
+        self.fake_ctx.logger.info = info
         patcher_ctx1 = mock.patch('versa_plugin.ctx', self.fake_ctx)
         patcher_ctx2 = mock.patch('versa_plugin.operations.ctx', self.fake_ctx)
         patcher_ctx3 = mock.patch('versa_plugin.versaclient.ctx', self.fake_ctx)

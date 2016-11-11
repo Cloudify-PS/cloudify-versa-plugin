@@ -55,6 +55,19 @@ def update_rule(client, appliance, org, policy, rule):
     client.put(url, json.dumps(data), JSON, codes.no_content)
 
 
+def get_rule(client, appliance, org, policy, name):
+    url = '/api/config/devices/device/{}/config/orgs'\
+        '/org-services/{}/security/access-policies/'\
+        'access-policy-group/{}/rules'.format(appliance, org, policy)
+    result = client.get(url, None, None, codes.ok, JSON)
+    if not result:
+        return None
+    for rule in result['rules']['access-policy']:
+        if name == rule['name']:
+            return rule
+    return None
+
+
 def delete_rule(client, appliance, org, policy, rule):
     url = '/api/config/devices/device/{}/config/orgs/org-services/{}/'\
         'security/access-policies'\
