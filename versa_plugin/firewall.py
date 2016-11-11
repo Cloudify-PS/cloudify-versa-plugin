@@ -58,8 +58,9 @@ def update_rule(client, appliance, org, policy, rule):
 def get_rule(client, appliance, org, policy, name):
     url = '/api/config/devices/device/{}/config/orgs'\
         '/org-services/{}/security/access-policies/'\
-        'access-policy-group/{}/rules'.format(appliance, org, policy)
+        'access-policy-group/{}/rules?deep'.format(appliance, org, policy)
     result = client.get(url, None, None, codes.ok, JSON)
+    import pdb; pdb.set_trace()  # XXX BREAKPOINT
     if not result:
         return None
     for rule in result['rules']['access-policy']:
