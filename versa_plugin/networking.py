@@ -240,13 +240,6 @@ def get_zone(client, appliance, org, zone_name):
     return None
 
 
-def add_to_zone(client, appliance, org, zone):
-    exists_zone = get_zone(client, appliance, org, zone['name'])
-    if exists_zone:
-        zone.update(exists_zone)
-        update_zone(client, appliance, org, zone)
-
-
 def create_zone(client, appliance, org, zone):
     url = '/api/config/devices/device/{}'\
         '/config/orgs/org-services/{}/objects/zones'.format(appliance, org)

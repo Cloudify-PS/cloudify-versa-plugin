@@ -40,8 +40,10 @@ inputs:
         default: 87.53.87.19
     nat_rule_source_address:
         default: 10.14.0.0/24
-    routing_name:
+    parent_routing_name:
         default: parent_router
+    org_routing_name:
+        default: hq_router
     parent_org_name:
         default: vcpe1_parent_org
 
@@ -130,41 +132,34 @@ node_templates:
       - type: cloudify.versa.dhcp_connected_to_profile
         target: dhcp_pool
 
-  #routing:
-    #type: cloudify.versa.nodes.Router
-    #properties:
-      #versa_config: { get_property: [versa_configuration, versa_config] }
-      #appliance_name: { get_input: appliance_name }
-      #org_name: { get_input: parent_org_name }
-      #name: { get_input: parent_routing_name }
-      #update: true
-      #networks:
-        #- { get_input: network_name }
-    #relationships:
-      #- type: cloudify.versa.router_connected_to_org
-        #target: appliance
+  routing:
+    type: cloudify.versa.nodes.Router
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: hq_org_name }
+      name: { get_input: org_routing_name }
+      update: true
+      networks:
+        - { get_input: network_name }
+    relationships:
+      - type: cloudify.versa.router_connected_to_org
+        target: limits
 
-  #trust_zone:
-    #type: cloudify.versa.nodes.Zone
-    #properties:
-      #versa_config: { get_property: [versa_configuration, versa_config] }
-      #appliance_name: { get_input: appliance_name }
-      #org_name: { get_input: hq_org_name }
-      #update: true
-      #zone:
-        #name: trust
-        #networks: { get_input: network_name }
-        
-  #untrust_zone:
-    #type: cloudify.versa.nodes.Zone
-    #properties:
-      #versa_config: { get_property: [versa_configuration, versa_config] }
-      #appliance_name: { get_input: appliance_name }
-      #org_name: { get_input: hq_org_name }
-      #update: true
-      #zone:
-        #name: untrust
-        #routing-instance: { get_input: routing_name }
+  trust_zone:
+    type: cloudify.versa.nodes.Zone
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: hq_org_name }
+      update: true
+      zone:
+        name: trust
+        networks: 
+          - { get_input: network_name }
+    relationships:
+      - type: cloudify.versa.router_connected_to_org
+        target: limits
 
   #nat:
     #type: cloudify.versa.nodes.CGNat
@@ -178,7 +173,7 @@ node_templates:
           #- name: nat_range_name
             #low: { get_input: range_low }
             #hight: { get_input: range_high }
-        #routing_instance: { get_input: routing_name }
+        #routing_instance: { get_input: parent_routing_name }
         #provider_org: { get_input: parent_org_name }
       #rule:
         #name: { get_input: nat_rule_name }

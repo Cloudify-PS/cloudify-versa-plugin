@@ -2,6 +2,7 @@ from cloudify import ctx
 from cloudify import exceptions as cfy_exc
 from cloudify.decorators import operation
 import versa_plugin
+from copy import deepcopy
 
 from versa_plugin import with_versa_client
 import versa_plugin.tasks
@@ -18,6 +19,21 @@ from versa_plugin.appliance import ApplianceInterface, NetworkInfo
 
 def is_use_existing():
     return ctx.node.properties.get('use_existing')
+
+
+def reqursive_update(d, u):
+    for k, v in u.iteritems():
+        if isinstance(v, dict):
+            r = reqursive_update(d.get(k, {}), v)
+            d[k] = r
+        elif isinstance(v, list):
+            if isinstance(u[k], list):
+                d[k] = d[k] + u[k]
+            else:
+                d[k] = d[k] + [u[k]]
+        else:
+            d[k] = u[k]
+    return d
 
 
 @operation
@@ -250,10 +266,11 @@ def create_zone(versa_client, **kwargs):
                                                     zone_name)
     if update:
         if zone_exsists:
-            ctx.instance.runtime_properties[zone_name] = zone_exsists
-            versa_plugin.networking.add_to_zone(versa_client,
+            ctx.instance.runtime_properties[zone_name] = deepcopy(zone_exsists)
+            new_zone = reqursive_update(zone_exsists, zone)
+            versa_plugin.networking.update_zone(versa_client,
                                                 appliance_name,
-                                                org_name, zone)
+                                                org_name, new_zone)
     else:
         if zone_exsists:
             raise cfy_exc.NonRecoverableError(
@@ -327,16 +344,6 @@ def create_firewall_rules(versa_client, **kwargs):
         ctx.instance.runtime_properties['rules'][name] = rule
         versa_plugin.firewall.add_rule(versa_client, appliance_name,
                                        org_name, policy_name, rule)
-
-
-def reqursive_update(d, u):
-    for k, v in u.iteritems():
-        if isinstance(v, dict):
-            r = reqursive_update(d.get(k, {}), v)
-            d[k] = r
-        else:
-            d[k] = u[k]
-    return d
 
 
 @operation
