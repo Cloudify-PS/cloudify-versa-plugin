@@ -491,6 +491,7 @@ def create_dhcp_pool(versa_client, **kwargs):
 def delete_dhcp_pool(versa_client, **kwargs):
     if is_use_existing():
         return
+    raise cfy_exc.NonRecoverableError("HTTP error!!")
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
     pool_name = ctx.node.properties['name']
@@ -513,6 +514,18 @@ def create_dhcp_server(versa_client, **kwargs):
     versa_plugin.dhcp.create_server(versa_client, appliance_name, org_name,
                                     server_name, lease_profile, options_profile,
                                     networks, pool_name)
+
+
+@operation
+@with_versa_client
+def delete_dhcp_server(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    server_name = ctx.node.properties['name']
+    versa_plugin.dhcp.delete_server(versa_client, appliance_name, org_name,
+                                    server_name)
 
 
 @operation

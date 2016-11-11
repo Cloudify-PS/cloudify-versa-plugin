@@ -1,9 +1,9 @@
+# This blueprint add and configure network to organization
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-  - https://raw.githubusercontent.com/cloudify-cosmo/tosca-vcloud-plugin/master/plugin.yaml
-  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/dhcp/plugin.yaml
+  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/filter/plugin.yaml
 
 inputs:
     versa_url:
@@ -83,6 +83,18 @@ node_templates:
       - type: cloudify.relationships.connected_to
         target: interface
 
+  limits:
+    type: cloudify.versa.nodes.Limits
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: hq_org_name }
+      networks:
+        - { get_input: network_name }
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: network
+
   dhcp_pool:
     type: cloudify.versa.nodes.DHCPPool
     properties:
@@ -99,6 +111,8 @@ node_templates:
     relationships:
       - type: cloudify.relationships.depends_on
         target: network
+      - type: cloudify.relationships.depends_on
+        target: limits
 
   dhcp_server:
     type: cloudify.versa.nodes.DHCPServer
@@ -116,24 +130,60 @@ node_templates:
       - type: cloudify.versa.dhcp_connected_to_profile
         target: dhcp_pool
 
-  nat:
-    type: cloudify.versa.nodes.CGNat
-    properties:
-      versa_config: { get_property: [versa_configuration, versa_config] }
-      appliance_name: { get_input: appliance_name }
-      org_name: { get_input: hq_org_name }
-      pool:
-        name: { get_input: nat_pool_name }
-        ranges:
-          - name: nat_range_name
-            low: { get_input: range_low }
-            hight: { get_input: range_high }
-        routing_instance: { get_input: routing_name }
-        provider_org: { get_input: parent_org_name }
-      rule:
-        name: { get_input: nat_rule_name }
-        addresses:
-          - { get_input: nat_rule_source_address }
-    relationships:
-      - type: cloudify.versa.cgnat_connected_to_org
-        target: dhcp_server
+  #routing:
+    #type: cloudify.versa.nodes.Router
+    #properties:
+      #versa_config: { get_property: [versa_configuration, versa_config] }
+      #appliance_name: { get_input: appliance_name }
+      #org_name: { get_input: parent_org_name }
+      #name: { get_input: parent_routing_name }
+      #update: true
+      #networks:
+        #- { get_input: network_name }
+    #relationships:
+      #- type: cloudify.versa.router_connected_to_org
+        #target: appliance
+
+  #trust_zone:
+    #type: cloudify.versa.nodes.Zone
+    #properties:
+      #versa_config: { get_property: [versa_configuration, versa_config] }
+      #appliance_name: { get_input: appliance_name }
+      #org_name: { get_input: hq_org_name }
+      #update: true
+      #zone:
+        #name: trust
+        #networks: { get_input: network_name }
+        
+  #untrust_zone:
+    #type: cloudify.versa.nodes.Zone
+    #properties:
+      #versa_config: { get_property: [versa_configuration, versa_config] }
+      #appliance_name: { get_input: appliance_name }
+      #org_name: { get_input: hq_org_name }
+      #update: true
+      #zone:
+        #name: untrust
+        #routing-instance: { get_input: routing_name }
+
+  #nat:
+    #type: cloudify.versa.nodes.CGNat
+    #properties:
+      #versa_config: { get_property: [versa_configuration, versa_config] }
+      #appliance_name: { get_input: appliance_name }
+      #org_name: { get_input: hq_org_name }
+      #pool:
+        #name: { get_input: nat_pool_name }
+        #ranges:
+          #- name: nat_range_name
+            #low: { get_input: range_low }
+            #hight: { get_input: range_high }
+        #routing_instance: { get_input: routing_name }
+        #provider_org: { get_input: parent_org_name }
+      #rule:
+        #name: { get_input: nat_rule_name }
+        #addresses:
+          #- { get_input: nat_rule_source_address }
+    #relationships:
+      #- type: cloudify.versa.cgnat_connected_to_org
+        #target: dhcp_server

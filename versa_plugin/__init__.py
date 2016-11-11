@@ -1,6 +1,7 @@
 import os
 from functools import wraps
 from cloudify import ctx
+from cloudify import exceptions as cfy_exc
 from versa_plugin.versaclient import VersaClient
 
 VERSA_CONFIG = 'versa_config'

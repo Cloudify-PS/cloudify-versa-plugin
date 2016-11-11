@@ -108,3 +108,13 @@ def create_server(client, appliance, org_name, server_name,
                 "log-new-allocations": True,
                 "log-renewals": False}}}
     client.post(url, json.dumps(data), JSON, codes.created)
+
+
+def delete_server(client, appliance, org_name, server_name):
+    url = '/api/config/devices/device/{}'\
+        '/config/orgs/org-services/{}'\
+        '/dhcp/dhcp4-server-and-relay'\
+        '/service-profiles/dhcp4-service-profile/{}'.format(appliance,
+                                                            org_name,
+                                                            server_name)
+    client.delete(url, codes.no_content)

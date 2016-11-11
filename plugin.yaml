@@ -418,6 +418,9 @@ node_types:
         create:
           implementation: versa.versa_plugin.operations.create_dhcp_server
           inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_dhcp_server
+          inputs: {}
 
   cloudify.versa.nodes.Network:
     derived_from: cloudify.nodes.SoftwareComponent
