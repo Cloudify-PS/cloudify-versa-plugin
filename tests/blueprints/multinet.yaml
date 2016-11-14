@@ -461,7 +461,8 @@ node_templates:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_property: [hq_organization, name]}
-      name: { get_input: firewall_policy_name }
+      policy:
+        name: { get_input: firewall_policy_name }
     relationships:
       - type: cloudify.versa.firewall_connected_to_org
         target: hq_associated

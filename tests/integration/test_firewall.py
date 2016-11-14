@@ -45,7 +45,7 @@ policy = """
     appliance_name: $appliance_name
     org_name: $org_name
     policy:
-        name: test_policy_name
+        name: tdc_firewall_policy
         description: descr
     """
 
@@ -103,7 +103,7 @@ rules_with_filter = """
 
 
 class FirewallTestCase(base.BaseTest):
-    @unittest.skip("")
+    # @unittest.skip("")
     def test_add_policy(self):
         self.update_node_properties(policy,
                                     "appliance_name org_name")
