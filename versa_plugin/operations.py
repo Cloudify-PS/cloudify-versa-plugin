@@ -309,7 +309,7 @@ def create_firewall_policy(versa_client, **kwargs):
         return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
-    policy = ctx.node.properties['policy']
+    policy = ctx.node.properties['name']
     versa_plugin.firewall.add_policy(versa_client, appliance_name,
                                      org_name, policy)
 

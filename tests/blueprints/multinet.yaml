@@ -420,7 +420,7 @@ node_templates:
       update: true
       zone:
         name: untrust
-        routing_instance:
+        routing-instance:
           - { get_input: parent_routing_name }
     relationships:
       - type: cloudify.relationships.depends_on
