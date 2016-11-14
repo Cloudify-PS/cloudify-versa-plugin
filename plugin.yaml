@@ -227,8 +227,8 @@ node_types:
         default: ""
       org_name:
         default: ""
-      name:
-        default: ""
+      policy:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
