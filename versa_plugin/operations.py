@@ -28,9 +28,9 @@ def reqursive_update(d, u):
             d[k] = r
         elif isinstance(v, list):
             if isinstance(u[k], list):
-                d[k] = d[k] + u[k]
+                d[k] = d.setdefault(k, []) + u[k]
             else:
-                d[k] = d[k] + [u[k]]
+                d[k] = d.setdefault(k, []) + [u[k]]
         else:
             d[k] = u[k]
     return d

@@ -33,7 +33,7 @@ zone_update = """
     org_name: $org_name
     update: true
     zone:
-        name: host
+        name: untrust
         routing-instance:
             - parent_router
     """
@@ -73,6 +73,18 @@ router = """
     name: test_router
     """
 
+limits = """
+    use_existing: false
+    appliance_name: $appliance_name
+    org_name: $org_name
+    dhcp_profile:   tdc_dhcp_profile
+    routes:
+      - parent_router
+      - hq_router
+    provider_orgs:
+      - vcpe1_parent_org
+    """
+
 
 class NetworkingTestCase(base.BaseTest):
     @unittest.skip("")
@@ -82,7 +94,7 @@ class NetworkingTestCase(base.BaseTest):
         versa_plugin.operations.create_zone()
         versa_plugin.operations.delete_zone()
 
-    @unittest.skip("")
+    # @unittest.skip("")
     def test_update_zone(self):
         self.update_node_properties(zone_update,
                                     "appliance_name org_name")
@@ -122,3 +134,9 @@ class NetworkingTestCase(base.BaseTest):
                                     "appliance_name org_name")
         versa_plugin.operations.create_router()
         versa_plugin.operations.delete_router()
+
+    @unittest.skip("")
+    def test_limits(self):
+        self.update_node_properties(limits,
+                                    "appliance_name org_name")
+        versa_plugin.operations.insert_to_limits()
