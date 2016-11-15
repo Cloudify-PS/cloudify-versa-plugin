@@ -1,9 +1,9 @@
-# This blueprint add and configure network to organization
+#Add and configure network with DHCP,DNS,Firewall to exsistent organization
+#Organization must have one free interface
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/filter/plugin.yaml
+  - imports.yaml
 
 inputs:
     versa_url:

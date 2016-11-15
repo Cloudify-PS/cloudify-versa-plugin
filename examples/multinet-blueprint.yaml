@@ -1,9 +1,11 @@
+#Create enviroment with networks and VMs.
+#Then create appliance with 2 organizations on flexvnf.
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - imports.yaml
   - networks.yaml
-  - vm-blueprint.yaml
+  - vms.yaml
   - multinet.yaml
  
 inputs:

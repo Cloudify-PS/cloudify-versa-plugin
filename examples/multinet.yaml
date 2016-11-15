@@ -1,3 +1,5 @@
+#Create appliance with 1 parent organization, connected to routed network
+#and 1 child organization with 4 connected networks
 tosca_definitions_version: cloudify_dsl_1_3
 
 #

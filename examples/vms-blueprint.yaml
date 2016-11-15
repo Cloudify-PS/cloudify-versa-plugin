@@ -1,9 +1,10 @@
+#Create VMs, attached to neworks
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - imports.yaml
   - networks.yaml
-  - vm-blueprint.yaml
+  - vms.yaml
  
 inputs:
 #

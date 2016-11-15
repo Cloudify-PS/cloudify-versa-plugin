@@ -1,3 +1,4 @@
+#Create 5 VMs for testing. 1 flexvnf and 4 clients
 tosca_definitions_version: cloudify_dsl_1_3
 
 node_templates:
