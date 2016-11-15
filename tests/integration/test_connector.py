@@ -11,43 +11,64 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import unittest
+import base
 import requests
-from versa_plugin.versaclient import VersaClient
-import versa_plugin.connectors
-import configuration
-from versa_plugin.connectors import Network
+import unittest
+import versa_plugin.operations
+import get_configuration as get_conf
 requests.packages.urllib3.disable_warnings()
 
+pool = """
+    instance:
+        name: $pool_name
+        ip-address: 1.2.3.4
+      """
 
-class ConnectorTestCase(unittest.TestCase):
-    def setUp(self):
-        self.config = configuration.data
+organization = """
+      organization:
+        name: $cms_name
+        resource-pool:
+          instances:
+            - $pool_name
+        org-networks:
+          org-network:
+            - name: test_net1
+              subnet: 10.1.0.0
+              mask: 255.255.255.0
+              ipaddress-allocation-mode: manual
+            - name: test_net2
+              subnet: 10.2.0.0
+              mask: 255.255.255.0
+              ipaddress-allocation-mode: manual
+"""
 
-    def test_add_delete_resource_pool(self):
-        name = "Test_resource"
-        address = "192.168.0.1"
-        with VersaClient(self.config, '/tmp/versa.key') as client:
-            versa_plugin.connectors.add_resource_pool(client, name, address)
-            versa_plugin.connectors.delete_resource_pool(client, name)
 
-    def notest_add_delete_organization(self):
-        org_name = "Test orgname"
-        resource = "Test_resource"
-        address = "192.168.0.1"
-        networks = [Network("versa2", "10.3.0.0", "255.255.255.0")]
-        with VersaClient(self.config) as client:
-            versa_plugin.connectors.add_resource_pool(client, resource, address)
-            versa_plugin.connectors.add_organization(client,
-                                                     org_name,
-                                                     networks,
-                                                     resource)
-            versa_plugin.connectors.delete_organization(client, org_name)
-            versa_plugin.connectors.delete_resource_pool(client, resource)
+class ConnectorTestCase(base.BaseTest):
+    # @unittest.skip("")
+    def test_resource_pool(self):
+        pool_name = self.gen_name('pool')
+        self.update_node_properties(pool, "", pool_name=pool_name)
+        self.assertFalse(get_conf.pool(pool_name))
+        versa_plugin.operations.create_resource_pool()
+        self.assertTrue(get_conf.pool(pool_name))
+        versa_plugin.operations.delete_resource_pool()
+        self.assertFalse(get_conf.pool(pool_name))
 
-    def notest_get_organization(self):
-        with VersaClient(self.config) as client:
-            orgs = versa_plugin.connectors.get_organization(client)
-            print orgs
-            self.assertTrue(orgs)
+    # @unittest.skip("")
+    def test_organization(self):
+        pool_name = self.gen_name('pool')
+        cms_name = self.gen_name('cms')
+        self.update_node_properties(pool, "", pool_name=pool_name)
+        self.assertFalse(get_conf.pool(pool_name))
+        versa_plugin.operations.create_resource_pool()
+        self.save_properties()
+        self.update_node_properties(organization, "", cms_name=cms_name,
+                                    pool_name=pool_name)
+        self.assertFalse(get_conf.cms_organization(cms_name))
+        versa_plugin.operations.create_cms_local_organization()
+        self.assertTrue(get_conf.cms_organization(cms_name))
+        versa_plugin.operations.delete_cms_local_organization()
+        self.assertFalse(get_conf.cms_organization(cms_name))
+        self.restore_properties()
+        versa_plugin.operations.delete_resource_pool()
+        self.assertFalse(get_conf.pool(pool_name))

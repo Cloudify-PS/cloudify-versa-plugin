@@ -20,18 +20,20 @@ node_types:
         default: false
       versa_config:
         default: {}
-      name:
-        default: ""
-      ip_address:
-        default: ""
+      instance:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_resource_pool
-          inputs: {}
+          inputs: 
+            instance:
+              default: {}
         delete:
           implementation: versa.versa_plugin.operations.delete_resource_pool
-          inputs: {}
+          inputs:
+            instance: 
+              default: {}
 
   cloudify.versa.nodes.CMSLocalOrganization:
     derived_from: cloudify.nodes.Root
@@ -40,20 +42,20 @@ node_types:
         default: false
       versa_config:
         default: {}
-      name:
-        default: ""
-      networks:
-        default: {}
-      resources:
+      organization:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_cms_local_organization
-          inputs: {}
+          inputs: 
+            organization:
+              default: {}
         delete:
           implementation: versa.versa_plugin.operations.delete_cms_local_organization
-          inputs: {}
+          inputs: 
+            organization:
+              default: {}
 
   cloudify.versa.nodes.Organization:
     derived_from: cloudify.nodes.Root
@@ -62,20 +64,20 @@ node_types:
         default: false
       versa_config:
         default: {}
-      name:
-        default: ""
-      parent:
-        default: ""
-      cms_org_name:
-        default: ""
+      organization:
+        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_organization
-          inputs: {}
+          inputs: 
+            organization:
+              default: {}
         delete:
           implementation: versa.versa_plugin.operations.delete_organization
-          inputs: {}
+          inputs: 
+            organization:
+              default: {}
 
   cloudify.versa.nodes.Appliance:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -84,22 +86,22 @@ node_types:
         default: false
       versa_config:
         default: {}
-      appliance_name:
-        default: ""
-      management_ip:
-        default: ""
-      appliance_owner:
+      appliance:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_appliance
-          inputs: {}
+          inputs:
+            appliance:
+              default: {}
         delete:
           implementation: versa.versa_plugin.operations.delete_appliance
-          inputs: {}
+          inputs:
+            appliance:
+              default: {}
 
-  cloudify.versa.nodes.Associated_organization:
+  cloudify.versa.nodes.AssociatedOrganization:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
       use_existing:

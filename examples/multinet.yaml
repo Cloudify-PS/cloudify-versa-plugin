@@ -27,7 +27,6 @@ node_templates:
     type: cloudify.versa.nodes.ResourcePool
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      name: { get_input: pool_name }
     relationships:
       - type: cloudify.versa.pool_connected_to_vm
         target: flexvm
@@ -35,28 +34,37 @@ node_templates:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            ip_address: { get_attribute: [flexvm, ip] }
+            instance:
+              name: { get_input: pool_name }
+              ip-address: { get_attribute: [flexvm, ip] }
 
   cms_organization:
     type: cloudify.versa.nodes.CMSLocalOrganization
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      name: { get_input: cms_org_name }
-      networks:
-        - name: { get_property: [external_network, resource_id] }
-          subnet: { get_input: ext_network_subnet }
-          mask: { get_input: ext_network_mask }
-        - name: { get_property: [hq_network, resource_id] }
-          subnet: { get_input: hq_network_subnet }
-          mask: { get_input: hq_network_mask }
-        - name: { get_property: [branch1_network, resource_id] }
-          subnet: { get_input: branch1_network_subnet }
-          mask: { get_input: branch1_network_mask }
-        - name: { get_property: [branch2_network, resource_id] }
-          subnet: { get_input: branch2_network_subnet }
-          mask: { get_input: branch2_network_mask }
-      resources:
-        - { get_property: [resource_pool, name] }
+      organization:
+        name: { get_input: cms_org_name }
+        resource-pool:
+          instances: 
+            - { get_input: pool_name }
+        org-networks:
+          org-network:
+            - name: { get_property: [external_network, resource_id] }
+              subnet: { get_input: ext_network_subnet }
+              mask: { get_input: ext_network_mask }
+              ipaddress-allocation-mode: manual
+            - name: { get_property: [hq_network, resource_id] }
+              subnet: { get_input: hq_network_subnet }
+              mask: { get_input: hq_network_mask }
+              ipaddress-allocation-mode: manual
+            - name: { get_property: [branch1_network, resource_id] }
+              subnet: { get_input: branch1_network_subnet }
+              mask: { get_input: branch1_network_mask }
+              ipaddress-allocation-mode: manual
+            - name: { get_property: [branch2_network, resource_id] }
+              subnet: { get_input: branch2_network_subnet }
+              mask: { get_input: branch2_network_mask }
+              ipaddress-allocation-mode: manual
     relationships:
       - type: cloudify.versa.cms_org_connected_to_pool
         target: resource_pool
@@ -68,9 +76,13 @@ node_templates:
     type: cloudify.versa.nodes.Organization
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      name: { get_input: parent_org_name }
-      parent: ""
-      cms_org_name: { get_input: cms_org_name }
+      organization:
+        name: { get_input: parent_org_name }
+        parent-org: none
+        subscription-plan: Default-All-Services-Plan
+        cms-orgs: 
+            name: { get_input: cms_org_name }
+            cms-connector: local
     relationships:
       - type: cloudify.versa.nms_org_connected_to_cms_org
         target: cms_organization
@@ -79,9 +91,13 @@ node_templates:
     type: cloudify.versa.nodes.Organization
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      name: { concat:[get_input: hq_name, "_org"] }
-      parent: { get_input: parent_org_name }
-      cms_org_name: { get_input: cms_org_name }
+      organization:
+        name: { concat:[get_input: hq_name, "_org"] }
+        parent-org: { get_input: parent_org_name }
+        subscription-plan: Default-All-Services-Plan
+        cms-orgs: 
+            name: { get_input: cms_org_name }
+            cms-connector: local
     relationships:
       - type: cloudify.versa.nms_org_connected_to_cms_org
         target: cms_organization
@@ -95,20 +111,20 @@ node_templates:
     type: cloudify.versa.nodes.Appliance
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      appliance_name: { get_input: appliance_name }
-      appliance_owner:
-        nms_org_name: { get_input: parent_org_name }
-        cms_org_name: { get_input: cms_org_name }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            management_ip: { get_attribute: [flexvm, ip] }
-            appliance_owner:
-              networks:
-                - name: { get_property: [external_network, resource_id] }
-                  ip_address: { get_input: external_ip }
-                  interface: { get_input: ext_interface }
+            appliance:
+              appliance_name: { get_input: appliance_name }
+              management_ip: { get_attribute: [flexvm, ip] }
+              appliance_owner:
+                nms_org_name: { get_input: parent_org_name }
+                cms_org_name: { get_input: cms_org_name }
+                networks:
+                  - name: { get_property: [external_network, resource_id] }
+                    ip_address: { get_input: external_ip }
+                    interface: { get_input: ext_interface }
     relationships:
       - type: cloudify.versa.organization_connected_to_appliance
         target: parent_organization
@@ -116,7 +132,7 @@ node_templates:
         target: hq_organization
 
   hq_associated:
-    type: cloudify.versa.nodes.Associated_organization
+    type: cloudify.versa.nodes.AssociatedOrganization
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }

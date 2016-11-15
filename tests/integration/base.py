@@ -17,6 +17,8 @@ import configuration
 import yaml
 from string import Template
 from copy import deepcopy
+from random import choice
+from string import ascii_uppercase
 
 
 class BaseTest(unittest.TestCase):
@@ -38,12 +40,17 @@ class BaseTest(unittest.TestCase):
     def tearDown(self):
         mock.patch.stopall()
 
-    def update_node_properties(self, template, fields):
-        kwargs = {}
+    def gen_name(self, prefix):
+        suffix = ''.join(choice(ascii_uppercase) for i in range(5))
+        return "{}-{}".format(prefix, suffix)
+
+    def update_node_properties(self, base_template, fields, **kwargs):
+        template = Template(base_template).substitute(kwargs)
+        default_config = {}
         nc = configuration.Node
         for field in fields.split():
-            kwargs[field] = getattr(nc, field)
-        node_config = Template(template).substitute(kwargs)
+            default_config[field] = getattr(nc, field)
+        node_config = Template(template).substitute(default_config)
         self.fake_ctx.node.properties = {'versa_config': self.config}
         self.fake_ctx.node.properties.update(yaml.load(node_config))
         self.fake_ctx.instance.runtime_properties = {}

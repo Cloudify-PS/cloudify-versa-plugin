@@ -10,10 +10,10 @@ import versa_plugin.networking
 import versa_plugin.dhcp
 import versa_plugin.firewall
 import versa_plugin.cgnat
+import versa_plugin.connectors
 from versa_plugin.networking import Routing
 from versa_plugin.networking import Unit
 from versa_plugin.cgnat import AddressRange
-from versa_plugin.connectors import Network
 from versa_plugin.appliance import ApplianceInterface, NetworkInfo
 
 
@@ -36,18 +36,18 @@ def reqursive_update(d, u):
     return d
 
 
+def _get_configuration(key, kwargs):
+    value = ctx.node.properties.get(key, {})
+    value.update(kwargs.get(key, {}))
+    return value
+
 @operation
 @with_versa_client
 def create_resource_pool(versa_client, **kwargs):
     if is_use_existing():
         return
-    if kwargs.get('ip_address'):
-        resource_address = kwargs['ip_address']
-    else:
-        resource_address = ctx.node.properties['ip_address']
-    resource = ctx.node.properties['name']
-    versa_plugin.connectors.add_resource_pool(versa_client, resource,
-                                              resource_address)
+    instance = _get_configuration('instance', kwargs)
+    versa_plugin.connectors.add_resource_pool(versa_client, instance)
 
 
 @operation
@@ -55,8 +55,9 @@ def create_resource_pool(versa_client, **kwargs):
 def delete_resource_pool(versa_client, **kwargs):
     if is_use_existing():
         return
-    resource = ctx.node.properties['name']
-    versa_plugin.connectors.delete_resource_pool(versa_client, resource)
+    instance = _get_configuration('instance', kwargs)
+    name = instance['name']
+    versa_plugin.connectors.delete_resource_pool(versa_client, name)
 
 
 @operation
@@ -64,15 +65,9 @@ def delete_resource_pool(versa_client, **kwargs):
 def create_cms_local_organization(versa_client, **kwargs):
     if is_use_existing():
         return
-    cms_org_name = ctx.node.properties['name']
-    resource = ctx.node.properties['resources'][0]
-    networks = ctx.node.properties['networks']
-    net_list = [Network(net['name'], net['subnet'],
-                        net['mask']) for net in networks]
+    organization = _get_configuration('organization', kwargs)
     versa_plugin.connectors.add_organization(versa_client,
-                                             cms_org_name,
-                                             net_list,
-                                             resource)
+                                             organization)
 
 
 @operation
@@ -80,7 +75,8 @@ def create_cms_local_organization(versa_client, **kwargs):
 def delete_cms_local_organization(versa_client, **kwargs):
     if is_use_existing():
         return
-    cms_org_name = ctx.node.properties['name']
+    organization = _get_configuration('organization', kwargs)
+    cms_org_name = organization['name']
     versa_plugin.connectors.delete_organization(versa_client,
                                                 cms_org_name)
 
@@ -90,13 +86,9 @@ def delete_cms_local_organization(versa_client, **kwargs):
 def create_organization(versa_client, **kwargs):
     if is_use_existing():
         return
-    nms_org_name = ctx.node.properties['name']
-    cms_org_name = ctx.node.properties['cms_org_name']
-    parent = ctx.node.properties['parent']
+    organization = _get_configuration('organization', kwargs)
     versa_plugin.appliance.add_organization(versa_client,
-                                            nms_org_name,
-                                            parent,
-                                            cms_org_name)
+                                            organization)
 
 
 @operation
@@ -104,7 +96,8 @@ def create_organization(versa_client, **kwargs):
 def delete_organization(versa_client, **kwargs):
     if is_use_existing():
         return
-    nms_org_name = ctx.node.properties['name']
+    organization = _get_configuration('organization', kwargs)
+    nms_org_name = organization['name']
     versa_plugin.appliance.delete_organization(versa_client,
                                                nms_org_name)
 
@@ -114,16 +107,13 @@ def delete_organization(versa_client, **kwargs):
 def create_appliance(versa_client, **kwargs):
     if is_use_existing():
         return
-    name = ctx.node.properties['appliance_name']
-    if kwargs.get('management_ip'):
-        management_ip = kwargs['management_ip']
-    else:
-        management_ip = ctx.node.properties['management_ip']
-    config = ctx.node.properties['appliance_owner']
+    appliance = _get_configuration('appliance', kwargs)
+    name = appliance['appliance_name']
+    management_ip = appliance['management_ip']
+    config = appliance['appliance_owner']
     nms_org_name = config['nms_org_name']
     cms_org_name = config['cms_org_name']
-    networks_inputs = kwargs.get('appliance_owner', {}).get('networks')
-    networks = networks_inputs if networks_inputs else config['networks']
+    networks = config['networks']
     app_networks = [ApplianceInterface(net['name'],
                                        net['ip_address'],
                                        net['interface']) for net in networks]
@@ -140,7 +130,8 @@ def create_appliance(versa_client, **kwargs):
 def delete_appliance(versa_client, **kwargs):
     if is_use_existing():
         return
-    name = ctx.node.properties['appliance_name']
+    appliance = _get_configuration('appliance', kwargs)
+    name = appliance['appliance_name']
     task = versa_plugin.appliance.delete_appliance(versa_client, name)
     versa_plugin.tasks.wait_for_task(versa_client, task)
 

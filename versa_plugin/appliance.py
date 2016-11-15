@@ -21,33 +21,21 @@ def _get_task_id(task_info):
     return task_info['output']['result']['task']['task-id']
 
 
-def add_organization(client, org_name, parent, cms_org_name):
+def add_organization(client, organization):
     url = "/api/config/nms/provider/organizations"
     org_uuid = str(uuid.uuid4())
+    cms_org_name = organization['cms-orgs']['name']
     cms_org_uuid = versa_plugin.connectors.get_organization_uuid(client,
                                                                  cms_org_name)
-    if not parent:
-        parent = 'none'
     while True:
         org_id = random.randint(1, 1000)
         if not is_organization_id_exists(client, org_id):
             break
-    xmldata = """
-    <organization>
-        <uuid>{0}</uuid>
-        <id>{1}</id>
-        <name>{2}</name>
-        <right>2</right>
-        <parent-org>{3}</parent-org>
-        <subscription-plan>Default-All-Services-Plan</subscription-plan>
-        <cms-orgs>
-            <uuid>{4}</uuid>
-            <name>{5}</name>
-            <cms-connector>local</cms-connector>
-        </cms-orgs>
-     </organization>""".format(org_uuid, org_id, org_name,
-                               parent, cms_org_uuid, cms_org_name)
-    client.post(url, xmldata, XML, codes.created)
+    organization['uuid'] = org_uuid
+    organization['id'] = org_id
+    organization['cms-orgs']['uuid'] = cms_org_uuid
+    data = {'organization': organization}
+    client.post(url, json.dumps(data), JSON, codes.created)
     return org_uuid
 
 

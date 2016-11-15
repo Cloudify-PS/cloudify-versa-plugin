@@ -4,19 +4,9 @@ from versa_plugin.versaclient import JSON
 import uuid
 
 
-class Network:
-    def __init__(self, name, subnet, mask):
-        self.name = name
-        self.subnet = subnet
-        self.mask = mask
-
-
-def add_resource_pool(client, name, ip_address):
+def add_resource_pool(client, instance):
     url = "/api/config/cms/local/instances"
-    data = {
-        "instance": {
-            "name": name,
-            "ip-address": ip_address}}
+    data = {"instance": instance}
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
@@ -25,27 +15,13 @@ def delete_resource_pool(client, name):
     client.delete(url, codes.no_content)
 
 
-def add_organization(client, org_name, networks, resource):
+def add_organization(client, organization):
     url = "/api/config/cms/local/organizations"
     org_uuid = str(uuid.uuid4())
-    network_list = []
-    for network in networks:
-        net = {
-            "uuid": str(uuid.uuid4()),
-            "name": network.name,
-            "subnet": network.subnet,
-            "mask": network.mask,
-            "ipaddress-allocation-mode": "manual"}
-        network_list.append(net)
-
-    data = {
-        "organization": {
-            "uuid": org_uuid,
-            "name": org_name,
-            "description": 'Created by cloudify',
-            "org-networks": {
-                "org-network": network_list},
-            "resource-pool": {"instances": resource}}}
+    for network in organization['org-networks']['org-network']:
+        network['uuid'] = str(uuid.uuid4())
+    organization['uuid'] = org_uuid
+    data = {"organization": organization}
     client.post(url, json.dumps(data), JSON, codes.created)
     return org_uuid
 
@@ -76,12 +52,3 @@ def get_organization(client, name):
         if name == org['name']:
             return org
     return None
-
-
-def get_network_information(client, org_uuid):
-    url = '/api/config/cms/local/organizations/'\
-        'organization/{0}/org-networks/'\
-        'org-network?select=uuid;ipaddress-allocation-mode;'\
-        'name;subnet;mask;vxlan'.format(org_uuid)
-    result = client.get(url, None, None, codes.ok)
-    return result
