@@ -5,16 +5,17 @@ import versa_plugin
 from copy import deepcopy
 
 from versa_plugin import with_versa_client
-import versa_plugin.tasks
-import versa_plugin.networking
-import versa_plugin.dhcp
-import versa_plugin.firewall
+from versa_plugin import get_mandatory
+import versa_plugin.appliance
 import versa_plugin.cgnat
 import versa_plugin.connectors
+import versa_plugin.dhcp
+import versa_plugin.firewall
+import versa_plugin.networking
+import versa_plugin.tasks
 from versa_plugin.networking import Routing
 from versa_plugin.networking import Unit
 from versa_plugin.cgnat import AddressRange
-from versa_plugin.appliance import ApplianceInterface, NetworkInfo
 
 
 def is_use_existing():
@@ -39,7 +40,12 @@ def reqursive_update(d, u):
 def _get_configuration(key, kwargs):
     value = ctx.node.properties.get(key, {})
     value.update(kwargs.get(key, {}))
-    return value
+    if value:
+        return value
+    else:
+        raise cfy_exc.NonRecoverableError(
+            "Configuration parameter {0} is absent".format(key))
+
 
 @operation
 @with_versa_client
@@ -56,7 +62,7 @@ def delete_resource_pool(versa_client, **kwargs):
     if is_use_existing():
         return
     instance = _get_configuration('instance', kwargs)
-    name = instance['name']
+    name = get_mandatory(instance, 'name')
     versa_plugin.connectors.delete_resource_pool(versa_client, name)
 
 
@@ -66,8 +72,7 @@ def create_cms_local_organization(versa_client, **kwargs):
     if is_use_existing():
         return
     organization = _get_configuration('organization', kwargs)
-    versa_plugin.connectors.add_organization(versa_client,
-                                             organization)
+    versa_plugin.connectors.add_organization(versa_client, organization)
 
 
 @operation
@@ -76,9 +81,8 @@ def delete_cms_local_organization(versa_client, **kwargs):
     if is_use_existing():
         return
     organization = _get_configuration('organization', kwargs)
-    cms_org_name = organization['name']
-    versa_plugin.connectors.delete_organization(versa_client,
-                                                cms_org_name)
+    name = get_mandatory(organization, 'name')
+    versa_plugin.connectors.delete_organization(versa_client, name)
 
 
 @operation
@@ -87,8 +91,7 @@ def create_organization(versa_client, **kwargs):
     if is_use_existing():
         return
     organization = _get_configuration('organization', kwargs)
-    versa_plugin.appliance.add_organization(versa_client,
-                                            organization)
+    versa_plugin.appliance.add_organization(versa_client, organization)
 
 
 @operation
@@ -97,9 +100,8 @@ def delete_organization(versa_client, **kwargs):
     if is_use_existing():
         return
     organization = _get_configuration('organization', kwargs)
-    nms_org_name = organization['name']
-    versa_plugin.appliance.delete_organization(versa_client,
-                                               nms_org_name)
+    name = get_mandatory(organization, 'name')
+    versa_plugin.appliance.delete_organization(versa_client, name)
 
 
 @operation
@@ -107,22 +109,11 @@ def delete_organization(versa_client, **kwargs):
 def create_appliance(versa_client, **kwargs):
     if is_use_existing():
         return
-    appliance = _get_configuration('appliance', kwargs)
-    name = appliance['appliance_name']
-    management_ip = appliance['management_ip']
-    config = appliance['appliance_owner']
-    nms_org_name = config['nms_org_name']
-    cms_org_name = config['cms_org_name']
-    networks = config['networks']
-    app_networks = [ApplianceInterface(net['name'],
-                                       net['ip_address'],
-                                       net['interface']) for net in networks]
-    versa_plugin.appliance.wait_for_device(versa_client, management_ip)
-    task = versa_plugin.appliance.add_appliance(versa_client,
-                                                management_ip, name,
-                                                nms_org_name, cms_org_name,
-                                                app_networks)
-    versa_plugin.tasks.wait_for_task(versa_client, task)
+    device = _get_configuration('device', kwargs)
+    management_ip = get_mandatory(device, 'mgmt-ip')
+    versa_plugin.appliance.wait_for_device(versa_client, management_ip, ctx)
+    task = versa_plugin.appliance.add_appliance(versa_client, device)
+    versa_plugin.tasks.wait_for_task(versa_client, task, ctx)
 
 
 @operation
@@ -130,10 +121,10 @@ def create_appliance(versa_client, **kwargs):
 def delete_appliance(versa_client, **kwargs):
     if is_use_existing():
         return
-    appliance = _get_configuration('appliance', kwargs)
-    name = appliance['appliance_name']
+    device = _get_configuration('device', kwargs)
+    name = get_mandatory(device, 'name')
     task = versa_plugin.appliance.delete_appliance(versa_client, name)
-    versa_plugin.tasks.wait_for_task(versa_client, task)
+    versa_plugin.tasks.wait_for_task(versa_client, task, ctx)
 
 
 @operation
@@ -141,22 +132,17 @@ def delete_appliance(versa_client, **kwargs):
 def associate_organization(versa_client, **kwargs):
     if is_use_existing():
         return
-    appliance = ctx.node.properties['appliance_name']
-    org = ctx.node.properties['organization']
-    nms_org_name = org['nms_org_name']
-    networks_inputs = kwargs.get('organization', {}).get('networks')
-    nets = networks_inputs if networks_inputs else org['networks']
-    net_info = [NetworkInfo(net['name'], net['parent_interface'],
-                            net['ip_address'], net['mask'],
-                            net['unit']) for net in nets]
+    organization = _get_configuration('organization', kwargs)
+    appliance = get_mandatory(organization, 'appliance')
+    net_info = get_mandatory(organization, 'networking-info')
     for net in net_info:
+        interface = get_mandatory(get_mandatory(net, 'network-info'),
+                                  'parent-interface')
         versa_plugin.networking.create_interface(versa_client, appliance,
-                                                 net.parent)
+                                                 interface)
     task = versa_plugin.appliance.associate_organization(versa_client,
-                                                         appliance,
-                                                         nms_org_name,
-                                                         net_info)
-    versa_plugin.tasks.wait_for_task(versa_client, task)
+                                                         organization)
+    versa_plugin.tasks.wait_for_task(versa_client, task, ctx)
 
 
 @operation

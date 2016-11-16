@@ -44,6 +44,9 @@ class BaseTest(unittest.TestCase):
         suffix = ''.join(choice(ascii_uppercase) for i in range(5))
         return "{}-{}".format(prefix, suffix)
 
+    def yaml_to_dict(self, template, **kwargs):
+        return yaml.load(Template(template).substitute(kwargs))
+
     def update_node_properties(self, base_template, fields, **kwargs):
         template = Template(base_template).substitute(kwargs)
         default_config = {}
@@ -52,7 +55,8 @@ class BaseTest(unittest.TestCase):
             default_config[field] = getattr(nc, field)
         node_config = Template(template).substitute(default_config)
         self.fake_ctx.node.properties = {'versa_config': self.config}
-        self.fake_ctx.node.properties.update(yaml.load(node_config))
+        if node_config:
+            self.fake_ctx.node.properties.update(yaml.load(node_config))
         self.fake_ctx.instance.runtime_properties = {}
 
     def save_properties(self):

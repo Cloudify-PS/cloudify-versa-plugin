@@ -115,16 +115,28 @@ node_templates:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
-            appliance:
-              appliance_name: { get_input: appliance_name }
-              management_ip: { get_attribute: [flexvm, ip] }
-              appliance_owner:
-                nms_org_name: { get_input: parent_org_name }
-                cms_org_name: { get_input: cms_org_name }
-                networks:
-                  - name: { get_property: [external_network, resource_id] }
-                    ip_address: { get_input: external_ip }
-                    interface: { get_input: ext_interface }
+            device:
+              mgmt-ip: { get_attribute: [flexvm, ip] }
+              name: { get_input: appliance_name }
+              org: { get_input: parent_org_name }
+              cmsorg: { get_input: cms_org_name }
+              type: service-vnf
+              networking-info:
+                  - network-info:
+                      network-name: { get_property: [external_network, resource_id] }
+                      ip-address: { get_input: external_ip }
+                      interface: { get_input: ext_interface }
+              snglist:
+                  - sng:
+                      name: Default_All_Services
+                      isPartOfVCSN: true
+                      services:
+                          - cgnat
+                          - nextgen-firewall
+              subscription:
+                  solution-tier: nextgen-firewall
+                  bandwidth: 100
+                  is-analytics-enabled: true
     relationships:
       - type: cloudify.versa.organization_connected_to_appliance
         target: parent_organization
@@ -135,31 +147,47 @@ node_templates:
     type: cloudify.versa.nodes.AssociatedOrganization
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      appliance_name: { get_input: appliance_name }
-      organization:
-        nms_org_name: { get_property: [hq_organization, name]}
-        parent: { get_input: parent_org_name }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           inputs:
             organization:
-              networks:
-                - name: { get_property: [hq_network, resource_id] }
-                  parent_interface: { get_input: hq_interface }
-                  ip_address: { get_attribute: [flexvm, networks, get_property:[hq_network, resource_id] ] }
-                  mask: { get_input: hq_network_mask }
-                  unit: { get_input: unit }
-                - name: { get_property: [branch1_network, resource_id] }
-                  parent_interface: { get_input: branch1_interface }
-                  ip_address: { get_attribute: [flexvm, networks, get_property:[branch1_network, resource_id] ] }
-                  mask: { get_input: branch1_network_mask }
-                  unit: { get_input: unit }
-                - name: { get_property: [branch2_network, resource_id] }
-                  parent_interface: { get_input: branch2_interface }
-                  ip_address: { get_attribute: [flexvm, networks, get_property:[branch2_network, resource_id]] }
-                  mask: { get_input: branch2_network_mask }
-                  unit: { get_input: unit }
+              appliance: { get_input: appliance_name }
+              org: { get_property: [hq_organization, name]}
+              subscription:
+                solution-tier: nextgen-firewall
+                bandwidth: 100
+              services:
+                - cgnat
+                - nextgen-firewall
+              networking-info:
+                - network-info:
+                    network-name: { get_property: [hq_network, resource_id] }
+                    ip-address: { get_attribute: [flexvm, networks, get_property:[hq_network, resource_id] ] }
+                    mask: { get_input: hq_network_mask }
+                    parent-interface: { get_input: hq_interface }
+                    subinterface-unit-number: { get_input: unit }
+                    vlan-id: { get_input: unit }
+                    ipaddress-allocation-mode: MANUAL
+                    slot: { get_input: unit }
+                - network-info:
+                    network-name: { get_property: [branch1_network, resource_id] }
+                    ip-address: { get_attribute: [flexvm, networks, get_property:[branch1_network, resource_id] ] }
+                    mask: { get_input: branch1_network_mask }
+                    parent-interface: { get_input: branch1_interface }
+                    subinterface-unit-number: { get_input: unit }
+                    vlan-id: { get_input: unit }
+                    ipaddress-allocation-mode: MANUAL
+                    slot: { get_input: unit }
+                - network-info:
+                    network-name: { get_property: [branch2_network, resource_id] }
+                    ip-address: { get_attribute: [flexvm, networks, get_property:[branch2_network, resource_id]] }
+                    mask: { get_input: branch2_network_mask }
+                    parent-interface: { get_input: branch2_interface }
+                    subinterface-unit-number: { get_input: unit }
+                    vlan-id: { get_input: unit }
+                    ipaddress-allocation-mode: MANUAL
+                    slot: { get_input: unit }
     relationships:
       - type: cloudify.versa.associated
         target: appliance

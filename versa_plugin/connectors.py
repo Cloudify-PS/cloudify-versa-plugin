@@ -2,6 +2,7 @@ import json
 from requests import codes
 from versa_plugin.versaclient import JSON
 import uuid
+from versa_plugin import get_mandatory
 
 
 def add_resource_pool(client, instance):
@@ -18,7 +19,9 @@ def delete_resource_pool(client, name):
 def add_organization(client, organization):
     url = "/api/config/cms/local/organizations"
     org_uuid = str(uuid.uuid4())
-    for network in organization['org-networks']['org-network']:
+    networks = get_mandatory(get_mandatory(organization, 'org-networks'),
+                             'org-network')
+    for network in networks:
         network['uuid'] = str(uuid.uuid4())
     organization['uuid'] = org_uuid
     data = {"organization": organization}

@@ -2,19 +2,15 @@ import json
 import time
 import uuid
 import versa_plugin
-from versa_plugin.versaclient import JSON, XML
+from versa_plugin.versaclient import JSON
 from requests import codes
 from cloudify import exceptions as cfy_exc
-from collections import namedtuple
 import random
+from versa_plugin import get_mandatory
 
 SUCCESS = 'SUCCESS'
 MAX_RETRY = 30
 SLEEP_TIME = 3
-
-ApplianceInterface = namedtuple("ApplianceInterface",
-                                "name, address, interface")
-NetworkInfo = namedtuple("NetworkInfo", "name, parent, address, mask, unit")
 
 
 def _get_task_id(task_info):
@@ -24,7 +20,8 @@ def _get_task_id(task_info):
 def add_organization(client, organization):
     url = "/api/config/nms/provider/organizations"
     org_uuid = str(uuid.uuid4())
-    cms_org_name = organization['cms-orgs']['name']
+    cms_org_name = get_mandatory(get_mandatory(organization, 'cms-orgs'),
+                                 'name')
     cms_org_uuid = versa_plugin.connectors.get_organization_uuid(client,
                                                                  cms_org_name)
     while True:
@@ -48,81 +45,34 @@ def delete_organization(client, org_name):
     return client.post(url, json.dumps(data), JSON, codes.ok)
 
 
-def add_appliance(client, mgm_ip, name, nms_org_name, cms_org_name, networks):
+def add_appliance(client, device):
     url = "/api/config/nms/actions/add-devices"
-    nms_org_uuid = get_organization_uuid(client, nms_org_name)
-    cms_org_uuid = versa_plugin.connectors.get_organization_uuid(client,
-                                                                 cms_org_name)
-    if not nms_org_uuid:
+    device['org'] = get_organization_uuid(client, device['org'])
+    device['cmsorg'] = versa_plugin.connectors.get_organization_uuid(
+        client, device['cmsorg'])
+    if not device['org']:
         raise cfy_exc.NonRecoverableError("NMS organization uuid not found")
-    elif not cms_org_uuid:
+    elif not device['cmsorg']:
         raise cfy_exc.NonRecoverableError("CMS organization uuid not found")
-    net_info = ""
-    for net in networks:
-        info = """
-                    <network-info>
-                        <network-name>{0}</network-name>
-                        <ip-address>{1}</ip-address>
-                        <interface>{2}</interface>
-                    </network-info>
-               """.format(net.name, net.address, net.interface)
-        net_info += info
-    xmldata = """
-    <add-devices>
-        <devices>
-            <device>
-                <mgmt-ip>{0}</mgmt-ip>
-                <name>{1}</name>
-                <org>{2}</org>
-                <cmsorg>{3}</cmsorg>
-                <type>service-vnf</type>
-                <networking-info>
-                {4}
-                </networking-info>
-                <snglist>
-                    <sng>
-                        <name>Default_All_Services</name>
-                        <isPartOfVCSN>true</isPartOfVCSN>
-                    </sng>
-                </snglist>
-                <subscription>
-                    <solution-tier>nextgen-firewall</solution-tier>
-                    <bandwidth>100</bandwidth>
-                </subscription>
-            </device>
-        </devices>
-    </add-devices> """.format(mgm_ip, name, nms_org_uuid, cms_org_uuid,
-                              net_info)
-    result = client.post(url, xmldata, XML, codes.ok)
+    data = {'add-devices': {'devices': {'device': device}}}
+    result = client.post(url, json.dumps(data), JSON, codes.ok)
     return _get_task_id(result)
 
 
-def associate_organization(client, appliance, org, net_info,
-                           services=None):
+def associate_organization(client, organization):
     url = '/api/config/nms/actions/'\
         '/associate-organization-to-appliance'
-    appliance_uuid = get_appliance_uuid(client, appliance)
-    org_uuid = get_organization_uuid(client, org)
-    network_info = [{
-                    "network-name": n_info.name,
-                    "parent-interface": n_info.parent,
-                    "subinterface-unit-number": n_info.unit,
-                    "vlan-id": n_info.unit,
-                    "ipaddress-allocation-mode": "MANUAL",
-                    "slot": "0",
-                    "ip-address": n_info.address,
-                    "mask": n_info.mask} for n_info in net_info]
-    data = {
-        "associate-organization-to-appliance": {
-            "orguuid": org_uuid,
-            "networking-info": {
-                "network-info": network_info},
-            "applianceuuid": appliance_uuid,
-            "subscription": {
-                "solution-tier": "nextgen-firewall",
-                "bandwidth": "100"}}}
-    if services:
-        data["associate-organization-to-appliance"]["services"] = services
+    appliance_uuid = get_appliance_uuid(client,
+                                        get_mandatory(organization,
+                                                      'appliance'))
+    org_uuid = get_organization_uuid(client,
+                                     get_mandatory(organization,
+                                                   'org'))
+    organization["orguuid"] = org_uuid
+    organization["applianceuuid"] = appliance_uuid
+    del organization['org']
+    del organization['appliance']
+    data = {"associate-organization-to-appliance": organization}
     result = client.post(url, json.dumps(data), JSON, codes.ok)
     return _get_task_id(result)
 
@@ -212,21 +162,12 @@ def get_device_information(client, address):
         return None
 
 
-def wait_for_device(client, address):
+def wait_for_device(client, address, ctx):
     for retry in range(MAX_RETRY):
-        print "Waiting for device. Try {}/{}".format(retry + 1, MAX_RETRY)
+        ctx.logger.info("Waiting for device. Try {}/{}".format(retry + 1,
+                                                               MAX_RETRY))
         device_info = get_device_information(client, address)
         if device_info:
             return
         time.sleep(SLEEP_TIME)
     raise cfy_exc.NonRecoverableError("Can't get device information")
-
-
-def wait_for_parent(client, parent):
-    for retry in range(MAX_RETRY):
-        print "Waiting for parent org. Try {}/{}".format(retry + 1, MAX_RETRY)
-        uuid = get_organization_uuid(client, parent)
-        if uuid:
-            return
-        time.sleep(SLEEP_TIME)
-    raise cfy_exc.NonRecoverableError("Can't get parent organization")

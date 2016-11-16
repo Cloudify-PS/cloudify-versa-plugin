@@ -28,3 +28,15 @@ def with_versa_client(f):
             result = f(*args, **kw)
         return result
     return wrapper
+
+
+def get_mandatory(obj, parameter):
+    """
+        return value for field or raise exception if field does not exist
+    """
+    value = obj.get(parameter)
+    if value:
+        return value
+    else:
+        raise cfy_exc.NonRecoverableError(
+            "Mandatory parameter {0} is absent".format(parameter))

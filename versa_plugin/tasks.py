@@ -18,9 +18,10 @@ def get_task_info(client, task):
     return client.get(url, None, None, codes.ok)
 
 
-def wait_for_task(client, task):
+def wait_for_task(client, task, ctx):
     for retry in range(MAX_RETRY):
-        print "Waiting for task. Try {}/{}".format(retry + 1, MAX_RETRY)
+        ctx.logger.info("Waiting for task. Try {}/{}".format(retry + 1,
+                                                             MAX_RETRY))
         task_info = get_task_info(client, task)
         status = task_info['task']['task-status']
         if status == FAILED:

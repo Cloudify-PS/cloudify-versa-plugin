@@ -38,16 +38,51 @@ child_organization = """
             cms-connector: local
 """
 
-appliance = """
-      appliance:
-        appliance_name: $app_name
-        """
+appliance_kwarg = """
+        device:
+            mgmt-ip: $resource
+            name: $app_name
+            org: $nms
+            cmsorg: $cms
+            type: service-vnf
+            networking-info:
+                    - network-info:
+                        network-name: hq
+                        ip-address: 10.1.0.11
+                        interface: vni-0/0
+            snglist:
+                - sng:
+                    name: Default_All_Services
+                    isPartOfVCSN: true
+                    services:
+                        - cgnat
+                        - nextgen-firewall
+            subscription:
+                solution-tier: nextgen-firewall
+                bandwidth: 100
+                is-analytics-enabled: true
+            """
 
-associate = """
-      appliance_name: $app_name
-      organization:
-        nms_org_name: $nms_name
-        parent: $parent_name
+associated_kwargs = """
+        organization:
+            appliance: $app_name
+            org: $nms_name
+            networking-info:
+              - network-info:
+                    network-name: branch
+                    ip-address: 10.2.0.11
+                    mask: 255.255.255.0
+                    parent-interface: vni-0/1
+                    subinterface-unit-number: 0
+                    vlan-id: 0
+                    ipaddress-allocation-mode: MANUAL
+                    slot: 0
+            subscription:
+              solution-tier: nextgen-firewall
+              bandwidth: 100
+            services:
+              - cgnat
+              - nextgen-firewall
 """
 
 
@@ -76,25 +111,20 @@ class ApplianceTestCase(base.BaseTest):
         versa_plugin.operations.create_organization()
         self.assertTrue(get_conf.nms_organization(nms_org_name))
         self.save_properties()
-        kwargs = {
-                'appliance': {
-                    'management_ip': resource_address,
-                    'appliance_owner': {
-                        'nms_org_name': nms_org_name,
-                        'cms_org_name': cms_org_name,
-                        'networks': [{
-                            'name': 'hq',
-                            'ip_address': '10.1.0.11',
-                            'interface': 'vni-0/0'}]}}}
-        self.update_node_properties(appliance, "", app_name=name)
-        self.assertFalse(get_conf.appliance(name))
-        versa_plugin.operations.create_appliance(**kwargs)
-        self.assertTrue(get_conf.appliance(name))
-        versa_plugin.operations.delete_appliance(**kwargs)
-        self.assertFalse(get_conf.appliance(name))
-        self.restore_properties()
-        versa_plugin.operations.delete_organization()
-        self.assertFalse(get_conf.nms_organization(nms_org_name))
+        try:
+            kwargs = self.yaml_to_dict(appliance_kwarg, app_name=name,
+                                       resource=resource_address,
+                                       nms=nms_org_name, cms=cms_org_name)
+            self.update_node_properties("", "")
+            self.assertFalse(get_conf.appliance(name))
+            versa_plugin.operations.create_appliance(**kwargs)
+            self.assertTrue(get_conf.appliance(name))
+        finally:
+            versa_plugin.operations.delete_appliance(**kwargs)
+            self.assertFalse(get_conf.appliance(name))
+            self.restore_properties()
+            versa_plugin.operations.delete_organization()
+            self.assertFalse(get_conf.nms_organization(nms_org_name))
 
     # @unittest.skip("")
     def test_associate_organization(self):
@@ -117,33 +147,18 @@ class ApplianceTestCase(base.BaseTest):
         versa_plugin.operations.create_organization()
         self.assertTrue(get_conf.nms_organization(nms_org_name_child))
         self.save_properties()
-        kwargs = {
-                'appliance': {
-                    'management_ip': resource_address,
-                    'appliance_owner': {
-                        'nms_org_name': nms_org_name,
-                        'cms_org_name': cms_org_name,
-                        'networks': [{
-                            'name': 'hq',
-                            'ip_address': '10.1.0.11',
-                            'interface': 'vni-0/0'}]}}}
-        self.update_node_properties(appliance, "", app_name=name)
+        kwargs = self.yaml_to_dict(appliance_kwarg, app_name=name,
+                                   resource=resource_address,
+                                   nms=nms_org_name, cms=cms_org_name)
+        self.update_node_properties("", "")
         self.assertFalse(get_conf.appliance(name))
         versa_plugin.operations.create_appliance(**kwargs)
         self.assertTrue(get_conf.appliance(name))
         self.save_properties()
-        self.update_node_properties(associate, "",
-                                    app_name=name,
-                                    nms_name=nms_org_name_child,
-                                    parent_name=nms_org_name)
-        kwargs_associated = {
-                'organization': {
-                    'networks': [{
-                        'name': 'branch',
-                        'ip_address': '10.2.0.11',
-                        'mask': '255.255.255.0',
-                        'parent_interface': 'vni-0/1',
-                        'unit': '0'}]}}
+        self.update_node_properties("", "")
+        kwargs_associated = self.yaml_to_dict(associated_kwargs,
+                                              app_name=name,
+                                              nms_name=nms_org_name_child)
         versa_plugin.operations.associate_organization(**kwargs_associated)
         self.restore_properties()
         versa_plugin.operations.delete_appliance(**kwargs)

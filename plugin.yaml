@@ -86,19 +86,19 @@ node_types:
         default: false
       versa_config:
         default: {}
-      appliance:
+      device:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_appliance
           inputs:
-            appliance:
+            device:
               default: {}
         delete:
           implementation: versa.versa_plugin.operations.delete_appliance
           inputs:
-            appliance:
+            device:
               default: {}
 
   cloudify.versa.nodes.AssociatedOrganization:
