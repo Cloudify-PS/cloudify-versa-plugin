@@ -129,8 +129,6 @@ node_types:
         default: ""
       org_name:
         default: ""
-      update:
-        default: false
       name:
         default: ""
       parent_router_name:
@@ -146,6 +144,34 @@ node_types:
           inputs: {}
         delete:
           implementation: versa.versa_plugin.operations.delete_router
+          inputs: {}
+
+  cloudify.versa.nodes.RouterUpdate:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      name:
+        default: ""
+      parent_router_name:
+        default: ""
+      networks:
+        default: {}
+      routings:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.insert_to_router
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_from_router
           inputs: {}
 
   cloudify.versa.nodes.CGNat:
@@ -183,8 +209,6 @@ node_types:
         default: ""
       org_name:
         default: ""
-      update:
-        default: false
       zone:
         default: {}
     interfaces:
@@ -194,6 +218,28 @@ node_types:
           inputs: {}
         delete:
           implementation: versa.versa_plugin.operations.delete_zone
+          inputs: {}
+
+  cloudify.versa.nodes.ZoneUpdate:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      zone:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.insert_to_zone
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_from_zone
           inputs: {}
 
   cloudify.versa.nodes.NGFirewallUrlFilter:

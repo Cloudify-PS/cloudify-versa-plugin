@@ -154,20 +154,27 @@ def create_router(versa_client, **kwargs):
     router_name = ctx.node.properties['name']
     networks = ctx.node.properties.get('networks', [])
     routings = ctx.node.properties.get('routings', [])
-    update = ctx.node.properties['update']
-    if update:
-        for name in networks:
-            versa_plugin.networking.add_network_to_router(
-                versa_client, appliance_name, router_name, name)
-    else:
-        if routings:
-            routings = [Routing(r['ip_prefix'], r['next_hop'],
-                                r['interface'], r['preference'],
-                                r['tag']) for r in routings]
-        versa_plugin.networking.create_virtual_router(versa_client,
-                                                      appliance_name,
-                                                      router_name, networks,
-                                                      routings)
+    if routings:
+        routings = [Routing(r['ip_prefix'], r['next_hop'],
+                            r['interface'], r['preference'],
+                            r['tag']) for r in routings]
+    versa_plugin.networking.create_virtual_router(versa_client,
+                                                  appliance_name,
+                                                  router_name, networks,
+                                                  routings)
+
+
+@operation
+@with_versa_client
+def insert_to_router(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    router_name = ctx.node.properties['name']
+    networks = ctx.node.properties.get('networks', [])
+    for name in networks:
+        versa_plugin.networking.add_network_to_router(
+            versa_client, appliance_name, router_name, name)
 
 
 @operation
@@ -176,13 +183,22 @@ def delete_router(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
+    router_name = ctx.node.properties['name']
+    versa_plugin.networking.delete_virtual_router(
+                versa_client, appliance_name, router_name)
+
+
+@operation
+@with_versa_client
+def delete_from_router(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
     networks = ctx.node.properties.get('networks', [])
     router_name = ctx.node.properties['name']
-    update = ctx.node.properties['update']
-    if update:
-        for name in networks:
-            versa_plugin.networking.delete_network_to_router(
-                versa_client, appliance_name, router_name, name)
+    for name in networks:
+        versa_plugin.networking.delete_network_from_router(
+            versa_client, appliance_name, router_name, name)
 
 
 @operation
@@ -235,26 +251,38 @@ def create_zone(versa_client, **kwargs):
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
     zone = ctx.node.properties['zone']
-    update = ctx.node.properties['update']
     zone_name = zone['name']
     zone_exsists = versa_plugin.networking.get_zone(versa_client,
                                                     appliance_name,
                                                     org_name,
                                                     zone_name)
-    if update:
-        if zone_exsists:
-            ctx.instance.runtime_properties[zone_name] = deepcopy(zone_exsists)
-            new_zone = reqursive_update(zone_exsists, zone)
-            versa_plugin.networking.update_zone(versa_client,
-                                                appliance_name,
-                                                org_name, new_zone)
-    else:
-        if zone_exsists:
-            raise cfy_exc.NonRecoverableError(
-                "Zone '{}' exsists".format(zone_name))
-        versa_plugin.networking.create_zone(versa_client,
+    if zone_exsists:
+        raise cfy_exc.NonRecoverableError(
+            "Zone '{}' exsists".format(zone_name))
+    versa_plugin.networking.create_zone(versa_client,
+                                        appliance_name,
+                                        org_name, zone)
+
+
+@operation
+@with_versa_client
+def insert_to_zone(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    zone = ctx.node.properties['zone']
+    zone_name = zone['name']
+    zone_exsists = versa_plugin.networking.get_zone(versa_client,
+                                                    appliance_name,
+                                                    org_name,
+                                                    zone_name)
+    if zone_exsists:
+        ctx.instance.runtime_properties[zone_name] = deepcopy(zone_exsists)
+        new_zone = reqursive_update(zone_exsists, zone)
+        versa_plugin.networking.update_zone(versa_client,
                                             appliance_name,
-                                            org_name, zone)
+                                            org_name, new_zone)
 
 
 @operation
@@ -265,18 +293,26 @@ def delete_zone(versa_client, **kwargs):
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
     zone = ctx.node.properties['zone']
-    update = ctx.node.properties['update']
     zone_name = zone['name']
-    if update:
-        old_zone = ctx.instance.runtime_properties.get(zone_name, None)
-        if old_zone:
-            versa_plugin.networking.update_zone(versa_client,
-                                                appliance_name,
-                                                org_name, old_zone)
-    else:
-        versa_plugin.networking.delete_zone(versa_client,
+    versa_plugin.networking.delete_zone(versa_client,
+                                        appliance_name,
+                                        org_name, zone_name)
+
+
+@operation
+@with_versa_client
+def delete_from_zone(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    zone = ctx.node.properties['zone']
+    zone_name = zone['name']
+    old_zone = ctx.instance.runtime_properties.get(zone_name, None)
+    if old_zone:
+        versa_plugin.networking.update_zone(versa_client,
                                             appliance_name,
-                                            org_name, zone_name)
+                                            org_name, old_zone)
 
 
 @operation

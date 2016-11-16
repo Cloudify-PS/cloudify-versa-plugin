@@ -25,7 +25,9 @@ def get_configuration(url):
 
 def select_by_name(url, root, name=""):
     output = get_configuration(url)
-    result = output[root]
+    for i in root:
+        output = output.get(i)
+    result = output
     if name:
         for item in result:
             if name == item['name']:
@@ -38,25 +40,40 @@ def select_by_name(url, root, name=""):
 
 def pool(name=""):
     url = "/api/config/cms/local/instances/instance"
-    return select_by_name(url, 'instance', name)
+    return select_by_name(url, ['instance'], name)
 
 
 def cms_organization(name=""):
     url = '/api/config/cms/local/organizations/organization?deep'
-    return select_by_name(url, 'organization', name)
+    return select_by_name(url, ['organization'], name)
 
 
 def nms_organization(name=""):
     url = '/api/config/nms/provider/organizations/organization?deep'
-    return select_by_name(url, 'organization', name)
+    return select_by_name(url, ['organization'], name)
 
 
 def appliance(name=""):
     url = '/api/config/nms/provider/appliances/appliance?deep'
-    return select_by_name(url, 'appliance', name)
+    return select_by_name(url, ['appliance'], name)
+
+
+def interface(appliance, name=""):
+    url = '/api/config/devices/device/{}/config/interfaces?deep'.\
+          format(appliance)
+    return select_by_name(url, ['interfaces', 'vni'], name)
+
+
+def network(appliance, name=""):
+    url = '/api/config/devices/device/{}/config/networks/network?deep'.\
+          format(appliance)
+    return select_by_name(url, ['network'], name)
 
 if __name__ == '__main__':
+    appliance_name = 'manualtesting'
     # display(pool())
     # display(cms_organization('manualtesting'))
     # display(nms_organization())
-    display(appliance('vcpe1'))
+    # display(appliance())
+    # display(interface(appliance_name 'vni-0/0'))
+    display(network(appliance_name, 'hq'))

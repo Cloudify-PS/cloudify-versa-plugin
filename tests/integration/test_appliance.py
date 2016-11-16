@@ -86,6 +86,10 @@ associated_inputs = """
 """
 
 
+cms_org_name = 'manualtesting'
+resource_address = "192.168.200.203"
+
+
 class ApplianceTestCase(base.BaseTest):
     def add_organization(self, name, **kwargs):
         """ Add organization """
@@ -138,8 +142,6 @@ class ApplianceTestCase(base.BaseTest):
     # @unittest.skip("")
     def test_appliance(self):
         nms_org_name = self.gen_name("org")
-        cms_org_name = 'manualtesting'
-        resource_address = "192.168.200.203"
         name = self.gen_name("appliance")
         self.add_to_sequence(self.add_organization,
                              self.delete_organization,
@@ -157,8 +159,6 @@ class ApplianceTestCase(base.BaseTest):
         nms_org_name = self.gen_name("org")
         nms_org_name_child = self.gen_name("childorg")
         name = self.gen_name("appliance")
-        cms_org_name = 'manualtesting'
-        resource_address = "192.168.200.203"
         self.add_to_sequence(self.add_organization,
                              self.delete_organization,
                              organization, name=nms_org_name,

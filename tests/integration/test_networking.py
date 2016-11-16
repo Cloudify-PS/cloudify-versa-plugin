@@ -15,7 +15,28 @@ import base
 import requests
 import unittest
 import versa_plugin.operations
+import get_configuration as get_conf
 requests.packages.urllib3.disable_warnings()
+
+interface = """
+    use_existing: false
+    appliance_name: $appliance_name
+    vni:
+        name: $name
+        enable: true
+        promiscuous: false
+    """
+
+interface_with_address = """
+    use_existing: false
+    appliance_name: $appliance_name
+    org_name: $org_name
+    name: vni-0/5
+    units:
+      - name: 0
+        address: 14.14.0.2
+        mask: 255.255.255.0
+    """
 
 zone = """
     use_existing: false
@@ -36,24 +57,6 @@ zone_update = """
         name: untrust
         routing-instance:
             - parent_router
-    """
-
-interface = """
-    use_existing: false
-    appliance_name: $appliance_name
-    org_name: $org_name
-    name: vni-0/5
-    """
-
-interface_with_address = """
-    use_existing: false
-    appliance_name: $appliance_name
-    org_name: $org_name
-    name: vni-0/5
-    units:
-      - name: 0
-        address: 14.14.0.2
-        mask: 255.255.255.0
     """
 
 network = """
@@ -87,36 +90,31 @@ limits = """
 
 
 class NetworkingTestCase(base.BaseTest):
-    @unittest.skip("")
-    def test_add_zone(self):
-        self.update_node_properties(zone,
-                                    "appliance_name org_name")
-        versa_plugin.operations.create_zone()
-        versa_plugin.operations.delete_zone()
+    def add_interface(self, name):
+        self.assertFalse(get_conf.interface(name))
+        versa_plugin.operations.create_interface()
+        self.assertTrue(get_conf.interface(name))
 
-    # @unittest.skip("")
-    def test_update_zone(self):
-        self.update_node_properties(zone_update,
-                                    "appliance_name org_name")
-        versa_plugin.operations.create_zone()
-        versa_plugin.operations.delete_zone()
+    def delete_interface(self, name):
+        self.assertTrue(get_conf.interface(name))
+        versa_plugin.operations.delete_interface()
+        self.assertFalse(get_conf.interface(name))
 
     @unittest.skip("")
-    def test_create_interface_without_address(self):
+    def test_interface_without_address(self):
+        name = 'vni-0/1'
         self.update_node_properties(interface,
                                     "appliance_name org_name")
-        versa_plugin.operations.create_interface()
-        versa_plugin.operations.delete_interface()
 
     @unittest.skip("")
-    def test_create_interface_with_address(self):
+    def test_interface_with_address(self):
         self.update_node_properties(interface_with_address,
                                     "appliance_name org_name")
         versa_plugin.operations.create_interface()
         versa_plugin.operations.delete_interface()
 
     @unittest.skip("")
-    def test_create_network(self):
+    def test_network(self):
         self.update_node_properties(interface_with_address,
                                     "appliance_name org_name")
         versa_plugin.operations.create_interface()
@@ -129,11 +127,25 @@ class NetworkingTestCase(base.BaseTest):
         versa_plugin.operations.delete_interface()
 
     @unittest.skip("")
-    def test_create_router(self):
+    def test_router(self):
         self.update_node_properties(router,
                                     "appliance_name org_name")
         versa_plugin.operations.create_router()
         versa_plugin.operations.delete_router()
+
+    @unittest.skip("")
+    def test_zone(self):
+        self.update_node_properties(zone,
+                                    "appliance_name org_name")
+        versa_plugin.operations.create_zone()
+        versa_plugin.operations.delete_zone()
+
+    @unittest.skip("")
+    def test_update_zone(self):
+        self.update_node_properties(zone_update,
+                                    "appliance_name org_name")
+        versa_plugin.operations.create_zone()
+        versa_plugin.operations.delete_zone()
 
     @unittest.skip("")
     def test_limits(self):

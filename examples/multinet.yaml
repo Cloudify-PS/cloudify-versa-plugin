@@ -441,12 +441,11 @@ node_templates:
   # Zone configuration
   #####################
   trust_zone:
-    type: cloudify.versa.nodes.Zone
+    type: cloudify.versa.nodes.ZoneUpdate
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_property: [hq_organization, name]}
-      update: true
       zone:
         name: trust
         networks: 
@@ -458,12 +457,11 @@ node_templates:
         target: limits
 
   untrust_zone:
-    type: cloudify.versa.nodes.Zone
+    type: cloudify.versa.nodes.ZoneUpdate
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_property: [hq_organization, name]}
-      update: true
       zone:
         name: untrust
         routing-instance:
