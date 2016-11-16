@@ -19,6 +19,10 @@ from string import Template
 from copy import deepcopy
 from random import choice
 from string import ascii_uppercase
+from collections import namedtuple
+
+
+Operation = namedtuple("Operation", "add, delete, template, arguments")
 
 
 class BaseTest(unittest.TestCase):
@@ -36,6 +40,7 @@ class BaseTest(unittest.TestCase):
         patcher_ctx2.start()
         patcher_ctx3.start()
         self.prop = []
+        self.sequence = []
 
     def tearDown(self):
         mock.patch.stopall()
@@ -47,16 +52,11 @@ class BaseTest(unittest.TestCase):
     def yaml_to_dict(self, template, **kwargs):
         return yaml.load(Template(template).substitute(kwargs))
 
-    def update_node_properties(self, base_template, fields, **kwargs):
-        template = Template(base_template).substitute(kwargs)
-        default_config = {}
-        nc = configuration.Node
-        for field in fields.split():
-            default_config[field] = getattr(nc, field)
-        node_config = Template(template).substitute(default_config)
+    def set_node_properties(self, template="{}",  **kwargs):
+        kwargs.update(configuration.appliance)
+        node_config = Template(template).substitute(kwargs)
         self.fake_ctx.node.properties = {'versa_config': self.config}
-        if node_config:
-            self.fake_ctx.node.properties.update(yaml.load(node_config))
+        self.fake_ctx.node.properties.update(yaml.load(node_config))
         self.fake_ctx.instance.runtime_properties = {}
 
     def save_properties(self):
@@ -66,9 +66,25 @@ class BaseTest(unittest.TestCase):
         self.fake_ctx.node.properties.clear()
         self.fake_ctx.node.properties.update(self.prop.pop())
 
-    def set_runtime(self, fields):
-        kwargs = {}
-        nc = configuration.Node
-        for field in fields.split():
-            kwargs[field] = getattr(nc, field)
+    def set_runtime_properties(self, **kwargs):
+        kwargs.update(configuration.appliance)
         self.fake_ctx.instance.runtime_properties.update(kwargs)
+
+    def add_to_sequence(self, add, delete, template, **kwargs):
+            self.save_properties()
+            template = template if template else '{}'
+            self.sequence.append(Operation(add, delete, template, kwargs))
+
+    def run_sequence(self):
+        completed = []
+        try:
+            for item in self.sequence:
+                print item.add.__doc__
+                self.set_node_properties(item.template, **item.arguments)
+                item.add(**item.arguments)
+                completed.append(item)
+        finally:
+            for item in reversed(completed):
+                print item.delete.__doc__
+                self.set_node_properties(item.template, **item.arguments)
+                item.delete(**item.arguments)

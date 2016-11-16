@@ -44,31 +44,50 @@ organization = """
 
 
 class ConnectorTestCase(base.BaseTest):
-    # @unittest.skip("")
-    def test_resource_pool(self):
-        pool_name = self.gen_name('pool')
-        self.update_node_properties(pool, "", pool_name=pool_name)
+    def add_pool(self, pool_name, **kwargs):
+        """ Add pool """
         self.assertFalse(get_conf.pool(pool_name))
         versa_plugin.operations.create_resource_pool()
         self.assertTrue(get_conf.pool(pool_name))
+
+    def delete_pool(self, pool_name, **kwargs):
+        """ Delete pool """
+        self.assertTrue(get_conf.pool(pool_name))
         versa_plugin.operations.delete_resource_pool()
         self.assertFalse(get_conf.pool(pool_name))
+
+    def add_organization(self, cms_name, **kwargs):
+        """ Add organization """
+        self.assertFalse(get_conf.cms_organization(cms_name))
+        versa_plugin.operations.create_cms_local_organization()
+        self.assertTrue(get_conf.cms_organization(cms_name))
+
+    def delete_organization(self, cms_name, **kwargs):
+        """ Delete organization """
+        self.assertTrue(get_conf.cms_organization(cms_name))
+        versa_plugin.operations.delete_cms_local_organization()
+        self.assertFalse(get_conf.cms_organization(cms_name))
+
+    # @unittest.skip("")
+    def test_resource_pool(self):
+        pool_name = self.gen_name('pool')
+        self.add_to_sequence(self.add_pool,
+                             self.delete_pool,
+                             pool,
+                             pool_name=pool_name)
+        self.run_sequence()
 
     # @unittest.skip("")
     def test_organization(self):
         pool_name = self.gen_name('pool')
         cms_name = self.gen_name('cms')
-        self.update_node_properties(pool, "", pool_name=pool_name)
-        self.assertFalse(get_conf.pool(pool_name))
-        versa_plugin.operations.create_resource_pool()
-        self.save_properties()
-        self.update_node_properties(organization, "", cms_name=cms_name,
-                                    pool_name=pool_name)
-        self.assertFalse(get_conf.cms_organization(cms_name))
-        versa_plugin.operations.create_cms_local_organization()
-        self.assertTrue(get_conf.cms_organization(cms_name))
-        versa_plugin.operations.delete_cms_local_organization()
-        self.assertFalse(get_conf.cms_organization(cms_name))
-        self.restore_properties()
-        versa_plugin.operations.delete_resource_pool()
-        self.assertFalse(get_conf.pool(pool_name))
+        self.add_to_sequence(self.add_pool,
+                             self.delete_pool,
+                             pool,
+                             pool_name=pool_name)
+        self.add_to_sequence(self.add_organization,
+                             self.delete_organization,
+                             organization,
+                             cms_name=cms_name,
+                             pool_name=pool_name)
+        self.run_sequence()

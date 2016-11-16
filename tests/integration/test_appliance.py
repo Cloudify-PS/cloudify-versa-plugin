@@ -38,7 +38,7 @@ child_organization = """
             cms-connector: local
 """
 
-appliance_kwarg = """
+appliance_inputs = """
         device:
             mgmt-ip: $resource
             name: $app_name
@@ -63,7 +63,7 @@ appliance_kwarg = """
                 is-analytics-enabled: true
             """
 
-associated_kwargs = """
+associated_inputs = """
         organization:
             appliance: $app_name
             org: $nms_name
@@ -87,44 +87,70 @@ associated_kwargs = """
 
 
 class ApplianceTestCase(base.BaseTest):
-    @unittest.skip("")
+    def add_organization(self, name, **kwargs):
+        """ Add organization """
+        self.assertFalse(get_conf.nms_organization(name))
+        versa_plugin.operations.create_organization()
+        self.assertTrue(get_conf.nms_organization(name))
+
+    def delete_organization(self, name, **kwargs):
+        """ Delete organization """
+        self.assertTrue(get_conf.nms_organization(name))
+        versa_plugin.operations.delete_organization()
+        self.assertFalse(get_conf.nms_organization(name))
+
+    def add_appliance(self, **kwargs):
+        """ Add appliance """
+        inputs = self.yaml_to_dict(appliance_inputs, **kwargs)
+        name = kwargs['app_name']
+        self.assertFalse(get_conf.appliance(name))
+        versa_plugin.operations.create_appliance(**inputs)
+        self.assertTrue(get_conf.appliance(name))
+
+    def delete_appliance(self, **kwargs):
+        """ Delete appliance """
+        inputs = self.yaml_to_dict(appliance_inputs, **kwargs)
+        name = kwargs['app_name']
+        self.assertTrue(get_conf.appliance(name))
+        versa_plugin.operations.delete_appliance(**inputs)
+        self.assertFalse(get_conf.appliance(name))
+
+    def associate(self, **kwargs):
+        """ Associate organization """
+        inputs = self.yaml_to_dict(associated_inputs, **kwargs)
+        versa_plugin.operations.associate_organization(**inputs)
+        pass
+
+    def disassociate(self, **kwargs):
+        """ Disassociate organization """
+        pass
+
+    # @unittest.skip("")
     def test_organization(self):
         nms_org_name = self.gen_name("org")
         cms_org_name = "manualtesting"
-        self.update_node_properties(organization, "", name=nms_org_name,
-                                    cms_name=cms_org_name)
-        self.assertFalse(get_conf.nms_organization(nms_org_name))
-        versa_plugin.operations.create_organization()
-        self.assertTrue(get_conf.nms_organization(nms_org_name))
-        versa_plugin.operations.delete_organization()
-        self.assertFalse(get_conf.nms_organization(nms_org_name))
+        self.add_to_sequence(self.add_organization,
+                             self.delete_organization,
+                             organization, name=nms_org_name,
+                             cms_name=cms_org_name)
+        self.run_sequence()
 
-    @unittest.skip("")
+    # @unittest.skip("")
     def test_appliance(self):
         nms_org_name = self.gen_name("org")
         cms_org_name = 'manualtesting'
         resource_address = "192.168.200.203"
         name = self.gen_name("appliance")
-        self.update_node_properties(organization, "", name=nms_org_name,
-                                    cms_name=cms_org_name)
-        self.assertFalse(get_conf.nms_organization(nms_org_name))
-        versa_plugin.operations.create_organization()
-        self.assertTrue(get_conf.nms_organization(nms_org_name))
-        self.save_properties()
-        try:
-            kwargs = self.yaml_to_dict(appliance_kwarg, app_name=name,
-                                       resource=resource_address,
-                                       nms=nms_org_name, cms=cms_org_name)
-            self.update_node_properties("", "")
-            self.assertFalse(get_conf.appliance(name))
-            versa_plugin.operations.create_appliance(**kwargs)
-            self.assertTrue(get_conf.appliance(name))
-        finally:
-            versa_plugin.operations.delete_appliance(**kwargs)
-            self.assertFalse(get_conf.appliance(name))
-            self.restore_properties()
-            versa_plugin.operations.delete_organization()
-            self.assertFalse(get_conf.nms_organization(nms_org_name))
+        self.add_to_sequence(self.add_organization,
+                             self.delete_organization,
+                             organization, name=nms_org_name,
+                             cms_name=cms_org_name)
+        self.add_to_sequence(self.add_appliance,
+                             self.delete_appliance, None,
+                             app_name=name,
+                             resource=resource_address,
+                             nms=nms_org_name, cms=cms_org_name)
+        self.run_sequence()
 
     # @unittest.skip("")
     def test_associate_organization(self):
@@ -133,39 +159,22 @@ class ApplianceTestCase(base.BaseTest):
         name = self.gen_name("appliance")
         cms_org_name = 'manualtesting'
         resource_address = "192.168.200.203"
-        self.update_node_properties(organization, "", name=nms_org_name,
-                                    cms_name=cms_org_name)
-        self.assertFalse(get_conf.nms_organization(nms_org_name))
-        versa_plugin.operations.create_organization()
-        self.assertTrue(get_conf.nms_organization(nms_org_name))
-        self.save_properties()
-        self.update_node_properties(child_organization, "",
-                                    name=nms_org_name_child,
-                                    parent_name=nms_org_name,
-                                    cms_name=cms_org_name)
-        self.assertFalse(get_conf.nms_organization(nms_org_name_child))
-        versa_plugin.operations.create_organization()
-        self.assertTrue(get_conf.nms_organization(nms_org_name_child))
-        self.save_properties()
-        kwargs = self.yaml_to_dict(appliance_kwarg, app_name=name,
-                                   resource=resource_address,
-                                   nms=nms_org_name, cms=cms_org_name)
-        self.update_node_properties("", "")
-        self.assertFalse(get_conf.appliance(name))
-        versa_plugin.operations.create_appliance(**kwargs)
-        self.assertTrue(get_conf.appliance(name))
-        self.save_properties()
-        self.update_node_properties("", "")
-        kwargs_associated = self.yaml_to_dict(associated_kwargs,
-                                              app_name=name,
-                                              nms_name=nms_org_name_child)
-        versa_plugin.operations.associate_organization(**kwargs_associated)
-        self.restore_properties()
-        versa_plugin.operations.delete_appliance(**kwargs)
-        self.assertFalse(get_conf.appliance(name))
-        self.restore_properties()
-        versa_plugin.operations.delete_organization()
-        self.assertFalse(get_conf.nms_organization(nms_org_name_child))
-        self.restore_properties()
-        versa_plugin.operations.delete_organization()
-        self.assertFalse(get_conf.nms_organization(nms_org_name))
+        self.add_to_sequence(self.add_organization,
+                             self.delete_organization,
+                             organization, name=nms_org_name,
+                             cms_name=cms_org_name)
+        self.add_to_sequence(self.add_organization,
+                             self.delete_organization,
+                             organization, name=nms_org_name_child,
+                             parent_name=nms_org_name,
+                             cms_name=cms_org_name)
+        self.add_to_sequence(self.add_appliance,
+                             self.delete_appliance, None,
+                             app_name=name,
+                             resource=resource_address,
+                             nms=nms_org_name, cms=cms_org_name)
+        self.add_to_sequence(self.associate,
+                             self.disassociate, None,
+                             app_name=name,
+                             nms_name=nms_org_name_child)
+        self.run_sequence()
