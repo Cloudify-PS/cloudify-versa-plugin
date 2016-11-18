@@ -463,14 +463,8 @@ node_types:
         default: {}
       appliance_name:
         default: ""
-      org_name:
-        default: ""
-      name:
+      network:
         default: {}
-      interface:
-        default: ""
-      unit:
-        default: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
