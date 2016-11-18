@@ -1,0 +1,319 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
+  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/cleanup/plugin.yaml
+
+inputs:
+    versa_url:
+        default: "https://172.19.0.210:9183"
+    client_id:
+        default: "voae_rest"
+    client_secret:
+        default: "asrevnet_123"
+    username:
+        default: "Administrator"
+    password:
+        default: "versa123"
+    appliance_name:
+      default: l2testing
+    org_name:
+        default: test
+    branch1_network_name:
+        default: net1
+    branch1_interface_name:
+      default: vni-0/1.0 
+    branch2_network_name:
+        default: net2
+    branch2_interface_name: 
+      default: vni-0/0.1
+    router_name: 
+        default:  router
+    dhcp_profile_name:
+        default: dhcp_profile
+    dhcp_lease_profile_name:
+        default: dhcp_lease_profile
+    dhcp_options_profile_name:
+        default: dhcp_options_profile
+    branch_domain_name:
+        default: branch.org
+    dns_server: 
+        default: 8.8.8.8
+    hq_dhcp_pool_mask: 
+        default: 255.255.255.0
+    branch1_dhcp_pool_mask: 
+        default: 255.255.255.0
+    branch1_dhcp_begin_address: 
+        default: 10.12.0.30
+    branch1_dhcp_end_address: 
+        default: 10.12.0.40
+    branch2_dhcp_pool_mask: 
+        default: 255.255.255.0
+    branch2_dhcp_begin_address: 
+        default: 10.13.0.30
+    branch2_dhcp_end_address: 
+        default: 10.13.0.40
+
+node_templates:
+  #####################
+  # Versa config
+  #####################
+  versa_configuration:
+    type: cloudify.versa.nodes.versa_configuration
+    properties:
+      versa_config:
+        username: { get_input: username }
+        password: { get_input: password }
+        versa_url: { get_input: versa_url}
+        client_id: { get_input: client_id}
+        client_secret: { get_input: client_secret}
+
+  #####################
+  # Interface configuration
+  #####################
+  branch1_interface:
+    type: cloudify.versa.nodes.Interface
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      interface:
+        name: vni-0/1
+        enable: true
+        promiscuous: false
+        unit:
+          - name: 0
+            family:
+                inet:
+                  address:
+                    addr: 10.1.0.2/24
+
+  branch2_interface:
+    type: cloudify.versa.nodes.Interface
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      interface:
+        name: vni-0/0
+        enable: true
+        promiscuous: false
+        unit:
+          - name: 1
+            vlan-id: 600
+            family:
+                inet:
+                  address:
+                    addr: 10.2.0.2/24
+
+
+  #####################
+  # Network configuration
+  #####################
+  branch1_network:
+    type: cloudify.versa.nodes.Network
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      network:
+        name: { get_input: branch1_network_name }
+        interfaces: 
+          - { get_input: branch1_interface_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: branch1_interface
+          
+  branch2_network:
+    type: cloudify.versa.nodes.Network
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      network:
+        name: { get_input: branch2_network_name }
+        interfaces: 
+          - { get_input: branch2_interface_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: branch1_interface
+
+  #####################
+  # Routing configuration
+  #####################
+  routing:
+    type: cloudify.versa.nodes.Router
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      router:
+        name: { get_input: router_name }
+        instance-type: virtual-router
+        networks:
+          - { get_input: branch1_network_name }
+          - { get_input: branch2_network_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: branch1_network
+      - type: cloudify.relationships.depends_on
+        target: branch2_network
+      - type: cloudify.relationships.depends_on
+        target: branch1_interface
+      - type: cloudify.relationships.depends_on
+        target: branch2_interface
+
+  #####################
+  # Limits configuration
+  #####################
+  dhcp_profile:
+    type: cloudify.versa.nodes.DHCPProfile
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      profile_name: { get_input: dhcp_profile_name }
+      organizations:
+        - { get_input: org_name }
+
+  limits:
+    type: cloudify.versa.nodes.Limits
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      dhcp_profile: { get_input: dhcp_profile_name }
+      routes:
+        - { get_input: router_name}
+      networks:
+          - { get_input: branch1_network_name }
+          - { get_input: branch2_network_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: routing
+      - type: cloudify.relationships.depends_on
+        target: branch1_network
+      - type: cloudify.relationships.depends_on
+        target: branch2_network
+      - type: cloudify.relationships.depends_on
+        target: dhcp_profile
+      - type: cloudify.relationships.depends_on
+        target: branch1_interface
+      - type: cloudify.relationships.depends_on
+        target: branch2_interface
+
+  #####################
+  # DHCP configuration
+  #####################
+  dhcp_lease_profile:
+    type: cloudify.versa.nodes.DHCPLeaseProfile
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: dhcp_profile
+      - type: cloudify.relationships.depends_on
+        target: limits
+
+  dhcp_options_profile:
+    type: cloudify.versa.nodes.DHCPOptionsProfile
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      name: { get_input: dhcp_options_profile_name }
+      domain: { get_input: branch_domain_name }
+      servers:
+        - { get_input: dns_server }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: dhcp_profile
+      - type: cloudify.relationships.depends_on
+        target: limits
+
+  dhcp_global_configuration:
+    type: cloudify.versa.nodes.DHCPGlobalConfiguration
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      dhcp_profile: { get_input: dhcp_profile_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
+      options_profile: { get_input: dhcp_options_profile_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: dhcp_lease_profile
+      - type: cloudify.relationships.depends_on
+        target: dhcp_options_profile
+
+  dhcp_pool_branch1:
+    type: cloudify.versa.nodes.DHCPPool
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
+      options_profile: { get_input: dhcp_options_profile_name }
+      name: branch1_pool
+      mask: { get_input: hq_dhcp_pool_mask }
+      range_name: branch1_range }
+      begin_address: { get_input: branch1_dhcp_begin_address }
+      end_address: { get_input: branch1_dhcp_end_address }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: dhcp_global_configuration
+      - type: cloudify.relationships.depends_on
+        target: limits
+
+  dhcp_pool_branch2:
+    type: cloudify.versa.nodes.DHCPPool
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
+      options_profile: { get_input: dhcp_options_profile_name }
+      name: branch2_pool
+      mask: { get_input: hq_dhcp_pool_mask }
+      range_name: branch2_rang
+      begin_address: { get_input: branch2_dhcp_begin_address }
+      end_address: { get_input: branch2_dhcp_end_address }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: dhcp_global_configuration
+      - type: cloudify.relationships.depends_on
+        target: limits
+
+  branch1_dhcp_server:
+    type: cloudify.versa.nodes.DHCPServer
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
+      options_profile: { get_input: dhcp_options_profile_name }
+      pool_name: branch1_pool
+      name: branch1_dhcp_server
+      networks:
+        - {get_input: branch1_network_name }
+    relationships:
+      - type: cloudify.versa.dhcp_connected_to_profile
+        target: dhcp_pool_branch1
+      - type: cloudify.versa.dhcp_connected_to_routing
+        target: routing
+
+  branch2_dhcp_server:
+    type: cloudify.versa.nodes.DHCPServer
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
+      options_profile: { get_input: dhcp_options_profile_name }
+      pool_name: branch2_pool
+      name: branch2_dhcp_server
+      networks:
+        - {get_input: branch2_network_name }
+    relationships:
+      - type: cloudify.versa.dhcp_connected_to_profile
+        target: dhcp_pool_branch2
+      - type: cloudify.versa.dhcp_connected_to_routing
+        target: routing
+
