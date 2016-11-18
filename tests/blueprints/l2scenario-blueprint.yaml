@@ -44,15 +44,15 @@ inputs:
     branch1_dhcp_pool_mask: 
         default: 255.255.255.0
     branch1_dhcp_begin_address: 
-        default: 10.12.0.30
+        default: 10.1.0.30
     branch1_dhcp_end_address: 
-        default: 10.12.0.40
+        default: 10.1.0.40
     branch2_dhcp_pool_mask: 
         default: 255.255.255.0
     branch2_dhcp_begin_address: 
-        default: 10.13.0.30
+        default: 10.2.0.30
     branch2_dhcp_end_address: 
-        default: 10.13.0.40
+        default: 10.2.0.40
 
 node_templates:
   #####################
