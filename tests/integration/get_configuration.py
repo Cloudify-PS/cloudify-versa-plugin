@@ -82,7 +82,8 @@ def router(appliance, name=""):
 
 
 if __name__ == '__main__':
-    appliance_name = 'manualtesting'
+    appliance_name = 'ipces'
+    # appliance_name = 'manualtesting'
     # display(pool())
     # display(cms_organization('manualtesting'))
     # display(nms_organization())

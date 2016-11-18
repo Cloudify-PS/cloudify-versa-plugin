@@ -1,10 +1,6 @@
 import json
 from versa_plugin.versaclient import JSON, XML
 from requests import codes
-from collections import namedtuple
-
-Routing = namedtuple("Routing",
-                     "ip_prefix, next_hop, interface, preference, tag")
 
 
 def _netmask_to_cidr(netmask):
@@ -166,7 +162,13 @@ def add_traffic_identification_networks(client, appliance, org, network):
     url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
                                                                     org)
     limits = get_organization_limits(client, appliance, org)
-    traffic_node = limits.getElementsByTagName('traffic-identification')[0]
+    traffic_nodes = limits.getElementsByTagName('traffic-identification')
+    if not traffic_nodes:
+        tnode = limits.createElement('traffic-identification')
+        limits.lastChild.appendChild(tnode)
+        traffic_node = tnode
+    else:
+        traffic_node = traffic_nodes[0]
     node = limits.createElement("using-networks")
     value = limits.createTextNode(network)
     node.appendChild(value)

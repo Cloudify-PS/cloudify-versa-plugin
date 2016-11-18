@@ -13,7 +13,6 @@ import versa_plugin.dhcp
 import versa_plugin.firewall
 import versa_plugin.networking
 import versa_plugin.tasks
-from versa_plugin.networking import Routing
 from versa_plugin.cgnat import AddressRange
 
 
@@ -150,30 +149,9 @@ def create_router(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
-    router_name = ctx.node.properties['name']
-    networks = ctx.node.properties.get('networks', [])
-    routings = ctx.node.properties.get('routings', [])
-    if routings:
-        routings = [Routing(r['ip_prefix'], r['next_hop'],
-                            r['interface'], r['preference'],
-                            r['tag']) for r in routings]
+    router = _get_configuration('router', kwargs)
     versa_plugin.networking.create_virtual_router(versa_client,
-                                                  appliance_name,
-                                                  router_name, networks,
-                                                  routings)
-
-
-@operation
-@with_versa_client
-def insert_to_router(versa_client, **kwargs):
-    if is_use_existing():
-        return
-    appliance_name = ctx.node.properties['appliance_name']
-    router_name = ctx.node.properties['name']
-    networks = ctx.node.properties.get('networks', [])
-    for name in networks:
-        versa_plugin.networking.add_network_to_router(
-            versa_client, appliance_name, router_name, name)
+                                                  appliance_name, router)
 
 
 @operation
@@ -182,9 +160,24 @@ def delete_router(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
-    router_name = ctx.node.properties['name']
+    router = _get_configuration('router', kwargs)
+    router_name = router['name']
     versa_plugin.networking.delete_virtual_router(
                 versa_client, appliance_name, router_name)
+
+
+@operation
+@with_versa_client
+def insert_to_router(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    router = _get_configuration('router', kwargs)
+    router_name = router['name']
+    networks = ctx.node.properties.get('networks', [])
+    for name in networks:
+        versa_plugin.networking.add_network_to_router(
+            versa_client, appliance_name, router_name, name)
 
 
 @operation

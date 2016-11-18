@@ -81,11 +81,11 @@ router = """
           static:
             route:
               rti-static-route-list:
-                - ip-prefix:
-                  next-hop:
-                  preference:
-                  tag:
-                  interface:
+                - ip-prefix: 1.2.3.0/24
+                  next-hop: 5.6.7.8
+                  preference: 1
+                  tag: 0
+                  interface: none
     """
 
 zone = """
@@ -147,6 +147,18 @@ class NetworkingTestCase(base.BaseTest):
         versa_plugin.operations.delete_network()
         self.assertFalse(get_conf.network(self.appliance, name))
 
+    def add_router(self, name, **kwargs):
+        """ Add router """
+        self.assertFalse(get_conf.router(self.appliance, name))
+        versa_plugin.operations.create_router()
+        self.assertTrue(get_conf.router(self.appliance, name))
+
+    def delete_router(self, name, **kwargs):
+        """ Delete router """
+        self.assertTrue(get_conf.router(self.appliance, name))
+        versa_plugin.operations.delete_router()
+        self.assertFalse(get_conf.router(self.appliance, name))
+
     @unittest.skip("")
     def test_interface_without_address(self):
         name = 'vni-0/1'
@@ -158,7 +170,7 @@ class NetworkingTestCase(base.BaseTest):
 
     @unittest.skip("")
     def test_interface_with_address(self):
-        name = 'vni-0/1'
+        name = 'vni-0/9'
         self.add_to_sequence(self.add_interface,
                              self.delete_interface,
                              interface_with_address,
@@ -167,7 +179,7 @@ class NetworkingTestCase(base.BaseTest):
 
     @unittest.skip("")
     def test_tvi_interface_with_address(self):
-        name = 'tvi-0/1'
+        name = 'tvi-0/9'
         self.add_to_sequence(self.add_interface,
                              self.delete_interface,
                              tvi_interface_with_address,
@@ -176,7 +188,7 @@ class NetworkingTestCase(base.BaseTest):
 
     @unittest.skip("")
     def test_network(self):
-        interface = 'vni-0/1'
+        interface = 'vni-0/9'
         unit = '.0'
         name = self.gen_name('network')
         self.add_to_sequence(self.add_interface,
@@ -190,12 +202,27 @@ class NetworkingTestCase(base.BaseTest):
                              interface=interface+unit)
         self.run_sequence()
 
-    @unittest.skip("")
+    # @unittest.skip("")
     def test_router(self):
-        self.update_node_properties(router,
-                                    "appliance_name org_name")
-        versa_plugin.operations.create_router()
-        versa_plugin.operations.delete_router()
+        interface = 'vni-0/9'
+        unit = '.0'
+        network_name = self.gen_name('network')
+        name = self.gen_name('router')
+        self.add_to_sequence(self.add_interface,
+                             self.delete_interface,
+                             interface_with_address,
+                             name=interface)
+        self.add_to_sequence(self.add_network,
+                             self.delete_network,
+                             network,
+                             name=network_name,
+                             interface=interface+unit)
+        self.add_to_sequence(self.add_router,
+                             self.delete_router,
+                             router,
+                             name=name,
+                             network=network_name)
+        self.run_sequence()
 
     @unittest.skip("")
     def test_zone(self):
