@@ -21,7 +21,7 @@ requests.packages.urllib3.disable_warnings()
 interface = """
     use_existing: false
     appliance_name: $appliance_name
-    vni:
+    interface:
         name: $name
         enable: true
         promiscuous: false
@@ -30,12 +30,62 @@ interface = """
 interface_with_address = """
     use_existing: false
     appliance_name: $appliance_name
-    org_name: $org_name
-    name: vni-0/5
-    units:
-      - name: 0
-        address: 14.14.0.2
-        mask: 255.255.255.0
+    interface:
+      name: $name
+      enable: true
+      promiscuous: false
+      unit:
+        - name: 0
+          family:
+              inet:
+                address:
+                  addr: 14.14.0.2/24
+    """
+
+tvi_interface_with_address = """
+    use_existing: false
+    appliance_name: $appliance_name
+    interface:
+      name: $name
+      enable: true
+      mode: ipsec
+      mtu: 1400
+      type: ipsec
+      unit:
+        - name: 0
+          enable: true
+          family:
+              inet:
+                address:
+                  addr: 14.14.0.2/24
+    """
+
+network = """
+    use_existing: false
+    appliance_name: $appliance_name
+    network:
+      name: $name
+      interfaces:
+        - $interface
+    """
+
+router = """
+    use_existing: false
+    appliance_name: $appliance_name
+    router:
+        name: $name
+        instance-type: virtual-router
+        networks:
+          - $network
+        routing-options:
+          static:
+            route:
+              rti-static-route-list:
+                - ip-prefix:
+                  next-hop:
+                  preference:
+                  tag:
+                  interface:
     """
 
 zone = """
@@ -59,23 +109,6 @@ zone_update = """
             - parent_router
     """
 
-network = """
-    use_existing: false
-    appliance_name: $appliance_name
-    org_name: $org_name
-    name: test_network
-    interface: vni-0/5
-    unit: 0
-    """
-
-router = """
-    use_existing: false
-    appliance_name: $appliance_name
-    org_name: $org_name
-    update: false
-    name: test_router
-    """
-
 limits = """
     use_existing: false
     appliance_name: $appliance_name
@@ -91,40 +124,71 @@ limits = """
 
 class NetworkingTestCase(base.BaseTest):
     def add_interface(self, name):
-        self.assertFalse(get_conf.interface(name))
+        """ Add interface """
+        self.assertFalse(get_conf.interface(self.appliance, name))
         versa_plugin.operations.create_interface()
-        self.assertTrue(get_conf.interface(name))
+        self.assertTrue(get_conf.interface(self.appliance, name))
 
     def delete_interface(self, name):
-        self.assertTrue(get_conf.interface(name))
+        """ Delete interface """
+        self.assertTrue(get_conf.interface(self.appliance, name))
         versa_plugin.operations.delete_interface()
-        self.assertFalse(get_conf.interface(name))
+        self.assertFalse(get_conf.interface(self.appliance, name))
+
+    def add_network(self, name, **kwargs):
+        """ Add network """
+        self.assertFalse(get_conf.network(self.appliance, name))
+        versa_plugin.operations.create_network()
+        self.assertTrue(get_conf.network(self.appliance, name))
+
+    def delete_network(self, name, **kwargs):
+        """ Delete network """
+        self.assertTrue(get_conf.network(self.appliance, name))
+        versa_plugin.operations.delete_network()
+        self.assertFalse(get_conf.network(self.appliance, name))
 
     @unittest.skip("")
     def test_interface_without_address(self):
         name = 'vni-0/1'
-        self.update_node_properties(interface,
-                                    "appliance_name org_name")
+        self.add_to_sequence(self.add_interface,
+                             self.delete_interface,
+                             interface,
+                             name=name)
+        self.run_sequence()
 
     @unittest.skip("")
     def test_interface_with_address(self):
-        self.update_node_properties(interface_with_address,
-                                    "appliance_name org_name")
-        versa_plugin.operations.create_interface()
-        versa_plugin.operations.delete_interface()
+        name = 'vni-0/1'
+        self.add_to_sequence(self.add_interface,
+                             self.delete_interface,
+                             interface_with_address,
+                             name=name)
+        self.run_sequence()
+
+    @unittest.skip("")
+    def test_tvi_interface_with_address(self):
+        name = 'tvi-0/1'
+        self.add_to_sequence(self.add_interface,
+                             self.delete_interface,
+                             tvi_interface_with_address,
+                             name=name)
+        self.run_sequence()
 
     @unittest.skip("")
     def test_network(self):
-        self.update_node_properties(interface_with_address,
-                                    "appliance_name org_name")
-        versa_plugin.operations.create_interface()
-        self.save_properties()
-        self.update_node_properties(network,
-                                    "appliance_name org_name")
-        versa_plugin.operations.create_network()
-        versa_plugin.operations.delete_network()
-        self.restore_properties()
-        versa_plugin.operations.delete_interface()
+        interface = 'vni-0/1'
+        unit = '.0'
+        name = self.gen_name('network')
+        self.add_to_sequence(self.add_interface,
+                             self.delete_interface,
+                             interface_with_address,
+                             name=interface)
+        self.add_to_sequence(self.add_network,
+                             self.delete_network,
+                             network,
+                             name=name,
+                             interface=interface+unit)
+        self.run_sequence()
 
     @unittest.skip("")
     def test_router(self):

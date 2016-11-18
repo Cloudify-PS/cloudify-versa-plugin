@@ -25,16 +25,19 @@ def get_configuration(url):
 
 def select_by_name(url, root, name=""):
     output = get_configuration(url)
+    if not output:
+        return []
     for i in root:
         output = output.get(i)
     result = output
-    if name:
-        for item in result:
-            if name == item['name']:
-                result = item
-                break
-        else:
-            result = []
+    if result:
+        if name:
+            for item in result:
+                if name == item['name']:
+                    result = item
+                    break
+            else:
+                result = []
     return result
 
 
@@ -58,16 +61,25 @@ def appliance(name=""):
     return select_by_name(url, ['appliance'], name)
 
 
-def interface(appliance, name=""):
+def interface(appliance,  name=""):
     url = '/api/config/devices/device/{}/config/interfaces?deep'.\
           format(appliance)
-    return select_by_name(url, ['interfaces', 'vni'], name)
+    itype = name.split('-')[0]
+    return select_by_name(url, ['interfaces', itype], name)
 
 
 def network(appliance, name=""):
     url = '/api/config/devices/device/{}/config/networks/network?deep'.\
           format(appliance)
     return select_by_name(url, ['network'], name)
+
+
+def router(appliance, name=""):
+    url = '/api/config/devices/device/{}'\
+          '/config/routing-instances/routing-instance?deep'.\
+          format(appliance)
+    return select_by_name(url, ['routing-instance'], name)
+
 
 if __name__ == '__main__':
     appliance_name = 'manualtesting'
@@ -76,4 +88,5 @@ if __name__ == '__main__':
     # display(nms_organization())
     # display(appliance())
     # display(interface(appliance_name 'vni-0/0'))
-    display(network(appliance_name, 'hq'))
+    # display(network(appliance_name, 'hq'))
+    display(router(appliance_name, ''))

@@ -41,6 +41,9 @@ class BaseTest(unittest.TestCase):
         patcher_ctx3.start()
         self.prop = []
         self.sequence = []
+        config = configuration.appliance
+        self.appliance = config['appliance_name']
+        self.org = config['org_name']
 
     def tearDown(self):
         mock.patch.stopall()

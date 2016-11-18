@@ -5,7 +5,6 @@ from collections import namedtuple
 
 Routing = namedtuple("Routing",
                      "ip_prefix, next_hop, interface, preference, tag")
-Unit = namedtuple("Unit", "name, address, mask")
 
 
 def _netmask_to_cidr(netmask):
@@ -29,34 +28,23 @@ def _add_organization_child(xml, tagname, text):
     org_node.appendChild(node)
 
 
-def create_interface(client, appliance, name, units=None):
+def create_interface(client, appliance, interface):
     url = '/api/config/devices/device/{}/config/interfaces'.format(appliance)
-    data = {"vni": {"name": name, "enable": True, "promiscuous": False}}
-    if units:
-        units_list = [{"name": u.name,
-                       "family": {
-                           "inet": {
-                               "address": [{
-                                   "addr": "{}/{}".format(u.address,
-                                                          _netmask_to_cidr(
-                                                              u.mask))}]}},
-                       "enable": True}
-                      for u in units]
-        data['vni'].update({"unit": units_list})
+    itype = interface['name'].split('-')[0]
+    data = {itype: interface}
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
 def delete_interface(client, appliance, name):
+    itype = name.split('-')[0]
     url = '/api/config/devices/device/{}'\
-          '/config/interfaces/vni/%22{}%22'.format(appliance, name)
+          '/config/interfaces/{}/%22{}%22'.format(appliance, itype, name)
     client.delete(url, codes.no_content)
 
 
-def create_network(client, appliance, name, interface):
+def create_network(client, appliance, network):
     url = '/api/config/devices/device/{}/config/networks'.format(appliance)
-    data = {"network": {
-        "name": name,
-        "interfaces": [interface]}}
+    data = {"network": network}
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
@@ -66,27 +54,10 @@ def delete_network(client, appliance, name):
     client.delete(url, codes.no_content)
 
 
-def create_virtual_router(client, appliance, name, networks, routings=None):
+def create_virtual_router(client, appliance, router):
     url = '/api/config/devices/device/{}'\
           '/config/routing-instances'.format(appliance)
-    route_list = []
-    if routings:
-        for route in routings:
-            route_list.append({
-                            "ip-prefix": route.ip_prefix,
-                            "next-hop": route.next_hop,
-                            "preference": route.preference,
-                            "tag": route.tag,
-                            "interface": route.interface})
-    data = {
-        "routing-instance": [{
-            "name": name,
-            "instance-type": "virtual-router",
-            "networks": networks,
-            "routing-options": {
-                "static": {
-                    "route": {
-                        "rti-static-route-list": route_list}}}}]}
+    data = {"routing-instance": [router]}
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
@@ -106,7 +77,7 @@ def add_network_to_router(client, appliance, name, network):
     client.put(url, json.dumps(result), JSON, codes.no_content)
 
 
-def delete_network_to_router(client, appliance, name, network):
+def delete_network_from_router(client, appliance, name, network):
     url = '/api/config/devices/device/{}'\
           '/config/routing-instances/'\
           'routing-instance/{}'.format(appliance, name)

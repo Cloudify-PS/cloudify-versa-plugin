@@ -505,9 +505,7 @@ node_types:
         default: {}
       appliance_name:
         default: ""
-      name:
-        default: ""
-      units:
+      interface:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:

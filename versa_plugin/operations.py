@@ -14,7 +14,6 @@ import versa_plugin.firewall
 import versa_plugin.networking
 import versa_plugin.tasks
 from versa_plugin.networking import Routing
-from versa_plugin.networking import Unit
 from versa_plugin.cgnat import AddressRange
 
 
@@ -553,15 +552,9 @@ def create_interface(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
-    name = ctx.node.properties['name']
-    units = ctx.node.properties.get('units')
-    if units:
-        unitlist = [Unit(unit['name'], unit['address'], unit['mask'])
-                    for unit in units]
-    else:
-        unitlist = []
+    interface = _get_configuration('interface', kwargs)
     versa_plugin.networking.create_interface(versa_client, appliance_name,
-                                             name, unitlist)
+                                             interface)
 
 
 @operation
@@ -570,7 +563,8 @@ def delete_interface(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
-    name = ctx.node.properties['name']
+    interface = _get_configuration('interface', kwargs)
+    name = interface['name']
     versa_plugin.networking.delete_interface(versa_client, appliance_name,
                                              name)
 
@@ -581,12 +575,9 @@ def create_network(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
-    name = ctx.node.properties['name']
-    interface = ctx.node.properties['interface']
-    unit = ctx.node.properties['unit']
-    full_interface = "{}.{}".format(interface, unit)
+    network = _get_configuration('network', kwargs)
     versa_plugin.networking.create_network(versa_client, appliance_name,
-                                           name, full_interface)
+                                           network)
 
 
 @operation
@@ -595,7 +586,8 @@ def delete_network(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
-    name = ctx.node.properties['name']
+    network = _get_configuration('network', kwargs)
+    name = network['name']
     versa_plugin.networking.delete_network(versa_client, appliance_name, name)
 
 
