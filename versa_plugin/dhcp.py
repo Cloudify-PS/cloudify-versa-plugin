@@ -1,5 +1,6 @@
 import json
 from versa_plugin.versaclient import JSON
+from versa_plugin import find_by_name
 from requests import codes
 
 
@@ -29,18 +30,30 @@ def create_options_profile(client, appliance, org_name, name, domain, servers):
     client.post(url, json.dumps(data), JSON, codes.created)
 
 
+def delete_options_profile(client, appliance, org_name, name):
+    url = '/api/config/devices/device/{}'\
+        '/config/orgs/org-services/{}'\
+        '/dhcp/dhcp4-options-profiles/'\
+        'dhcp4-options-profile/{}'.format(appliance, org_name, name)
+    client.delete(url, codes.no_content)
+
+
+def is_dhcp_profile_exists(client, appliance, org_name, name):
+    url = '/api/config/devices/device/{}'\
+        '/config/orgs/org-services/{}'\
+        '/dhcp/dhcp4-options-profiles/'\
+        'dhcp4-options-profile?deep'.format(appliance, org_name)
+    result = client.get(url, None, None, codes.ok)
+    return find_by_name(result, "dhcp4-options-profile", name)
+
+
 def is_lease_profile_exsists(client, appliance, org_name, name):
     url = '/api/config/devices/device/{}'\
         '/config/orgs/org-services/{}/dhcp/'\
         'dhcp4-lease-profiles/'\
         'dhcp4-lease-profile?deep=true'.format(appliance, org_name)
     result = client.get(url, None, None, codes.ok)
-    if not result:
-        return
-    for lease in result["dhcp4-lease-profile"]:
-        if lease["name"] == name:
-            return True
-    return False
+    return find_by_name(result, "dhcp4-lease-profile", name)
 
 
 def create_lease_profile(client, appliance, org_name, name):
@@ -55,6 +68,15 @@ def create_lease_profile(client, appliance, org_name, name):
             "rebind-timer": "2800",
             "log-utilization": False}}
     client.post(url, json.dumps(data), JSON, codes.created)
+
+
+def delete_lease_profile(client, appliance, org_name, name):
+    url = '/api/config/devices/device/{}'\
+        '/config/orgs/org-services/{}'\
+        '/dhcp/dhcp4-lease-profiles/dhcp4-lease-profile/{}'.format(appliance,
+                                                                   org_name,
+                                                                   name)
+    client.delete(url, codes.no_content)
 
 
 def create_pool(client, appliance, org_name, pool_name, mask,
@@ -88,6 +110,20 @@ def delete_pool(client, appliance, org_name, pool_name):
     client.delete(url, codes.no_content)
 
 
+def is_pool_exists(client, appliance, org_name, pool_name):
+    url = '/api/config/devices/device/{}'\
+        '/config/orgs/org-services/{}'\
+        '/dhcp/dhcp4-dynamic-pools'\
+        '/dhcp4-dynamic-pool?deep'.format(appliance, org_name)
+    result = client.get(url, None, None, codes.ok)
+    if not result:
+        return
+    for pool in result["dhcp4-dynamic-pool"]:
+        if pool["name"] == pool_name:
+            return True
+    return False
+
+
 def create_server(client, appliance, org_name, server_name,
                   lease_profile, options_profile, networks, pool):
     url = '/api/config/devices/device/{}'\
@@ -118,3 +154,13 @@ def delete_server(client, appliance, org_name, server_name):
                                                             org_name,
                                                             server_name)
     client.delete(url, codes.no_content)
+
+
+def is_server_exists(client, appliance, org_name, server_name):
+    url = '/api/config/devices/device/{}'\
+        '/config/orgs/org-services/{}'\
+        '/dhcp/dhcp4-server-and-relay'\
+        '/service-profiles/dhcp4-service-profile?deep'.format(appliance,
+                                                              org_name)
+    result = client.get(url, None, None, codes.ok)
+    return find_by_name(result, 'dhcp4-service-profile', server_name)

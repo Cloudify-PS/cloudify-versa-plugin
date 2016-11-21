@@ -132,7 +132,7 @@ node_templates:
           - { get_input: branch2_interface_name }
     relationships:
       - type: cloudify.relationships.depends_on
-        target: branch1_interface
+        target: branch2_interface
 
   #####################
   # Routing configuration
@@ -253,7 +253,7 @@ node_templates:
       options_profile: { get_input: dhcp_options_profile_name }
       name: branch1_pool
       mask: { get_input: hq_dhcp_pool_mask }
-      range_name: branch1_range }
+      range_name: branch1_range 
       begin_address: { get_input: branch1_dhcp_begin_address }
       end_address: { get_input: branch1_dhcp_end_address }
     relationships:
@@ -261,6 +261,10 @@ node_templates:
         target: dhcp_global_configuration
       - type: cloudify.relationships.depends_on
         target: limits
+      - type: cloudify.relationships.depends_on
+        target: dhcp_lease_profile
+      - type: cloudify.relationships.depends_on
+        target: dhcp_options_profile
 
   dhcp_pool_branch2:
     type: cloudify.versa.nodes.DHCPPool
@@ -272,7 +276,7 @@ node_templates:
       options_profile: { get_input: dhcp_options_profile_name }
       name: branch2_pool
       mask: { get_input: hq_dhcp_pool_mask }
-      range_name: branch2_rang
+      range_name: branch2_range
       begin_address: { get_input: branch2_dhcp_begin_address }
       end_address: { get_input: branch2_dhcp_end_address }
     relationships:
@@ -280,6 +284,10 @@ node_templates:
         target: dhcp_global_configuration
       - type: cloudify.relationships.depends_on
         target: limits
+      - type: cloudify.relationships.depends_on
+        target: dhcp_lease_profile
+      - type: cloudify.relationships.depends_on
+        target: dhcp_options_profile
 
   branch1_dhcp_server:
     type: cloudify.versa.nodes.DHCPServer

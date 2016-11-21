@@ -240,6 +240,16 @@ class NetworkingTestCase(base.BaseTest):
 
     @unittest.skip("")
     def test_limits(self):
-        self.update_node_properties(limits,
-                                    "appliance_name org_name")
-        versa_plugin.operations.insert_to_limits()
+        interface = 'vni-0/9'
+        unit = '.0'
+        name = self.gen_name('network')
+        self.add_to_sequence(self.add_interface,
+                             self.delete_interface,
+                             interface_with_address,
+                             name=interface)
+        self.add_to_sequence(self.add_network,
+                             self.delete_network,
+                             network,
+                             name=name,
+                             interface=interface+unit)
+        self.run_sequence()

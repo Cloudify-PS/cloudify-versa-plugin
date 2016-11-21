@@ -1,5 +1,6 @@
 import json
 from versa_plugin.versaclient import JSON, XML
+from versa_plugin import find_by_name
 from requests import codes
 
 
@@ -50,6 +51,13 @@ def delete_network(client, appliance, name):
     client.delete(url, codes.no_content)
 
 
+def is_network_exists(client, appliance, name):
+    url = '/api/config/devices/device/{}/config/networks/network?deep'.\
+          format(appliance)
+    result = client.get(url, None, None, codes.ok, JSON)
+    return find_by_name(result, 'network', name)
+
+
 def create_virtual_router(client, appliance, router):
     url = '/api/config/devices/device/{}'\
           '/config/routing-instances'.format(appliance)
@@ -62,6 +70,14 @@ def delete_virtual_router(client, appliance, name):
           '/config/routing-instances/routing-instance/{}'.format(appliance,
                                                                  name)
     client.delete(url, codes.no_content)
+
+
+def is_router_exists(client, appliance, name):
+    url = '/api/config/devices/device/{}'\
+          '/config/routing-instances/routing-instance?deep'.\
+          format(appliance)
+    result = client.get(url, None, None, codes.ok, JSON)
+    return find_by_name(result, 'routing-instance', name)
 
 
 def add_network_to_router(client, appliance, name, network):
@@ -99,6 +115,13 @@ def delete_dhcp_profile(client, appliance, profile):
     client.delete(url, codes.no_content)
 
 
+def is_dhcp_profile_exists(client, appliance, profile):
+    url = '/api/config/devices/device/{}'\
+          '/config/dhcp-profiles/dhcp-profile?deep'.format(appliance)
+    result = client.get(url, None, None, codes.ok, JSON)
+    return find_by_name(result, 'dhcp-profile', profile)
+
+
 def get_organization_limits(client, appliance, org):
     url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
                                                                     org)
@@ -109,13 +132,24 @@ def get_organization_limits(client, appliance, org):
     return result
 
 
-def update_dhcp_profile(client, appliance, org, profile):
+def insert_dhcp_profile_to_limits(client, appliance, org, profile):
     url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
                                                                     org)
     limits = get_organization_limits(client, appliance, org)
     _add_organization_child(limits, 'dhcp-profile', profile)
     xmldata = limits.toxml()
     client.put(url, xmldata, XML, codes.no_content)
+
+
+def delete_dhcp_profile_from_limits(client, appliance, org, profile):
+    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
+                                                                    org)
+    limits = get_organization_limits(client, appliance, org)
+    node = _find_node_by_name(limits, "dhcp-profile", profile)
+    if node:
+        limits.firstChild.removeChild(node)
+        xmldata = limits.toxml()
+        client.put(url, xmldata, XML, codes.no_content)
 
 
 def add_routing_instance(client, appliance, org, instance):
@@ -133,7 +167,7 @@ def delete_routing_instance(client, appliance, org, instance):
     limits = get_organization_limits(client, appliance, org)
     node = _find_node_by_name(limits, "available-routing-instances", instance)
     if node:
-        limits.removeChild(node)
+        limits.firstChild.removeChild(node)
         xmldata = limits.toxml()
         client.put(url, xmldata, XML, codes.no_content)
 
@@ -153,7 +187,7 @@ def delete_provider_organization(client, appliance, org, provider):
     limits = get_organization_limits(client, appliance, org)
     node = _find_node_by_name(limits, "available-provider-orgs", provider)
     if node:
-        limits.removeChild(node)
+        limits.firstChild.removeChild(node)
         xmldata = limits.toxml()
         client.put(url, xmldata, XML, codes.no_content)
 

@@ -40,3 +40,12 @@ def get_mandatory(obj, parameter):
     else:
         raise cfy_exc.NonRecoverableError(
             "Mandatory parameter {0} is absent".format(parameter))
+
+
+def find_by_name(result, key, name):
+    if not result:
+        return None
+    for item in result[key]:
+        if item["name"] == name:
+            return item
+    return None
