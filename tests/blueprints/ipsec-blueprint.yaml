@@ -31,7 +31,7 @@ inputs:
         default: net1
     external_interface_name:
       default: vni-0/0 
-    interna_network_name:
+    internal_network_name:
         default: hq_network
     internal_interface_name: 
       default: vni-0/1
@@ -65,8 +65,6 @@ node_templates:
       versa_config: { get_property: [versa_configuration, versa_config] }
       use_existing: { get_input : use_exsisting_appliance }
     relationships:
-      - type: cloudify.versa.pool_connected_to_vm
-        target: flexvm
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -87,9 +85,9 @@ node_templates:
             - { get_input: pool_name }
         org-networks:
           org-network:
-            - name: { get_input: branch1_network_name }
+            - name: { get_input: internal_network_name }
               ipaddress-allocation-mode: manual
-            - name: { get_input: branch2_network_name }
+            - name: { get_input: external_network_name }
               ipaddress-allocation-mode: manual
     relationships:
       - type: cloudify.versa.cms_org_connected_to_pool
@@ -151,8 +149,6 @@ node_templates:
     relationships:
       - type: cloudify.versa.organization_connected_to_appliance
         target: parent_organization
-      - type: cloudify.versa.organization_connected_to_appliance
-        target: hq_organization
           
   #####################
   # Interface configuration
@@ -308,10 +304,9 @@ node_templates:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: org_name }
-      dhcp_profile: { get_input: dhcp_profile_name }
       routes:
-        - { get_input: internal_router}
-        - { get_input: external_router}
+        - { get_input: internal_router_name}
+        - { get_input: external_router_name}
       networks:
           - { get_input: internal_network_name }
           - { get_input: external_network_name }
