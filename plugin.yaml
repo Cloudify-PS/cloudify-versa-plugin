@@ -536,7 +536,7 @@ node_types:
           implementation: versa.versa_plugin.operations.delete_from_limits
           inputs: {}
 
-  cloudify.versa.nodes.VPNProfile
+  cloudify.versa.nodes.VPNProfile:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
       use_existing:
