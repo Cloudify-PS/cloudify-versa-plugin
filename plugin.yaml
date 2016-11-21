@@ -350,6 +350,9 @@ node_types:
         create:
           implementation: versa.versa_plugin.operations.create_dhcp_options_profile
           inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_dhcp_options_profile
+          inputs: {}
 
   cloudify.versa.nodes.DHCPLeaseProfile:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -368,6 +371,9 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_dhcp_lease_profile
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_dhcp_lease_profile
           inputs: {}
 
   cloudify.versa.nodes.DHCPGlobalConfiguration:
@@ -391,6 +397,9 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_dhcp_global_configuration
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_dhcp_global_configuration
           inputs: {}
 
   cloudify.versa.nodes.DHCPPool:
