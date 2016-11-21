@@ -1,0 +1,332 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
+  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/vpn/plugin.yaml
+
+inputs:
+    versa_url:
+        default: "https://172.19.0.210:9183"
+    client_id:
+        default: "voae_rest"
+    client_secret:
+        default: "asrevnet_123"
+    username:
+        default: "Administrator"
+    password:
+        default: "versa123"
+    appliance_name:
+      default: ipsec
+    org_name:
+        default: vcpe1_parent_org
+    use_exsisting_appliance:
+        default: true
+    pool_name: 
+        default: ipsec
+    pool_ip: 
+        default: 192.168.200.205
+    cms_org_name: 
+        default: ipsec
+    external_network_name:
+        default: net1
+    external_interface_name:
+      default: vni-0/0 
+    interna_network_name:
+        default: hq_network
+    internal_interface_name: 
+      default: vni-0/1
+    tunnel_interface_name: 
+      default: tvi-0/0
+    internal_router_name: 
+        default:  internal_router
+    external_router_name: 
+        default:  external_router
+
+node_templates:
+  #####################
+  # Versa config
+  #####################
+  versa_configuration:
+    type: cloudify.versa.nodes.versa_configuration
+    properties:
+      versa_config:
+        username: { get_input: username }
+        password: { get_input: password }
+        versa_url: { get_input: versa_url}
+        client_id: { get_input: client_id}
+        client_secret: { get_input: client_secret}
+
+  #####################
+  # CMS config
+  #####################
+  resource_pool:
+    type: cloudify.versa.nodes.ResourcePool
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      use_existing: { get_input : use_exsisting_appliance }
+    relationships:
+      - type: cloudify.versa.pool_connected_to_vm
+        target: flexvm
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            instance:
+              name: { get_input: pool_name }
+              ip-address: { get_input: pool_ip }
+
+  cms_organization:
+    type: cloudify.versa.nodes.CMSLocalOrganization
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      use_existing: { get_input : use_exsisting_appliance }
+      organization:
+        name: { get_input: cms_org_name }
+        resource-pool:
+          instances: 
+            - { get_input: pool_name }
+        org-networks:
+          org-network:
+            - name: { get_input: branch1_network_name }
+              ipaddress-allocation-mode: manual
+            - name: { get_input: branch2_network_name }
+              ipaddress-allocation-mode: manual
+    relationships:
+      - type: cloudify.versa.cms_org_connected_to_pool
+        target: resource_pool
+
+  #####################
+  # NMS organizations
+  #####################
+  parent_organization:
+    type: cloudify.versa.nodes.Organization
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      use_existing: { get_input : use_exsisting_appliance }
+      organization:
+        name: { get_input: org_name }
+        parent-org: none
+        subscription-plan: Default-All-Services-Plan
+        cms-orgs: 
+            name: { get_input: cms_org_name }
+            cms-connector: local
+    relationships:
+      - type: cloudify.versa.nms_org_connected_to_cms_org
+        target: cms_organization
+
+  #####################
+  # Appliance configuration
+  #####################
+  appliance:
+    type: cloudify.versa.nodes.Appliance
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      use_existing: { get_input : use_exsisting_appliance }
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            device:
+              mgmt-ip: { get_input: pool_ip }
+              name: { get_input: appliance_name }
+              org: { get_input: org_name }
+              cmsorg: { get_input: cms_org_name }
+              type: service-vnf
+              networking-info:
+                  - network-info:
+                      network-name: { get_input: external_network_name }
+                  - network-info:
+                      network-name: { get_input: internal_network_name }
+              snglist:
+                  - sng:
+                      name: Default_All_Services
+                      isPartOfVCSN: true
+                      services:
+                          - cgnat
+                          - nextgen-firewall
+              subscription:
+                  solution-tier: nextgen-firewall
+                  bandwidth: 100
+                  is-analytics-enabled: true
+    relationships:
+      - type: cloudify.versa.organization_connected_to_appliance
+        target: parent_organization
+      - type: cloudify.versa.organization_connected_to_appliance
+        target: hq_organization
+          
+  #####################
+  # Interface configuration
+  #####################
+  internal_interface:
+    type: cloudify.versa.nodes.Interface
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      interface:
+        name: { get_input: internal_interface_name }
+        enable: true
+        promiscuous: false
+        unit:
+          - name: 0
+            family:
+                inet:
+                  address:
+                    addr: 192.168.63.216/24
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: appliance
+
+  external_interface:
+    type: cloudify.versa.nodes.Interface
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      interface:
+        name: { get_input: external_interface_name }
+        enable: true
+        promiscuous: false
+        unit:
+          - name: 0
+            family:
+                inet:
+                  address:
+                    addr: 87.53.86.10/30
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: appliance
+
+
+  tunnel_interface:
+    type: cloudify.versa.nodes.Interface
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      interface:
+        name: { get_input: tunnel_interface_name }
+        enable: true
+        promiscuous: false
+        unit:
+          - name: 0
+            family:
+                inet:
+                  address:
+                    addr: 11.11.11.63/24
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: appliance
+
+
+  #####################
+  # Network configuration
+  #####################
+  external_network:
+    type: cloudify.versa.nodes.Network
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      network:
+        name: { get_input: external_network_name }
+        interfaces: 
+          - vni-0/0.0
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: external_interface
+          
+  internal_network:
+    type: cloudify.versa.nodes.Network
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      network:
+        name: { get_input: internal_network_name }
+        interfaces: 
+          - vni-0/1.0
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: internal_interface
+
+  #####################
+  # Routing configuration
+  #####################
+  internal_router:
+    type: cloudify.versa.nodes.Router
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      router:
+        name: { get_input: internal_router_name }
+        instance-type: virtual-router
+        networks:
+          - { get_input: internal_network_name }
+        interfaces:
+          - tvi-0/4.0
+        routing-options:
+          static:
+            route:
+              rti-static-route-list:
+                - ip-prefix:    192.168.65.0/24
+                  next-hop: 11.11.11.1
+                  preference: 1
+                  tag: 0
+                  interface: none
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: internal_network
+      - type: cloudify.relationships.depends_on
+        target: tunnel_interface
+
+  external_router:
+    type: cloudify.versa.nodes.Router
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      router:
+        name: { get_input: external_router_name }
+        instance-type: virtual-router
+        networks:
+          - { get_input: external_network_name }
+        routing-options:
+          static:
+            route:
+              rti-static-route-list:
+                - ip-prefix: 0.0.0.0/0
+                  next-hop: 87.53.86.9
+                  preference: 1
+                  tag: 0
+                  interface: none
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: external_network
+
+  #####################
+  # Limits configuration
+  #####################
+
+  limits:
+    type: cloudify.versa.nodes.Limits
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      dhcp_profile: { get_input: dhcp_profile_name }
+      routes:
+        - { get_input: internal_router}
+        - { get_input: external_router}
+      networks:
+          - { get_input: internal_network_name }
+          - { get_input: external_network_name }
+      interfaces:
+          - tvi-0/4.0
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: internal_router
+      - type: cloudify.relationships.depends_on
+        target: external_router
+      - type: cloudify.relationships.depends_on
+        target: internal_network
+      - type: cloudify.relationships.depends_on
+        target: external_network
+      - type: cloudify.relationships.depends_on
+        target: tunnel_interface
+
+
