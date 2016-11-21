@@ -122,7 +122,13 @@ limits = """
     """
 
 
-class NetworkingTestCase(base.BaseTest):
+class Operations(unittest.TestCase):
+    def __init__(self, appliance):
+        self.appliance = appliance
+
+    def runTest(self):
+        pass
+
     def add_interface(self, name):
         """ Add interface """
         self.assertFalse(get_conf.interface(self.appliance, name))
@@ -159,6 +165,16 @@ class NetworkingTestCase(base.BaseTest):
         versa_plugin.operations.delete_router()
         self.assertFalse(get_conf.router(self.appliance, name))
 
+    def add_limits(self, **kwargs):
+        """ Add limits """
+        versa_plugin.operations.insert_to_limits()
+
+    def delete_limits(self, **kwargs):
+        """ Delete limits """
+        versa_plugin.operations.delete_from_limits()
+
+
+class NetworkingTestCase(base.BaseTest):
     @unittest.skip("")
     def test_interface_without_address(self):
         name = 'vni-0/1'
@@ -202,7 +218,7 @@ class NetworkingTestCase(base.BaseTest):
                              interface=interface+unit)
         self.run_sequence()
 
-    # @unittest.skip("")
+    @unittest.skip("")
     def test_router(self):
         interface = 'vni-0/9'
         unit = '.0'

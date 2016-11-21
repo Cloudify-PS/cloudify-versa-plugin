@@ -13,6 +13,7 @@ import versa_plugin.dhcp
 import versa_plugin.firewall
 import versa_plugin.networking
 import versa_plugin.tasks
+import versa_plugin.vpn
 from versa_plugin.cgnat import AddressRange
 
 
@@ -674,6 +675,7 @@ def insert_to_limits(versa_client, **kwargs):
     dhcp_profile = ctx.node.properties.get('dhcp_profile')
     routes = ctx.node.properties.get('routes', [])
     networks = ctx.node.properties.get('networks', [])
+    interfaces = ctx.node.properties.get('interfaces', [])
     provider_orgs = ctx.node.properties.get('provider_orgs', [])
     if dhcp_profile:
         versa_plugin.networking.insert_dhcp_profile_to_limits(versa_client,
@@ -686,7 +688,10 @@ def insert_to_limits(versa_client, **kwargs):
                                                      org_name, name)
     for name in networks:
         versa_plugin.networking.add_traffic_identification_networks(
-            versa_client, appliance_name, org_name, name)
+            versa_client, appliance_name, org_name, name, 'using-networks')
+    for name in interfaces:
+        versa_plugin.networking.add_traffic_identification_networks(
+            versa_client, appliance_name, org_name, name, 'using')
     for name in provider_orgs:
         versa_plugin.networking.add_provider_organization(versa_client,
                                                           appliance_name,
@@ -704,6 +709,7 @@ def delete_from_limits(versa_client, **kwargs):
     dhcp_profile = ctx.node.properties.get('dhcp_profile')
     routes = ctx.node.properties.get('routes', [])
     networks = ctx.node.properties.get('networks', [])
+    interfaces = ctx.node.properties.get('interfaces', [])
     provider_orgs = ctx.node.properties.get('provider_orgs', [])
     for name in routes:
         versa_plugin.networking.delete_routing_instance(versa_client,
@@ -711,7 +717,10 @@ def delete_from_limits(versa_client, **kwargs):
                                                         org_name, name)
     for name in networks:
         versa_plugin.networking.delete_traffic_identification_networks(
-            versa_client, appliance_name, org_name, name)
+            versa_client, appliance_name, org_name, name, 'using-networks')
+    for name in interfaces:
+        versa_plugin.networking.delete_traffic_identification_networks(
+            versa_client, appliance_name, org_name, name, 'using')
     for name in provider_orgs:
         versa_plugin.networking.delete_provider_organization(versa_client,
                                                              appliance_name,
@@ -722,3 +731,36 @@ def delete_from_limits(versa_client, **kwargs):
                                                                 appliance_name,
                                                                 org_name,
                                                                 dhcp_profile)
+
+
+@operation
+@with_versa_client
+def create_vpn_profile(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    profile = _get_configuration('profile', kwargs)
+    name = profile['name']
+    if versa_plugin.vpn.is_profile_exists(versa_client,
+                                          appliance_name, org_name,
+                                          name):
+        raise cfy_exc.NonRecoverableError("VPN profile exists")
+    versa_plugin.vpn.create_profile(versa_client, appliance_name, org_name,
+                                    profile)
+
+
+@operation
+@with_versa_client
+def delete_vpn_profile(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    profile = _get_configuration('profile', kwargs)
+    name = profile['name']
+    if versa_plugin.vpn.is_profile_exists(versa_client,
+                                          appliance_name, org_name,
+                                          name):
+        versa_plugin.vpn.delete_profile(versa_client, appliance_name, org_name,
+                                        name)

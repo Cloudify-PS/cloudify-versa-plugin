@@ -192,7 +192,7 @@ def delete_provider_organization(client, appliance, org, provider):
         client.put(url, xmldata, XML, codes.no_content)
 
 
-def add_traffic_identification_networks(client, appliance, org, network):
+def add_traffic_identification_networks(client, appliance, org, name, using):
     url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
                                                                     org)
     limits = get_organization_limits(client, appliance, org)
@@ -203,22 +203,22 @@ def add_traffic_identification_networks(client, appliance, org, network):
         traffic_node = tnode
     else:
         traffic_node = traffic_nodes[0]
-    node = limits.createElement("using-networks")
-    value = limits.createTextNode(network)
+    node = limits.createElement(using)
+    value = limits.createTextNode(name)
     node.appendChild(value)
     traffic_node.appendChild(node)
     xmldata = limits.toxml()
     client.put(url, xmldata, XML, codes.no_content)
 
 
-def delete_traffic_identification_networks(client, appliance, org, network):
+def delete_traffic_identification_networks(client, appliance, org, name, using):
     url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
                                                                     org)
     limits = get_organization_limits(client, appliance, org)
     traffic_node = limits.getElementsByTagName('traffic-identification')[0]
     node = None
-    for net in limits.getElementsByTagName("using-networks"):
-        if net.firstChild.data == network:
+    for net in limits.getElementsByTagName(using):
+        if net.firstChild.data == name:
             node = net
             break
     if node:

@@ -1,7 +1,7 @@
 plugins:
   versa:
     executor: central_deployment_agent
-    source: http://github.com/Cloudify-PS/cloudify-versa-plugin/archive/cleanup.zip
+    source: http://github.com/Cloudify-PS/cloudify-versa-plugin/archive/vpn.zip
     package_name: cloudify-versa-plugin
     package_version: '1.0'
 
@@ -523,6 +523,8 @@ node_types:
         default: {}
       networks:
         default: {}
+      interfaces:
+        default: {}
       provider_orgs:
         default: {}
     interfaces:
@@ -532,6 +534,28 @@ node_types:
           inputs: {}
         delete:
           implementation: versa.versa_plugin.operations.delete_from_limits
+          inputs: {}
+
+  cloudify.versa.nodes.VPNProfile
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      profile:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_vpn_profile
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_vpn_profile
           inputs: {}
 
 relationships:

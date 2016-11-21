@@ -81,13 +81,21 @@ def router(appliance, name=""):
     return select_by_name(url, ['routing-instance'], name)
 
 
+def vpn_profile(appliance, org, name=""):
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org-services/{}'\
+          '/ipsec/vpn-profile?deep'.format(appliance, org)
+    return select_by_name(url, ['vpn-profile'], name)
+
+
 if __name__ == '__main__':
-    appliance_name = 'ipces'
-    # appliance_name = 'manualtesting'
+    # appliance_name = 'ipces'
+    appliance_name = 'manualtesting'
+    org_name = 'TDC'
     # display(pool())
     # display(cms_organization('manualtesting'))
     # display(nms_organization())
     # display(appliance())
     # display(interface(appliance_name 'vni-0/0'))
     # display(network(appliance_name, 'hq'))
-    display(router(appliance_name, ''))
+    display(vpn_profile(appliance_name, org_name, 'vpn-profile-VUZQL'))
