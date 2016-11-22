@@ -16,9 +16,9 @@ inputs:
     password:
         default: "versa123"
     appliance_name:
-      default: ipsec
+      default: manualtesting
     org_name:
-        default: vcpe1_parent_org
+        default: TDC
     use_exsisting_appliance:
         default: true
     pool_name: 
@@ -28,7 +28,7 @@ inputs:
     cms_org_name: 
         default: ipsec
     external_network_name:
-        default: net1
+        default: external
     external_interface_name:
       default: vni-0/0 
     internal_network_name:
@@ -41,6 +41,8 @@ inputs:
         default:  internal_router
     external_router_name: 
         default:  external_router
+    unit:
+        default: 0
 
 node_templates:
   #####################
@@ -200,9 +202,12 @@ node_templates:
       interface:
         name: { get_input: tunnel_interface_name }
         enable: true
-        promiscuous: false
+        mode: ipsec
+        type: ipsec
+        mtu: 1400
         unit:
           - name: 0
+            enable: true
             family:
                 inet:
                   address:
@@ -223,7 +228,7 @@ node_templates:
       network:
         name: { get_input: external_network_name }
         interfaces: 
-          - vni-0/0.0
+          - { concat: [get_input: external_interface_name, ".", get_input: unit] }
     relationships:
       - type: cloudify.relationships.depends_on
         target: external_interface
@@ -236,7 +241,7 @@ node_templates:
       network:
         name: { get_input: internal_network_name }
         interfaces: 
-          - vni-0/1.0
+          - { concat: [get_input: internal_interface_name, ".", get_input: unit] }
     relationships:
       - type: cloudify.relationships.depends_on
         target: internal_interface
@@ -255,7 +260,7 @@ node_templates:
         networks:
           - { get_input: internal_network_name }
         interfaces:
-          - tvi-0/4.0
+          - { concat: [get_input: tunnel_interface_name, ".", get_input: unit] }
         routing-options:
           static:
             route:
@@ -311,7 +316,7 @@ node_templates:
           - { get_input: internal_network_name }
           - { get_input: external_network_name }
       interfaces:
-          - tvi-0/4.0
+          - { concat: [get_input: tunnel_interface_name, ".", get_input: unit] }
     relationships:
       - type: cloudify.relationships.depends_on
         target: internal_router
@@ -325,3 +330,52 @@ node_templates:
         target: tunnel_interface
 
 
+  #####################
+  # VPN configuration
+  #####################
+
+  vpn_profile:
+    type: cloudify.versa.nodes.VPNProfile
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      profile:
+        name: vpn_profile
+        vpn-type: site-to-site
+        tunnel-initiate: automatic
+        hardware-accelerator: any
+        routing-instance: { get_input: external_router_name}
+        tunnel-routing-instance: { get_input: internal_router_name}
+        tunnel-interface: { concat: [get_input: tunnel_interface_name, ".", get_input: unit] }
+        local-auth-info:
+            auth-type: psk
+            id-string: 87.53.86.10
+            id-type: ip
+            key: versa123
+        peer-auth-info:
+            auth-type: psk
+            id-type: ip
+            key: versa123
+            id-string: 87.53.86.14
+        ipsec:
+            fragmentation: pre-fragmentation
+            force-nat-t: disable
+            mode: tunnel
+            pfs-group: mod-none
+            anti-replay: disable
+            transform: esp-aes128-sha1
+            keepalive-timeout: 10
+        ike:
+            version: v2
+            group: mod2
+            transform: aes128-sha1
+            lifetime: 28800
+            dpd-timeout: 30
+        local:
+            inet: 87.53.86.10
+        peer:
+            inet: 87.53.86.14
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: limits
