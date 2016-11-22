@@ -43,6 +43,23 @@ inputs:
         default:  external_router
     unit:
         default: 0
+    dhcp_profile_name:
+        default: dhcp_profile
+    dhcp_lease_profile_name:
+        default: dhcp_lease_profile
+    dhcp_options_profile_name:
+        default: dhcp_options_profile
+    branch_domain_name:
+        default: branch.org
+    dns_server: 
+        default: 8.8.8.8
+    dhcp_pool_mask: 
+        default: 255.255.255.0
+    branch1_dhcp_begin_address: 
+        default: 192.168.63.100
+    branch1_dhcp_end_address: 
+        default: 192.168.63.200
+
 
 node_templates:
   #####################
@@ -265,7 +282,7 @@ node_templates:
           static:
             route:
               rti-static-route-list:
-                - ip-prefix:    192.168.65.0/24
+                - ip-prefix: 192.168.65.0/24
                   next-hop: 11.11.11.1
                   preference: 1
                   tag: 0
@@ -302,6 +319,18 @@ node_templates:
   #####################
   # Limits configuration
   #####################
+  dhcp_profile:
+    type: cloudify.versa.nodes.DHCPProfile
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      profile_name: { get_input: dhcp_profile_name }
+      organizations:
+        - { get_input: org_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: appliance
+
 
   limits:
     type: cloudify.versa.nodes.Limits
@@ -309,6 +338,7 @@ node_templates:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: org_name }
+      dhcp_profile: { get_input: dhcp_profile_name }
       routes:
         - { get_input: internal_router_name}
         - { get_input: external_router_name}
@@ -323,12 +353,7 @@ node_templates:
       - type: cloudify.relationships.depends_on
         target: external_router
       - type: cloudify.relationships.depends_on
-        target: internal_network
-      - type: cloudify.relationships.depends_on
-        target: external_network
-      - type: cloudify.relationships.depends_on
-        target: tunnel_interface
-
+        target: dhcp_profile
 
   #####################
   # VPN configuration
@@ -379,3 +404,86 @@ node_templates:
     relationships:
       - type: cloudify.relationships.depends_on
         target: limits
+
+  #####################
+  # DHCP configuration
+  #####################
+  dhcp_lease_profile:
+    type: cloudify.versa.nodes.DHCPLeaseProfile
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: limits
+
+  dhcp_options_profile:
+    type: cloudify.versa.nodes.DHCPOptionsProfile
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      name: { get_input: dhcp_options_profile_name }
+      domain: { get_input: branch_domain_name }
+      servers:
+        - { get_input: dns_server }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: limits
+
+  dhcp_global_configuration:
+    type: cloudify.versa.nodes.DHCPGlobalConfiguration
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      dhcp_profile: { get_input: dhcp_profile_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
+      options_profile: { get_input: dhcp_options_profile_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: dhcp_lease_profile
+      - type: cloudify.relationships.depends_on
+        target: dhcp_options_profile
+
+  dhcp_pool:
+    type: cloudify.versa.nodes.DHCPPool
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
+      options_profile: { get_input: dhcp_options_profile_name }
+      name: branch_pool
+      mask: { get_input: dhcp_pool_mask }
+      range_name: branch_range 
+      begin_address: { get_input: branch1_dhcp_begin_address }
+      end_address: { get_input: branch1_dhcp_end_address }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: dhcp_global_configuration
+      - type: cloudify.relationships.depends_on
+        target: limits
+      - type: cloudify.relationships.depends_on
+        target: dhcp_lease_profile
+      - type: cloudify.relationships.depends_on
+        target: dhcp_options_profile
+
+  dhcp_server:
+    type: cloudify.versa.nodes.DHCPServer
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
+      options_profile: { get_input: dhcp_options_profile_name }
+      pool_name: branch_pool
+      name: branch_dhcp_server
+      networks:
+        - {get_input: internal_network_name }
+    relationships:
+      - type: cloudify.versa.dhcp_connected_to_profile
+        target: dhcp_pool
+  
