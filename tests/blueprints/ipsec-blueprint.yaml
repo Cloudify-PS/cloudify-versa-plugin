@@ -139,6 +139,8 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       #use_existing: { get_input : use_exsisting_appliance }
+      device:
+        name: { get_input: appliance_name }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
