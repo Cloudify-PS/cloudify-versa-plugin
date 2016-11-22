@@ -28,19 +28,19 @@ inputs:
     cms_org_name: 
         default: ipsec
     external_network_name:
-        default: external
+        default: vlan100
     external_interface_name:
       default: vni-0/0 
-    internal_network_name:
-        default: hq_network
-    internal_interface_name: 
+    hq_network_name:
+        default: vcpe1_hq_network
+    hq_interface_name: 
       default: vni-0/1
     tunnel_interface_name: 
       default: tvi-0/0
-    internal_router_name: 
-        default:  internal_router
+    hq_router_name: 
+        default:  hq_router
     external_router_name: 
-        default:  external_router
+        default: external_router
     unit:
         default: 0
     dhcp_profile_name:
@@ -56,9 +56,9 @@ inputs:
     dhcp_pool_mask: 
         default: 255.255.255.0
     branch1_dhcp_begin_address: 
-        default: 192.168.63.100
+        default: 10.11.0.100
     branch1_dhcp_end_address: 
-        default: 192.168.63.200
+        default: 10.11.0.200
 
 
 node_templates:
@@ -104,8 +104,6 @@ node_templates:
             - { get_input: pool_name }
         org-networks:
           org-network:
-            - name: { get_input: internal_network_name }
-              ipaddress-allocation-mode: manual
             - name: { get_input: external_network_name }
               ipaddress-allocation-mode: manual
     relationships:
@@ -115,7 +113,7 @@ node_templates:
   #####################
   # NMS organizations
   #####################
-  parent_organization:
+  organization:
     type: cloudify.versa.nodes.Organization
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
@@ -152,8 +150,6 @@ node_templates:
               networking-info:
                   - network-info:
                       network-name: { get_input: external_network_name }
-                  - network-info:
-                      network-name: { get_input: internal_network_name }
               snglist:
                   - sng:
                       name: Default_All_Services
@@ -161,24 +157,25 @@ node_templates:
                       services:
                           - cgnat
                           - nextgen-firewall
+                          - ipsec
               subscription:
                   solution-tier: nextgen-firewall
                   bandwidth: 100
                   is-analytics-enabled: true
     relationships:
       - type: cloudify.versa.organization_connected_to_appliance
-        target: parent_organization
+        target: organization
           
   #####################
   # Interface configuration
   #####################
-  internal_interface:
+  hq_interface:
     type: cloudify.versa.nodes.Interface
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       interface:
-        name: { get_input: internal_interface_name }
+        name: { get_input: hq_interface_name }
         enable: true
         promiscuous: false
         unit:
@@ -186,7 +183,7 @@ node_templates:
             family:
                 inet:
                   address:
-                    addr: 192.168.63.216/24
+                    addr: 10.11.0.2/24
     relationships:
       - type: cloudify.relationships.depends_on
         target: appliance
@@ -250,32 +247,32 @@ node_templates:
       - type: cloudify.relationships.depends_on
         target: external_interface
           
-  internal_network:
+  hq_network:
     type: cloudify.versa.nodes.Network
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       network:
-        name: { get_input: internal_network_name }
+        name: { get_input: hq_network_name }
         interfaces: 
-          - { concat: [get_input: internal_interface_name, ".", get_input: unit] }
+          - { concat: [get_input: hq_interface_name, ".", get_input: unit] }
     relationships:
       - type: cloudify.relationships.depends_on
-        target: internal_interface
+        target: hq_interface
 
   #####################
   # Routing configuration
   #####################
-  internal_router:
+  hq_router:
     type: cloudify.versa.nodes.Router
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       router:
-        name: { get_input: internal_router_name }
+        name: { get_input: hq_router_name }
         instance-type: virtual-router
         networks:
-          - { get_input: internal_network_name }
+          - { get_input: hq_network_name }
         interfaces:
           - { concat: [get_input: tunnel_interface_name, ".", get_input: unit] }
         routing-options:
@@ -289,7 +286,7 @@ node_templates:
                   interface: none
     relationships:
       - type: cloudify.relationships.depends_on
-        target: internal_network
+        target: hq_network
       - type: cloudify.relationships.depends_on
         target: tunnel_interface
 
@@ -340,16 +337,16 @@ node_templates:
       org_name: { get_input: org_name }
       dhcp_profile: { get_input: dhcp_profile_name }
       routes:
-        - { get_input: internal_router_name}
+        - { get_input: hq_router_name}
         - { get_input: external_router_name}
       networks:
-          - { get_input: internal_network_name }
+          - { get_input: hq_network_name }
           - { get_input: external_network_name }
       interfaces:
           - { concat: [get_input: tunnel_interface_name, ".", get_input: unit] }
     relationships:
       - type: cloudify.relationships.depends_on
-        target: internal_router
+        target: hq_router
       - type: cloudify.relationships.depends_on
         target: external_router
       - type: cloudify.relationships.depends_on
@@ -371,7 +368,7 @@ node_templates:
         tunnel-initiate: automatic
         hardware-accelerator: any
         routing-instance: { get_input: external_router_name}
-        tunnel-routing-instance: { get_input: internal_router_name}
+        tunnel-routing-instance: { get_input: hq_router_name}
         tunnel-interface: { concat: [get_input: tunnel_interface_name, ".", get_input: unit] }
         local-auth-info:
             auth-type: psk
@@ -482,7 +479,7 @@ node_templates:
       pool_name: branch_pool
       name: branch_dhcp_server
       networks:
-        - {get_input: internal_network_name }
+        - {get_input: hq_network_name }
     relationships:
       - type: cloudify.versa.dhcp_connected_to_profile
         target: dhcp_pool
