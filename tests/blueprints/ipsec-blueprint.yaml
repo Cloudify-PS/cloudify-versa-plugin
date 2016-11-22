@@ -16,17 +16,17 @@ inputs:
     password:
         default: "versa123"
     appliance_name:
-      default: manualtesting
+      default: ipsec
     org_name:
-        default: TDC
+        default: vcpe1_parent_org
     use_exsisting_appliance:
         default: true
     pool_name: 
-        default: ipsec
+        default: vcpe1_tdcpool
     pool_ip: 
         default: 192.168.200.205
     cms_org_name: 
-        default: ipsec
+        default: vcpe1_tdccms
     external_network_name:
         default: vlan100
     external_interface_name:
@@ -59,6 +59,8 @@ inputs:
         default: 10.11.0.100
     branch1_dhcp_end_address: 
         default: 10.11.0.200
+    created_by_appliance:
+        default: true
 
 
 node_templates:
@@ -136,7 +138,7 @@ node_templates:
     type: cloudify.versa.nodes.Appliance
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      use_existing: { get_input : use_exsisting_appliance }
+      #use_existing: { get_input : use_exsisting_appliance }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -150,6 +152,8 @@ node_templates:
               networking-info:
                   - network-info:
                       network-name: { get_input: external_network_name }
+                      interface: { get_input: external_interface_name }
+                      ip-address: 87.53.86.10
               snglist:
                   - sng:
                       name: Default_All_Services
@@ -158,6 +162,7 @@ node_templates:
                           - cgnat
                           - nextgen-firewall
                           - ipsec
+                          - sdwan
               subscription:
                   solution-tier: nextgen-firewall
                   bandwidth: 100
@@ -192,6 +197,7 @@ node_templates:
     type: cloudify.versa.nodes.Interface
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
+      use_existing: { get_input : created_by_appliance }
       appliance_name: { get_input: appliance_name }
       interface:
         name: { get_input: external_interface_name }
@@ -239,6 +245,7 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
+      use_existing: { get_input : created_by_appliance }
       network:
         name: { get_input: external_network_name }
         interfaces: 
@@ -351,6 +358,8 @@ node_templates:
         target: external_router
       - type: cloudify.relationships.depends_on
         target: dhcp_profile
+      - type: cloudify.relationships.depends_on
+        target: tunnel_interface
 
   #####################
   # VPN configuration
