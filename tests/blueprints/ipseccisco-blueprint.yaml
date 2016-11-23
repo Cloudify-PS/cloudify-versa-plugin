@@ -624,5 +624,5 @@ outputs:
       HQ_network: { get_input: hq_nat_rule_source_address }
       branch2_network: 192.168.65.1/24
       DHCP_address_pool: { concat: [get_input: branch1_dhcp_begin_address, "-", get_input: branch1_dhcp_end_address] }
-      FW: enabled
+      FW: disable
 
