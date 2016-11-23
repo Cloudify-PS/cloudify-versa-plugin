@@ -77,9 +77,6 @@ node_templates:
     properties:
       agent_config:
         install_method: none
-    relationships:
-      - type: cloudify.relationships.depends_on
-        target: vpn_profile
   
   CPE:
     type: cloudify.nodes.Root
@@ -271,6 +268,8 @@ node_templates:
     relationships:
       - type: cloudify.versa.organization_connected_to_appliance
         target: organization
+      - type: cloudify.relationships.depends_on
+        target: my_host
           
   #####################
   # Interface configuration
