@@ -79,7 +79,7 @@ node_templates:
         install_method: none
     relationships:
       - type: cloudify.relationships.depends_on
-        target: appliance
+        target: vpn_profile
   
   CPE:
     type: cloudify.nodes.Root
