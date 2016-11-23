@@ -70,6 +70,96 @@ inputs:
 
 
 node_templates:
+
+
+  my_host:
+    type: cloudify.nodes.Compute
+    properties:
+      agent_config:
+        install_method: none
+  
+  CPE:
+    type: cloudify.nodes.Root
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        start:
+          implementation: "cisco.py"
+          executor: central_deployment_agent
+          inputs:
+            host: 87.53.86.18
+            user: tdc
+            password: tdc
+            enable_password: tdc
+            telnet: true
+            remove_global: ^ip dhcp excluded-address;^ip dhcp pool INTERNET;^ip nat inside;^access-list
+            remove_children_from_parent: ^interface Vlan30;ip address
+            dry_run: true
+            extra_cmds: >
+              ip dhcp excluded-address 192.168.65.200 192.168.65.254
+              ip dhcp pool INTERNET1
+               vrf INTERNET
+               network 192.168.65.0 255.255.255.0
+               default-router 87.53.86.13 
+               dns-server 194.239.134.83 193.162.153.164 
+               lease 0 1
+               class INTERNET1
+                address range 192.168.65.2 192.168.65.200
+                
+              crypto ikev2 proposal versa 
+               encryption aes-cbc-128
+               integrity sha1
+               group 2
+              crypto ikev2 policy versa 
+               match fvrf INTERNET
+               proposal versa
+              crypto ikev2 keyring versa1
+               peer branch3
+                address 87.53.86.10
+                pre-shared-key local versa123
+                pre-shared-key remote versa123
+               !
+              crypto ikev2 profile versa
+               match fvrf INTERNET
+               match identity remote address 87.53.86.10 255.255.255.255 
+               identity local address 87.53.86.14
+               authentication remote pre-share
+               authentication local pre-share
+               keyring local versa1
+               dpd 30 5 on-demand
+               ivrf INTERNET
+              crypto ipsec transform-set versa esp-aes esp-sha-hmac 
+               mode tunnel
+              crypto ipsec profile versa
+               set transform-set versa 
+               set ikev2-profile versa
+              interface Vlan30
+               ip address 192.168.65.1 255.255.255.0               
+              interface Tunnel4
+               ip vrf forwarding INTERNET
+               ip address 11.11.11.1 255.255.255.0
+               ip mtu 1400
+               ip nat outside
+               ip virtual-reassembly in
+               tunnel source GigabitEthernet8.2000
+               tunnel mode ipsec ipv4
+               tunnel destination 87.53.86.10
+               tunnel vrf INTERNET
+               tunnel protection ipsec profile versa
+              interface GigabitEthernet8.2000
+               ip vrf forwarding INTERNET
+               ip address 87.53.86.14 255.255.255.252
+               ip nat outside
+               exit
+               
+              ip route vrf INTERNET 10.11.0.0 255.255.255.0 Tunnel4
+              
+              ip nat inside source list 2 interface GigabitEthernet8.2000 vrf INTERNET overload
+              
+              access-list 2 permit 192.168.65.0 0.0.0.255
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: my_host
+
   #####################
   # Versa config
   #####################
@@ -527,4 +617,12 @@ node_templates:
         target: hq_router
       - type: cloudify.relationships.depends_on
         target: limits
+
+outputs:
+  configuration:
+    value:
+      HQ_network: { get_input: hq_nat_rule_source_address }
+      branch2_network: 192.168.65.1/24
+      DHCP_address_pool: { concat: [get_input: branch1_dhcp_begin_address, "-", get_input: branch1_dhcp_end_address] }
+      FW: enabled
 
