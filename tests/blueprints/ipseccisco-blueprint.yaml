@@ -93,7 +93,7 @@ node_templates:
             telnet: true
             remove_global: ^ip dhcp excluded-address;^ip dhcp pool INTERNET;^ip nat inside;^access-list
             remove_children_from_parent: ^interface Vlan30;ip address
-            dry_run: true
+            dry_run: false
             extra_cmds: >
               ip dhcp excluded-address 192.168.65.200 192.168.65.254
               ip dhcp pool INTERNET1
