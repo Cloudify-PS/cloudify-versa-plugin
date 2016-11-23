@@ -446,7 +446,7 @@ def create_dhcp_profile(versa_client, **kwargs):
         return
     appliance_name = ctx.node.properties['appliance_name']
     profile_name = ctx.node.properties['profile_name']
-    if versa_plugin.networking.is_dhcp_profile_exists(versa_client,
+    if versa_plugin.limits.is_dhcp_profile_exists(versa_client,
                                                       appliance_name,
                                                       profile_name):
         raise cfy_exc.NonRecoverableError("Dhcp profile exists")
@@ -461,7 +461,7 @@ def delete_dhcp_profile(versa_client, **kwargs):
         return
     appliance_name = ctx.node.properties['appliance_name']
     profile_name = ctx.node.properties['profile_name']
-    if versa_plugin.networking.is_dhcp_profile_exists(versa_client,
+    if versa_plugin.limits.is_dhcp_profile_exists(versa_client,
                                                       appliance_name,
                                                       profile_name):
         versa_plugin.limits.delete_dhcp_profile(versa_client,
