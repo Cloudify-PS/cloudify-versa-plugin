@@ -1,0 +1,280 @@
+#Create enviroment with networks and VMs.
+#Then create appliance with 2 organizations on flexvnf.
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - imports.yaml
+  - networks.yaml
+  - vms.yaml
+  - multinet.yaml
+ 
+inputs:
+#
+# Network configuration
+#
+  edge_gateway:
+    type: string
+
+  use_existing_networks:
+    type: boolean
+    default: true
+
+  management_network_name:
+    type: string
+
+  external_network_name:
+    default: ""
+
+  hq_network_name:
+    type: string
+
+  branch1_network_name:
+    type: string
+
+  branch2_network_name:
+    type: string
+
+  branch3_network_name:
+    default: ""
+#
+# VMs configuration
+#
+  catalog:
+    type: string
+
+  flexvnf_template:
+    type: string
+
+  template:
+    type: string
+
+  flex_vm_name:
+    type: string
+
+  hq_vm_name:
+    type: string
+
+  branch1_vm_name:
+    type: string
+
+  branch2_vm_name:
+    type: string
+
+  branch3_vm_name:
+    default: ""
+
+  use_existing_vms:
+    type: boolean
+
+#
+# Versa configuration
+#
+  versa_url:
+    default: ""
+
+  client_id:
+    default: ""
+
+  client_secret:
+    default: ""
+
+  username:
+    default: ""
+
+  password:
+    default: ""
+
+#
+# CMS configuration
+#
+  pool_name:
+    default: ""
+
+  cms_org_name:
+    default: ""
+
+#
+# Networks configuration
+#
+  ext_network_subnet:
+    default: ""
+
+  ext_network_mask:
+    default: ""
+
+  hq_network_name:
+    default: ""
+
+  hq_network_subnet:
+    default: ""
+
+  hq_network_mask:
+    default: ""
+
+  branch1_network_name:
+    default: ""
+
+  branch1_network_subnet:
+    default: ""
+
+  branch1_network_mask:
+    default: ""
+
+  branch2_network_name:
+    default: ""
+
+  branch2_network_subnet:
+    default: ""
+
+  branch2_network_mask:
+    default: ""
+
+#
+# Organization configuration
+#
+  parent_org_name:
+    default: ""
+
+  hq_name:
+    default: ""
+
+  branch1_name:
+    default: ""
+
+  branch2_name:
+    default: ""
+#
+# Appliance configuration
+#
+  appliance_name:
+    default: ""
+
+  ext_interface:
+    default: ""
+
+  external_ip:
+    default: ""
+
+  hq_interface:
+    default: ""
+
+  branch1_interface:
+    default: ""
+
+  branch2_interface:
+    default: ""
+
+  unit:
+    default: 0
+#
+# Routing Configuration
+#
+  default_address:
+    default: "0.0.0.0/0"
+
+  gateway_address:
+    default: ""
+
+  routing_preference:
+    default: 1
+
+  routing_tag:
+    default: 0
+
+  gateway_interface:
+    default: ""
+
+  parent_routing_name:
+    default: ""
+#
+# DHCP Configuration
+#
+  dhcp_profile_name :
+    default: ""
+
+  dhcp_options_profile_name:
+    default: ""
+
+
+  dhcp_lease_profile_name:
+    default: ""
+  dns_server:
+    default: ""
+
+  hq_domain_name:
+    default: ""
+        
+  hq_dhcp_pool_mask:
+    default: ""
+        
+  hq_dhcp_begin_address:
+    default: ""
+        
+  hq_dhcp_end_address:
+    default: ""
+
+  branch1_dhcp_pool_mask:
+    default: ""
+        
+  branch1_dhcp_begin_address:
+    default: ""
+        
+  branch1_dhcp_end_address:
+    default: ""
+        
+  branch2_dhcp_pool_mask:
+    default: ""
+        
+  branch2_dhcp_begin_address:
+    default: ""
+        
+  branch2_dhcp_end_address:
+    default: ""
+#
+# Firewall configuration
+#
+  firewall_policy_name:
+    default: ""
+
+  firewall_rule_name:
+    default: ""
+#
+# NAT configuration
+#
+
+  nat_rule_name:
+    default: ""
+
+  hq_range_low:
+    default: ""
+
+  hq_range_high:
+    default: ""
+
+  hq_nat_rule_source_address:
+    default: ""
+
+  branch1_range_low:
+    default: ""
+
+  branch1_range_high:
+    default: ""
+
+  branch1_nat_rule_source_address:
+    default: ""
+
+  branch2_range_low:
+    default: ""
+
+  branch2_range_high:
+    default: ""
+
+  branch2_nat_rule_source_address:
+    default: ""
+
+  natbranch1_rule_name: 
+    default: ""
+
+  natbranch2_rule_name: 
+    default: ""
+

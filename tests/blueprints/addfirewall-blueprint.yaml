@@ -1,0 +1,155 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
+  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/master/plugin.yaml
+
+inputs:
+    versa_url:
+        default: "https://172.19.0.210:9183"
+    client_id:
+        default: "voae_rest"
+    client_secret:
+        default: "asrevnet_123"
+    username:
+        default: "Administrator"
+    password:
+        default: "versa123"
+    appliance_name:
+      default: ipsec
+    org_name:
+        default: vcpe1_parent_org
+    external_router_name: 
+        default: external_router
+    external_network_name:
+        default: vlan100
+    hq_network_name:
+        default: vcpe1_hq_network
+    firewall_policy_name:
+      default: firewall_policy
+    firewall_rule_name:
+      default: firewall_rule
+    firewall_filter_name:
+      default: firewall_filter
+    filter_string:
+      default: https://www.youtube.com/*
+
+node_templates:
+
+  #####################
+  # Versa config
+  #####################
+  versa_configuration:
+    type: cloudify.versa.nodes.versa_configuration
+    properties:
+      versa_config:
+        username: { get_input: username }
+        password: { get_input: password }
+        versa_url: { get_input: versa_url}
+        client_id: { get_input: client_id}
+        client_secret: { get_input: client_secret}
+
+  #####################
+  # Zone configuration
+  #####################
+  trust_zone:
+    type: cloudify.versa.nodes.ZoneUpdate
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      zone:
+        name: trust
+        networks: 
+            - { get_input: hq_network_name }
+
+  untrust_zone:
+    type: cloudify.versa.nodes.ZoneUpdate
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      zone:
+        name: untrust
+        routing-instance:
+          - { get_input: external_router_name }
+
+  #####################
+  # Firewall configuration
+  #####################
+  hq_url_filter:
+    type: cloudify.versa.nodes.NGFirewallUrlFilter
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      filters:
+        - name: { get_input: firewall_filter_name }
+          description: test
+          default-action:
+             predefined: allow
+          cloud-lookup-mode: never
+          category-action-map:
+             category-action: []
+          reputation-action-map:
+             reputation-action: []
+          blacklist:
+             action:
+               predefined: alert
+             patterns:
+               - { get_input: filter_string }
+          whitelist: {}
+
+  hq_firewall_policy:
+    type: cloudify.versa.nodes.NGFirewallPolicy
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      policy:
+        name: { get_input: firewall_policy_name }
+
+  hq_firewall_rule:
+    type: cloudify.versa.nodes.NGFirewallRule
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      policy_name: { get_input: firewall_policy_name }
+      rules:
+        - name: { get_input: firewall_rule_name }
+          match:
+            source:
+              zone:
+                zone-list:
+                  - trust
+            destination:
+              zone:
+                zone-list:
+                  - untrust
+          set:
+            lef:
+              event: end
+              options:
+                send-pcap-data:
+                    enable: False
+            action: allow
+            security-profile:
+              urlf: { get_input: firewall_filter_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: trust_zone
+      - type: cloudify.relationships.depends_on
+        target: untrust_zone
+      - type: cloudify.relationships.depends_on
+        target: hq_url_filter
+      - type: cloudify.relationships.depends_on
+        target: hq_firewall_policy
+
+
+outputs:
+  configuration:
+    value:
+      FW: enable
+      blocked_filter: { get_input: filter_string }
+

@@ -1,0 +1,9 @@
+operation: update
+node_instance_ids: [hq_firewall_503ce]
+allow_kwargs_override: true
+operation_kwargs:
+  rule:
+    name: test_firewall_rule
+    set: 
+      security-profile: 
+        urlf: test

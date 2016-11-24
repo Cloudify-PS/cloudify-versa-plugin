@@ -1,0 +1,78 @@
+#Create 4 networks for testing
+tosca_definitions_version: cloudify_dsl_1_3
+
+node_templates:
+#
+# Networks
+#
+  management_network:
+    type: cloudify.vcloud.nodes.Network
+    properties:
+      use_external_resource: true
+      resource_id: { get_input: management_network_name }
+
+  external_network:
+    type: cloudify.vcloud.nodes.Network
+    properties:
+      use_external_resource: true
+      resource_id: { get_input: external_network_name }
+
+  hq_network:
+    type: cloudify.vcloud.nodes.Network
+    properties:
+      resource_id: { get_input: hq_network_name }
+      use_external_resource: { get_input: use_existing_networks }
+      network:
+        name: { get_input: hq_network_name }
+        edge_gateway: { get_input: edge_gateway }
+        netmask: 255.255.255.0
+        gateway_ip: 10.11.0.1
+        static_range: 10.11.0.2-10.11.0.5
+
+
+  branch1_network:
+    type: cloudify.vcloud.nodes.Network
+    properties:
+      resource_id: { get_input: branch1_network_name }
+      use_external_resource: { get_input: use_existing_networks }
+      network:
+        name: { get_input: branch1_network_name }
+        edge_gateway: { get_input: edge_gateway }
+        netmask: 255.255.255.0
+        gateway_ip: 10.12.0.1
+        static_range: 10.12.0.2-10.12.0.5
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: hq_network
+
+
+  branch2_network:
+    type: cloudify.vcloud.nodes.Network
+    properties:
+      resource_id: { get_input: branch2_network_name }
+      use_external_resource: { get_input: use_existing_networks }
+      network:
+        name: { get_input: branch2_network_name }
+        edge_gateway: { get_input: edge_gateway }
+        netmask: 255.255.255.0
+        gateway_ip: 10.13.0.1
+        static_range: 10.13.0.2-10.13.0.5
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: branch1_network
+
+  branch3_network:
+    type: cloudify.vcloud.nodes.Network
+    properties:
+      resource_id: { get_input: branch3_network_name }
+      use_external_resource: { get_input: use_existing_networks }
+      network:
+        name: { get_input: branch3_network_name }
+        edge_gateway: { get_input: edge_gateway }
+        netmask: 255.255.255.0
+        gateway_ip: 10.14.0.1
+        static_range: 10.14.0.2-10.14.0.5
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: branch2_network
+

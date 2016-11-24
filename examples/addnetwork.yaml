@@ -1,0 +1,186 @@
+#Add and configure network with DHCP,DNS,Firewall to exsistent organization
+#Organization must have one free interface
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - imports.yaml
+
+inputs:
+    versa_url:
+        default: "https://172.19.0.210:9183"
+    client_id:
+        default: "voae_rest"
+    client_secret:
+        default: "asrevnet_123"
+    username:
+        default: "Administrator"
+    password:
+        default: "versa123"
+    appliance_name:
+        default: vcpe1tdcappliance
+    hq_org_name:
+        default: hq_org
+    interface_name:
+        default: vni-0/4
+    network_name:
+        default: newbranch_net
+    dhcp_options_profile_name:
+        default: tdc_dhcp_options
+    dhcp_lease_profile_name:
+        default: tdc_dhcp_lease
+    dhcp_pool_name:
+        default: newbranch_dhcp_pool
+    nat_pool_name:
+        default: newbranch_nat_pool
+    nat_rule_name:
+        default: newbranch_nat_rule
+    range_low:
+        default: 87.53.87.17
+    range_high:
+        default: 87.53.87.19
+    nat_rule_source_address:
+        default: 10.14.0.0/24
+    parent_routing_name:
+        default: parent_router
+    org_routing_name:
+        default: hq_router
+    parent_org_name:
+        default: vcpe1_parent_org
+
+node_templates:
+  #####################
+  # Versa config
+  #####################
+  versa_configuration:
+    type: cloudify.versa.nodes.versa_configuration
+    properties:
+      versa_config:
+        username: { get_input: username }
+        password: { get_input: password }
+        versa_url: { get_input: versa_url}
+        client_id: { get_input: client_id}
+        client_secret: { get_input: client_secret}
+
+  interface:
+    type: cloudify.versa.nodes.Interface
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      name: { get_input: interface_name }
+      units:
+        - name: 0
+          address: 10.14.0.2
+          mask: 255.255.255.0
+
+  network:
+    type: cloudify.versa.nodes.Network
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      name: { get_input: network_name }
+      org_name: { get_input: hq_org_name }
+      interface: { get_input: interface_name }
+      unit: 0
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: interface
+
+  limits:
+    type: cloudify.versa.nodes.Limits
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: hq_org_name }
+      networks:
+        - { get_input: network_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: network
+
+  dhcp_pool:
+    type: cloudify.versa.nodes.DHCPPool
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: hq_org_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
+      options_profile: { get_input: dhcp_options_profile_name }
+      name: { get_input: dhcp_pool_name }
+      mask: 255.255.255.0
+      range_name: newbranch_range
+      begin_address: 10.14.0.30
+      end_address: 10.14.0.40
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: network
+      - type: cloudify.relationships.depends_on
+        target: limits
+
+  dhcp_server:
+    type: cloudify.versa.nodes.DHCPServer
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: hq_org_name }
+      lease_profile: { get_input: dhcp_lease_profile_name }
+      options_profile: { get_input: dhcp_options_profile_name }
+      pool_name: { get_input: dhcp_pool_name }
+      name: newbranch_dhcp_server
+      networks:
+        - { get_input: network_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: dhcp_pool
+
+  routing:
+    type: cloudify.versa.nodes.Router
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: hq_org_name }
+      name: { get_input: org_routing_name }
+      update: true
+      networks:
+        - { get_input: network_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: limits
+
+  trust_zone:
+    type: cloudify.versa.nodes.Zone
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: hq_org_name }
+      update: true
+      zone:
+        name: trust
+        networks: 
+          - { get_input: network_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: limits
+
+  nat:
+    type: cloudify.versa.nodes.CGNat
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: hq_org_name }
+      pool:
+        name: { get_input: nat_pool_name }
+        ranges:
+          - name: nat_range_name
+            low: { get_input: range_low }
+            hight: { get_input: range_high }
+        routing_instance: { get_input: parent_routing_name }
+        provider_org: { get_input: parent_org_name }
+      rule:
+        name: { get_input: nat_rule_name }
+        addresses:
+          - { get_input: nat_rule_source_address }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: dhcp_server
+      - type: cloudify.relationships.depends_on
+        target: limits

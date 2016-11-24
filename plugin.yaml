@@ -1,0 +1,608 @@
+plugins:
+  versa:
+    executor: central_deployment_agent
+    source: http://github.com/Cloudify-PS/cloudify-versa-plugin/archive/master.zip
+    package_name: cloudify-versa-plugin
+    package_version: '1.0'
+
+node_types:
+
+  cloudify.versa.nodes.versa_configuration:
+    derived_from: cloudify.nodes.Root
+    properties:
+      versa_config:
+        default: {}
+
+  cloudify.versa.nodes.ResourcePool:
+    derived_from: cloudify.nodes.Root
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      instance:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_resource_pool
+          inputs: 
+            instance:
+              default: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_resource_pool
+          inputs:
+            instance: 
+              default: {}
+
+  cloudify.versa.nodes.CMSLocalOrganization:
+    derived_from: cloudify.nodes.Root
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      organization:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_cms_local_organization
+          inputs: 
+            organization:
+              default: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_cms_local_organization
+          inputs: 
+            organization:
+              default: {}
+
+  cloudify.versa.nodes.Organization:
+    derived_from: cloudify.nodes.Root
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      organization:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_organization
+          inputs: 
+            organization:
+              default: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_organization
+          inputs: 
+            organization:
+              default: {}
+
+  cloudify.versa.nodes.Appliance:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      device:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_appliance
+          inputs:
+            device:
+              default: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_appliance
+          inputs:
+            device:
+              default: {}
+
+  cloudify.versa.nodes.AssociatedOrganization:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      organization:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.associate_organization
+          inputs: {}
+
+  cloudify.versa.nodes.Router:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      router:
+        default: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_router
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_router
+          inputs: {}
+
+  cloudify.versa.nodes.RouterUpdate:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      router:
+        default: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.insert_to_router
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_from_router
+          inputs: {}
+
+  cloudify.versa.nodes.CGNat:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      pool:
+        default: {}
+      rule:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_cgnat
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_cgnat
+          inputs: {}
+
+  cloudify.versa.nodes.Zone:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      zone:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_zone
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_zone
+          inputs: {}
+
+  cloudify.versa.nodes.ZoneUpdate:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      zone:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.insert_to_zone
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_from_zone
+          inputs: {}
+
+  cloudify.versa.nodes.NGFirewallUrlFilter:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      filters:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_url_filters
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_url_filters
+          inputs: {}
+
+  cloudify.versa.nodes.NGFirewallPolicy:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      policy:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_firewall_policy
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_firewall_policy
+          inputs: {}
+
+  cloudify.versa.nodes.NGFirewallRule:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      policy_name:
+        default: ""
+      rules:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_firewall_rules
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_firewall_rules
+          inputs: {}
+      versa.interfaces.actions:
+        update:
+          implementation: versa.versa_plugin.operations.update_firewall_rule
+          inputs:
+            rule:
+              default: {}
+        get:
+          implementation: versa.versa_plugin.operations.get_firewall_rule
+          inputs:
+            name: 
+              default: ""
+
+
+  cloudify.versa.nodes.DHCPProfile:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      profile_name:
+        default: {}
+      organizations:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_dhcp_profile
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_dhcp_profile
+          inputs: {}
+
+  cloudify.versa.nodes.DHCPOptionsProfile:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      name:
+        default: ""
+      domain:
+        default: ""
+      servers:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_dhcp_options_profile
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_dhcp_options_profile
+          inputs: {}
+
+  cloudify.versa.nodes.DHCPLeaseProfile:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      lease_profile:
+        default: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_dhcp_lease_profile
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_dhcp_lease_profile
+          inputs: {}
+
+  cloudify.versa.nodes.DHCPGlobalConfiguration:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      dhcp_profile:
+        default: ""
+      lease_profile:
+        default: ""
+      options_profile:
+        default: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_dhcp_global_configuration
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_dhcp_global_configuration
+          inputs: {}
+
+  cloudify.versa.nodes.DHCPPool:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      lease_profile:
+        default: ""
+      options_profile:
+        default: ""
+      name:
+        default: {}
+      mask:
+        default: ""
+      range_name:
+        default: ""
+      begin_address:
+        default: ""
+      end_address:
+        default: ""
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_dhcp_pool
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_dhcp_pool
+          inputs: {}
+
+  cloudify.versa.nodes.DHCPServer:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      lease_profile:
+        default: ""
+      options_profile:
+        default: ""
+      pool_name:
+        default: {}
+      name:
+        default: ""
+      networks:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_dhcp_server
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_dhcp_server
+          inputs: {}
+
+  cloudify.versa.nodes.Network:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      network:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_network
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_network
+          inputs: {}
+
+  cloudify.versa.nodes.Interface:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      interface:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_interface
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_interface
+          inputs: {}
+
+  cloudify.versa.nodes.Limits:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      dhcp_profile:
+        default: ""
+      routes:
+        default: {}
+      networks:
+        default: {}
+      interfaces:
+        default: {}
+      provider_orgs:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.insert_to_limits
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_from_limits
+          inputs: {}
+
+  cloudify.versa.nodes.VPNProfile:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      profile:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_vpn_profile
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_vpn_profile
+          inputs: {}
+
+relationships:
+    cloudify.versa.pool_connected_to_vm:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.dhcp_profile_connected_to_appliance:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.dhcp_connected_to_routing:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.dhcp_connected_to_organization:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.dhcp_connected_to_profile:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.firewall_connected_to_router:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.firewall_connected_to_org:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.cgnat_connected_to_routing:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.cgnat_connected_to_org:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.router_connected_to_router:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.router_connected_to_org:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.associated:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.parent:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.cms_org_connected_to_pool:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.nms_org_connected_to_cms_org:
+      derived_from: cloudify.relationships.connected_to
+
+    cloudify.versa.organization_connected_to_appliance:
+      derived_from: cloudify.relationships.connected_to

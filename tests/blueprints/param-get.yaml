@@ -1,0 +1,5 @@
+operation: get
+node_instance_ids: [hq_firewall_503ce]
+allow_kwargs_override: true
+operation_kwargs:
+  name: test_firewall_rule

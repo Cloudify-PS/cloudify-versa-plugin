@@ -1,0 +1,69 @@
+#Create firewall rule on exsistent appliance
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - imports.yaml
+
+inputs:
+    versa_url:
+        default: "https://172.19.0.210:9183"
+    client_id:
+        default: "voae_rest"
+    client_secret:
+        default: "asrevnet_123"
+    username:
+        default: "Administrator"
+    password:
+        default: "versa123"
+    appliance_name:
+        default: vcpe1tdcappliance
+    hq_org_name:
+        default: hq_org
+    firewall_policy:
+        default: tdc_firewall_policy
+    rule_name:
+        default: test_firewall_rule
+
+
+#
+# Node templates
+#
+node_templates:
+  #####################
+  # Versa config
+  #####################
+  versa_configuration:
+    type: cloudify.versa.nodes.versa_configuration
+    properties:
+      versa_config:
+        username: { get_input: username }
+        password: { get_input: password }
+        versa_url: { get_input: versa_url}
+        client_id: { get_input: client_id}
+        client_secret: { get_input: client_secret}
+
+  hq_firewall:
+    type: cloudify.versa.nodes.NGFirewallRule
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: hq_org_name }
+      policy_name: { get_input: firewall_policy }
+      rules:
+        - name: { get_input: rule_name }
+          match:
+            source:
+              zone:
+                zone-list:
+                  - trust
+            destination:
+              zone:
+                zone-list:
+                  - untrust
+          set:
+            lef:
+              event: end
+              options:
+                send-pcap-data:
+                    enable: False
+            action: allow
