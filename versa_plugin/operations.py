@@ -146,8 +146,10 @@ def associate_organization(versa_client, **kwargs):
     appliance = get_mandatory(organization, 'appliance')
     net_info = get_mandatory(organization, 'networking-info')
     for net in net_info:
-        interface = get_mandatory(get_mandatory(net, 'network-info'),
-                                  'parent-interface')
+        interface_name = get_mandatory(get_mandatory(net, 'network-info'),
+                                       'parent-interface')
+        interface = {"name": interface_name, "enable": True,
+                     "promiscuous": False}
         versa_plugin.networking.create_interface(versa_client, appliance,
                                                  interface)
     task = versa_plugin.appliance.associate_organization(versa_client,
@@ -447,8 +449,8 @@ def create_dhcp_profile(versa_client, **kwargs):
     appliance_name = ctx.node.properties['appliance_name']
     profile_name = ctx.node.properties['profile_name']
     if versa_plugin.limits.is_dhcp_profile_exists(versa_client,
-                                                      appliance_name,
-                                                      profile_name):
+                                                  appliance_name,
+                                                  profile_name):
         raise cfy_exc.NonRecoverableError("Dhcp profile exists")
     versa_plugin.limits.create_dhcp_profile(versa_client, appliance_name,
                                             profile_name)
@@ -462,8 +464,8 @@ def delete_dhcp_profile(versa_client, **kwargs):
     appliance_name = ctx.node.properties['appliance_name']
     profile_name = ctx.node.properties['profile_name']
     if versa_plugin.limits.is_dhcp_profile_exists(versa_client,
-                                                      appliance_name,
-                                                      profile_name):
+                                                  appliance_name,
+                                                  profile_name):
         versa_plugin.limits.delete_dhcp_profile(versa_client,
                                                 appliance_name,
                                                 profile_name)

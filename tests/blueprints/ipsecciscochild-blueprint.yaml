@@ -359,7 +359,7 @@ node_templates:
                   interface: none
     relationships:
       - type: cloudify.relationships.depends_on
-        target: hq_network
+        target: hq_associated
       - type: cloudify.relationships.depends_on
         target: tunnel_interface
 
@@ -384,7 +384,7 @@ node_templates:
                   interface: none
     relationships:
       - type: cloudify.relationships.depends_on
-        target: external_network
+        target: appliance
 
   #####################
   # Limits configuration
@@ -396,7 +396,7 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       profile_name: { get_input: dhcp_profile_name }
       organizations:
-        - { get_input: org_name }
+        - { get_input: hq_name }
     relationships:
       - type: cloudify.relationships.depends_on
         target: appliance
@@ -412,9 +412,6 @@ node_templates:
       routes:
         - { get_input: hq_router_name}
         - { get_input: external_router_name}
-      networks:
-          - { get_input: hq_network_name }
-          - { get_input: external_network_name }
       interfaces:
           - { concat: [get_input: tunnel_interface_name, ".", get_input: unit] }
       provider_orgs:
@@ -438,7 +435,7 @@ node_templates:
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
-      org_name: { get_input: org_name }
+      org_name: { get_input: hq_name }
       profile:
         name: vpn_profile
         vpn-type: site-to-site
@@ -577,7 +574,8 @@ node_templates:
             low: { get_input: hq_range_low }
             hight: { get_input: hq_range_high }
         routing_instance: { get_input: external_router_name }
-        provider_org: []
+        provider_org: { get_input: org_name }
+
       rule:
         name: hq_nat_rule
         addresses:
@@ -601,6 +599,11 @@ node_templates:
         name: trust
         networks: 
             - { get_input: hq_network_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: hq_associated
+      - type: cloudify.relationships.depends_on
+        target: limits
 
   untrust_zone:
     type: cloudify.versa.nodes.ZoneUpdate
@@ -612,6 +615,11 @@ node_templates:
         name: untrust
         routing-instance:
           - { get_input: external_router_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: external_router
+      - type: cloudify.relationships.depends_on
+        target: limits
 
   #####################
   # Firewall configuration
@@ -624,6 +632,9 @@ node_templates:
       org_name: { get_input: hq_name }
       policy:
         name: { get_input: firewall_policy_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: hq_associated
 
   hq_firewall_rule:
     type: cloudify.versa.nodes.NGFirewallRule
