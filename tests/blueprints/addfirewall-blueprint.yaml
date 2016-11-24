@@ -2,8 +2,9 @@ tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/master/plugin.yaml
-
+#  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/master/plugin.yaml
+  - plugin.yaml
+  
 inputs:
     versa_url:
         default: "https://172.19.0.210:9183"
@@ -56,8 +57,8 @@ node_templates:
     type: cloudify.versa.nodes.ZoneUpdate
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      appliance_name: { get_input: appliance_name }
-      org_name: { get_input: org_name }
+      appliance: { get_input: appliance_name }
+      organization: { get_input: org_name }
       zone:
         name: trust
         networks: 
@@ -67,8 +68,8 @@ node_templates:
     type: cloudify.versa.nodes.ZoneUpdate
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      appliance_name: { get_input: appliance_name }
-      org_name: { get_input: org_name }
+      appliance: { get_input: appliance_name }
+      organization: { get_input: org_name }
       zone:
         name: untrust
         routing-instance:
@@ -81,8 +82,8 @@ node_templates:
     type: cloudify.versa.nodes.NGFirewallUrlFilter
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      appliance_name: { get_input: appliance_name }
-      org_name: { get_input: org_name }
+      appliance: { get_input: appliance_name }
+      organization: { get_input: org_name }
       filters:
         - name: { get_input: firewall_filter_name }
           description: test
@@ -104,8 +105,8 @@ node_templates:
     type: cloudify.versa.nodes.NGFirewallPolicy
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      appliance_name: { get_input: appliance_name }
-      org_name: { get_input: org_name }
+      appliance: { get_input: appliance_name }
+      organization: { get_input: org_name }
       policy:
         name: { get_input: firewall_policy_name }
 
@@ -113,8 +114,8 @@ node_templates:
     type: cloudify.versa.nodes.NGFirewallRule
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      appliance_name: { get_input: appliance_name }
-      org_name: { get_input: org_name }
+      appliance: { get_input: appliance_name }
+      organization: { get_input: org_name }
       policy_name: { get_input: firewall_policy_name }
       rules:
         - name: { get_input: firewall_rule_name }

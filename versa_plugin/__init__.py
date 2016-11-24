@@ -15,16 +15,30 @@ def _create_path():
     return '{}/versa.key'.format(key_dir)
 
 
-def with_versa_client(f):
+class Versa:
+    def __init__(self):
+        path = _create_path()
+        config = ctx.node.properties.get(VERSA_CONFIG)
+        self.client = VersaClient(config, path)
+        self.appliance = ctx.node.properties.get('appliance')
+        self.organization = ctx.node.properties.get('organization')
+
+    def __enter__(self):
+        self.client.get_token()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        pass
+
+
+def with_versa(f):
     """
         add vca client to function params
     """
     @wraps(f)
     def wrapper(*args, **kw):
-        config = ctx.node.properties.get(VERSA_CONFIG)
-        path = _create_path()
-        with VersaClient(config, path) as client:
-            kw['versa_client'] = client
+        with Versa() as versa:
+            kw['versa'] = versa
             result = f(*args, **kw)
         return result
     return wrapper

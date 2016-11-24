@@ -17,55 +17,55 @@ def _get_task_id(task_info):
     return task_info['output']['result']['task']['task-id']
 
 
-def add_organization(client, organization):
+def add_organization(versa, organization):
     url = "/api/config/nms/provider/organizations"
     org_uuid = str(uuid.uuid4())
     cms_org_name = get_mandatory(get_mandatory(organization, 'cms-orgs'),
                                  'name')
-    cms_org_uuid = versa_plugin.connectors.get_organization_uuid(client,
+    cms_org_uuid = versa_plugin.connectors.get_organization_uuid(versa,
                                                                  cms_org_name)
     while True:
         org_id = random.randint(1, 1000)
-        if not is_organization_id_exists(client, org_id):
+        if not is_organization_id_exists(versa, org_id):
             break
     organization['uuid'] = org_uuid
     organization['id'] = org_id
     organization['cms-orgs']['uuid'] = cms_org_uuid
     data = {'organization': organization}
-    client.post(url, json.dumps(data), JSON, codes.created)
+    versa.client.post(url, json.dumps(data), JSON, codes.created)
     return org_uuid
 
 
-def delete_organization(client, org_name):
-    org_uuid = get_organization_uuid(client, org_name)
+def delete_organization(versa, org_name):
+    org_uuid = get_organization_uuid(versa, org_name)
     if not org_uuid:
         return None
     url = "/api/config/nms/actions/delete-organization"
     data = {"delete-organization": {"orguuid":  org_uuid}}
-    return client.post(url, json.dumps(data), JSON, codes.ok)
+    return versa.client.post(url, json.dumps(data), JSON, codes.ok)
 
 
-def add_appliance(client, device):
+def add_appliance(versa, device):
     url = "/api/config/nms/actions/add-devices"
-    device['org'] = get_organization_uuid(client, device['org'])
+    device['org'] = get_organization_uuid(versa, device['org'])
     device['cmsorg'] = versa_plugin.connectors.get_organization_uuid(
-        client, device['cmsorg'])
+        versa, device['cmsorg'])
     if not device['org']:
         raise cfy_exc.NonRecoverableError("NMS organization uuid not found")
     elif not device['cmsorg']:
         raise cfy_exc.NonRecoverableError("CMS organization uuid not found")
     data = {'add-devices': {'devices': {'device': device}}}
-    result = client.post(url, json.dumps(data), JSON, codes.ok)
+    result = versa.client.post(url, json.dumps(data), JSON, codes.ok)
     return _get_task_id(result)
 
 
-def associate_organization(client, organization):
+def associate_organization(versa, organization):
     url = '/api/config/nms/actions/'\
         '/associate-organization-to-appliance'
-    appliance_uuid = get_appliance_uuid(client,
+    appliance_uuid = get_appliance_uuid(versa,
                                         get_mandatory(organization,
                                                       'appliance'))
-    org_uuid = get_organization_uuid(client,
+    org_uuid = get_organization_uuid(versa,
                                      get_mandatory(organization,
                                                    'org'))
     organization["orguuid"] = org_uuid
@@ -73,25 +73,25 @@ def associate_organization(client, organization):
     del organization['org']
     del organization['appliance']
     data = {"associate-organization-to-appliance": organization}
-    result = client.post(url, json.dumps(data), JSON, codes.ok)
+    result = versa.client.post(url, json.dumps(data), JSON, codes.ok)
     return _get_task_id(result)
 
 
-def disassociate_org(client, appliance, org):
+def disassociate_org(versa, appliance, org):
     url = '/api/config/nms/actions'\
           '/dissociate-organization-from-appliances'
-    appliance_uuid = get_appliance_uuid(client, appliance)
-    org_uuid = get_organization_uuid(client, org)
+    appliance_uuid = get_appliance_uuid(versa, appliance)
+    org_uuid = get_organization_uuid(versa, org)
     data = {
         "dissociate-organization-from-appliances": {
             "orguuid": org_uuid,
             "appliances": [appliance_uuid]}}
-    client.post(url, json.dumps(data), JSON, codes.ok)
+    versa.client.post(url, json.dumps(data), JSON, codes.ok)
 
 
-def get_appliance_uuid(client, name):
+def get_appliance_uuid(versa, name):
     url = '/api/config/nms/provider/appliances/appliance/'
-    result = client.get(url, None, None, codes.ok)
+    result = versa.client.get(url, None, None, codes.ok)
     if not result:
         return None
     for app in result['appliance']:
@@ -100,9 +100,9 @@ def get_appliance_uuid(client, name):
     return None
 
 
-def delete_appliance(client, name):
+def delete_appliance(versa, name):
     url = "/api/config/nms/actions/delete-appliance"
-    uuid = get_appliance_uuid(client, name)
+    uuid = get_appliance_uuid(versa, name)
     if not uuid:
         return None
     data = {
@@ -110,13 +110,13 @@ def delete_appliance(client, name):
             "applianceuuid": uuid,
             "dopostdelete": "true",
             "clean-config": "true"}}
-    result = client.post(url, json.dumps(data), JSON, codes.ok)
+    result = versa.client.post(url, json.dumps(data), JSON, codes.ok)
     return _get_task_id(result)
 
 
-def is_organization_id_exists(client, test_id):
+def is_organization_id_exists(versa, test_id):
     url = "/api/config/nms/provider/organizations?deep"
-    result = client.get(url, None, None)
+    result = versa.client.get(url, None, None)
     if not result:
         return False
     for org in result['organizations']['organization']:
@@ -125,9 +125,9 @@ def is_organization_id_exists(client, test_id):
     return False
 
 
-def get_organization(client, name):
+def get_organization(versa, name):
     url = "/api/config/nms/provider/organizations?deep"
-    result = client.get(url, None, None)
+    result = versa.client.get(url, None, None)
     if not result:
         return None
     for org in result['organizations']['organization']:
@@ -136,9 +136,9 @@ def get_organization(client, name):
     return None
 
 
-def get_organization_uuid(client, name):
+def get_organization_uuid(versa, name):
     url = "/api/config/nms/provider/organizations?deep"
-    result = client.get(url, None, None)
+    result = versa.client.get(url, None, None)
     if not result:
         return None
     for org in result['organizations']['organization']:
@@ -147,13 +147,13 @@ def get_organization_uuid(client, name):
     return None
 
 
-def get_device_information(client, address):
+def get_device_information(versa, address):
     url = '/api/config/nms/actions/get-device-information'
     data = {
      "get-device-information": {
           "ip-address": address,
           "clean-config": "false"}}
-    result = client.post(url, json.dumps(data), JSON, codes.ok)
+    result = versa.client.post(url, json.dumps(data), JSON, codes.ok)
     if not result:
         return None
     if result['output']['status'] == SUCCESS:
@@ -162,11 +162,11 @@ def get_device_information(client, address):
         return None
 
 
-def wait_for_device(client, address, ctx):
+def wait_for_device(versa, address, ctx):
     for retry in range(MAX_RETRY):
         ctx.logger.info("Waiting for device. Try {}/{}".format(retry + 1,
                                                                MAX_RETRY))
-        device_info = get_device_information(client, address)
+        device_info = get_device_information(versa, address)
         if device_info:
             return
         time.sleep(SLEEP_TIME)

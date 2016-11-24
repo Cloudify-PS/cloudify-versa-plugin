@@ -22,104 +22,106 @@ def _add_organization_child(xml, tagname, text):
     org_node.appendChild(node)
 
 
-def create_dhcp_profile(client, appliance, name):
-    url = '/api/config/devices/device/{}/config/dhcp-profiles'.format(appliance)
+def create_dhcp_profile(versa, name):
+    url = '/api/config/devices/device/{}'\
+          '/config/dhcp-profiles'.format(versa.appliance)
     data = {
         "dhcp-profile": {
             "name": name,
             "dhcp-options": {
                 "max-servers": "256",
                 "max-clients": "256"}}}
-    client.post(url, json.dumps(data), JSON, codes.created)
+    versa.client.post(url, json.dumps(data), JSON, codes.created)
 
 
-def delete_dhcp_profile(client, appliance, profile):
+def delete_dhcp_profile(versa, profile):
     url = '/api/config/devices/device/{}'\
-          '/config/dhcp-profiles/dhcp-profile/{}'.format(appliance, profile)
-    client.delete(url, codes.no_content)
+          '/config/dhcp-profiles/dhcp-profile/{}'.format(versa.appliance,
+                                                         profile)
+    versa.client.delete(url, codes.no_content)
 
 
-def is_dhcp_profile_exists(client, appliance, profile):
+def is_dhcp_profile_exists(versa, profile):
     url = '/api/config/devices/device/{}'\
-          '/config/dhcp-profiles/dhcp-profile?deep'.format(appliance)
-    result = client.get(url, None, None, codes.ok, JSON)
+          '/config/dhcp-profiles/dhcp-profile?deep'.format(versa.appliance)
+    result = versa.client.get(url, None, None, codes.ok, JSON)
     return find_by_name(result, 'dhcp-profile', profile)
 
 
-def get_organization_limits(client, appliance, org):
-    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
-                                                                    org)
-    result = client.get(url, None, None, codes.ok, XML)
+def get_organization_limits(versa):
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org/{}'.format(versa.appliance, versa.organization)
+    result = versa.client.get(url, None, None, codes.ok, XML)
     org_node = result.lastChild
     operations_node = org_node.getElementsByTagName('y:operations')[0]
     org_node.removeChild(operations_node)
     return result
 
 
-def insert_dhcp_profile_to_limits(client, appliance, org, profile):
-    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
-                                                                    org)
-    limits = get_organization_limits(client, appliance, org)
+def insert_dhcp_profile_to_limits(versa, profile):
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org/{}'.format(versa.appliance, versa.organization)
+    limits = get_organization_limits(versa)
     _add_organization_child(limits, 'dhcp-profile', profile)
     xmldata = limits.toxml()
-    client.put(url, xmldata, XML, codes.no_content)
+    versa.client.put(url, xmldata, XML, codes.no_content)
 
 
-def delete_dhcp_profile_from_limits(client, appliance, org, profile):
-    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
-                                                                    org)
-    limits = get_organization_limits(client, appliance, org)
+def delete_dhcp_profile_from_limits(versa, profile):
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org/{}'.format(versa.appliance, versa.organization)
+    limits = get_organization_limits(versa)
     node = _find_node_by_name(limits, "dhcp-profile", profile)
     if node:
         limits.firstChild.removeChild(node)
         xmldata = limits.toxml()
-        client.put(url, xmldata, XML, codes.no_content)
+        versa.client.put(url, xmldata, XML, codes.no_content)
 
 
-def add_routing_instance(client, appliance, org, instance):
-    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
-                                                                    org)
-    limits = get_organization_limits(client, appliance, org)
+def add_routing_instance(versa, instance):
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org/{}'.format(versa.appliance, versa.organization)
+    limits = get_organization_limits(versa)
     _add_organization_child(limits, "available-routing-instances", instance)
     xmldata = limits.toxml()
-    client.put(url, xmldata, XML, codes.no_content)
+    versa.client.put(url, xmldata, XML, codes.no_content)
 
 
-def delete_routing_instance(client, appliance, org, instance):
-    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
-                                                                    org)
-    limits = get_organization_limits(client, appliance, org)
+def delete_routing_instance(versa, instance):
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org/{}'.format(versa.appliance, versa.organization)
+    limits = get_organization_limits(versa)
     node = _find_node_by_name(limits, "available-routing-instances", instance)
     if node:
         limits.firstChild.removeChild(node)
         xmldata = limits.toxml()
-        client.put(url, xmldata, XML, codes.no_content)
+        versa.client.put(url, xmldata, XML, codes.no_content)
 
 
-def add_provider_organization(client, appliance, org, provider):
-    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
-                                                                    org)
-    limits = get_organization_limits(client, appliance, org)
+def add_provider_organization(versa, provider):
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org/{}'.format(versa.appliance, versa.organization)
+    limits = get_organization_limits(versa)
     _add_organization_child(limits, "available-provider-orgs", provider)
     xmldata = limits.toxml()
-    client.put(url, xmldata, XML, codes.no_content)
+    versa.client.put(url, xmldata, XML, codes.no_content)
 
 
-def delete_provider_organization(client, appliance, org, provider):
-    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
-                                                                    org)
-    limits = get_organization_limits(client, appliance, org)
+def delete_provider_organization(versa, provider):
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org/{}'.format(versa.appliance, versa.organization)
+    limits = get_organization_limits(versa)
     node = _find_node_by_name(limits, "available-provider-orgs", provider)
     if node:
         limits.firstChild.removeChild(node)
         xmldata = limits.toxml()
-        client.put(url, xmldata, XML, codes.no_content)
+        versa.client.put(url, xmldata, XML, codes.no_content)
 
 
-def add_traffic_identification_networks(client, appliance, org, name, using):
-    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
-                                                                    org)
-    limits = get_organization_limits(client, appliance, org)
+def add_traffic_identification_networks(versa, name, using):
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org/{}'.format(versa.appliance, versa.organization)
+    limits = get_organization_limits(versa)
     traffic_nodes = limits.getElementsByTagName('traffic-identification')
     if not traffic_nodes:
         tnode = limits.createElement('traffic-identification')
@@ -132,13 +134,13 @@ def add_traffic_identification_networks(client, appliance, org, name, using):
     node.appendChild(value)
     traffic_node.appendChild(node)
     xmldata = limits.toxml()
-    client.put(url, xmldata, XML, codes.no_content)
+    versa.client.put(url, xmldata, XML, codes.no_content)
 
 
-def delete_traffic_identification_networks(client, appliance, org, name, using):
-    url = '/api/config/devices/device/{}/config/orgs/org/{}'.format(appliance,
-                                                                    org)
-    limits = get_organization_limits(client, appliance, org)
+def delete_traffic_identification_networks(versa, name, using):
+    url = '/api/config/devices/device/{}'\
+          '/config/orgs/org/{}'.format(versa.appliance, versa.organization)
+    limits = get_organization_limits(versa)
     traffic_node = limits.getElementsByTagName('traffic-identification')[0]
     node = None
     for net in limits.getElementsByTagName(using):
@@ -148,4 +150,4 @@ def delete_traffic_identification_networks(client, appliance, org, name, using):
     if node:
         traffic_node.removeChild(node)
         xmldata = limits.toxml()
-        client.put(url, xmldata, XML, codes.no_content)
+        versa.client.put(url, xmldata, XML, codes.no_content)

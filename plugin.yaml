@@ -11,7 +11,7 @@ node_types:
     derived_from: cloudify.nodes.Root
     properties:
       versa_config:
-        default: {}
+        required: true
 
   cloudify.versa.nodes.ResourcePool:
     derived_from: cloudify.nodes.Root
@@ -19,21 +19,18 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
+        required: true
       instance:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_resource_pool
           inputs: 
             instance:
-              default: {}
         delete:
           implementation: versa.versa_plugin.operations.delete_resource_pool
           inputs:
             instance: 
-              default: {}
 
   cloudify.versa.nodes.CMSLocalOrganization:
     derived_from: cloudify.nodes.Root
@@ -41,21 +38,18 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
+        required: true
       organization:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_cms_local_organization
           inputs: 
             organization:
-              default: {}
         delete:
           implementation: versa.versa_plugin.operations.delete_cms_local_organization
           inputs: 
             organization:
-              default: {}
 
   cloudify.versa.nodes.Organization:
     derived_from: cloudify.nodes.Root
@@ -63,21 +57,18 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
+        required: true
       organization:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_organization
           inputs: 
             organization:
-              default: {}
         delete:
           implementation: versa.versa_plugin.operations.delete_organization
           inputs: 
             organization:
-              default: {}
 
   cloudify.versa.nodes.Appliance:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -85,21 +76,18 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
+        required: true
       device:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_appliance
           inputs:
             device:
-              default: {}
         delete:
           implementation: versa.versa_plugin.operations.delete_appliance
           inputs:
             device:
-              default: {}
 
   cloudify.versa.nodes.AssociatedOrganization:
     derived_from: cloudify.nodes.SoftwareComponent
@@ -107,11 +95,10 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
       organization:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -124,11 +111,10 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
       router:
-        default: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -144,11 +130,10 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
       router:
-        default: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -164,15 +149,15 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
-      org_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
+      organization:
+        required: true
       pool:
-        default: {}
+        required: true
       rule:
-        default: {}
+        required: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -188,13 +173,12 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
-      org_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
+      organization:
+        required: true
       zone:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -210,13 +194,12 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
-      org_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
+      organization:
+        required: true
       zone:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -232,13 +215,12 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
-      org_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
+      organization:
+        required: true
       filters:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -254,13 +236,12 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
-      org_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
+      organization:
+        required: true
       policy:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -276,15 +257,13 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
-      org_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
+      organization:
+        required: true
       policy_name:
-        default: ""
       rules:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -298,12 +277,10 @@ node_types:
           implementation: versa.versa_plugin.operations.update_firewall_rule
           inputs:
             rule:
-              default: {}
         get:
           implementation: versa.versa_plugin.operations.get_firewall_rule
           inputs:
             name: 
-              default: ""
 
 
   cloudify.versa.nodes.DHCPProfile:
@@ -312,13 +289,11 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
       profile_name:
-        default: {}
       organizations:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -334,17 +309,15 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
-      org_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
+      organization:
+        required: true
       name:
-        default: ""
+        required: true
       domain:
-        default: ""
       servers:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -360,13 +333,13 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
-      org_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
+      organization:
+        required: true
       lease_profile:
-        default: ""
+        required: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -382,17 +355,17 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
-      org_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
+      organization:
+        required: true
       dhcp_profile:
-        default: ""
+        required: true
       lease_profile:
-        default: ""
+        required: true
       options_profile:
-        default: ""
+        required: true
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -408,25 +381,18 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
-      org_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
+      organization:
+        required: true
       lease_profile:
-        default: ""
       options_profile:
-        default: ""
       name:
-        default: {}
       mask:
-        default: ""
       range_name:
-        default: ""
       begin_address:
-        default: ""
       end_address:
-        default: ""
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -442,21 +408,18 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
-      org_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
+      organization:
+        required: true
       lease_profile:
-        default: ""
+        required: true
       options_profile:
-        default: ""
+        required: true
       pool_name:
-        default: {}
       name:
-        default: ""
       networks:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -472,11 +435,10 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
+        required: true
+      appliance:
+        required: true
       network:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -492,11 +454,10 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
+        required: true
+      appliance: 
+        required: true
       interface:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -512,21 +473,16 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
-      org_name:
-        default: ""
+        required: true
+      appliance: 
+        required: true
+      organization: 
+        required: true
       dhcp_profile:
-        default: ""
       routes:
-        default: {}
       networks:
-        default: {}
       interfaces:
-        default: {}
       provider_orgs:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -542,13 +498,12 @@ node_types:
       use_existing:
         default: false
       versa_config:
-        default: {}
-      appliance_name:
-        default: ""
-      org_name:
-        default: ""
+        required: true
+      appliance: 
+        required: true
+      organization: 
+        required: true
       profile:
-        default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
@@ -557,52 +512,3 @@ node_types:
         delete:
           implementation: versa.versa_plugin.operations.delete_vpn_profile
           inputs: {}
-
-relationships:
-    cloudify.versa.pool_connected_to_vm:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.dhcp_profile_connected_to_appliance:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.dhcp_connected_to_routing:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.dhcp_connected_to_organization:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.dhcp_connected_to_profile:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.firewall_connected_to_router:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.firewall_connected_to_org:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.cgnat_connected_to_routing:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.cgnat_connected_to_org:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.router_connected_to_router:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.router_connected_to_org:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.associated:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.parent:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.cms_org_connected_to_pool:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.nms_org_connected_to_cms_org:
-      derived_from: cloudify.relationships.connected_to
-
-    cloudify.versa.organization_connected_to_appliance:
-      derived_from: cloudify.relationships.connected_to

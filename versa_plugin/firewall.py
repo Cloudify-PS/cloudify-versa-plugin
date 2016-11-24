@@ -9,21 +9,22 @@ CategoryAction = namedtuple("CategoryAction", "name, action, categories")
 ReputationAction = namedtuple("ReputationAction", "name, action, reputations")
 
 
-def add_policy(client, appliance, org, policy):
+def add_policy(versa, policy):
     url = '/api/config/devices/device/{}/config/orgs/org-services/{}'\
-        '/security/access-policies'.format(appliance, org)
+        '/security/access-policies'.format(versa.appliance, versa.organization)
     data = {"access-policy-group": policy}
-    client.post(url, json.dumps(data), JSON, codes.created)
+    versa.client.post(url, json.dumps(data), JSON, codes.created)
 
 
-def delete_policy(client, appliance, org, policy):
+def delete_policy(versa, policy):
     url = '/api/config/devices/device/{}/config/orgs/org-services/{}'\
-          '/security/access-policies/access-policy-group/{}'.format(appliance,
-                                                                    org, policy)
-    client.delete(url)
+          '/security/access-policies'\
+          '/access-policy-group/{}'.format(versa.appliance, versa.organization,
+                                           policy)
+    versa.client.delete(url)
 
 
-def add_rule(client, appliance, org, policy, rule):
+def add_rule(versa, policy, rule):
     """
         :param  appliance (str)
         :param org (str)
@@ -32,34 +33,35 @@ def add_rule(client, appliance, org, policy, rule):
     """
     url = '/api/config/devices/device/{}/config/orgs'\
         '/org-services/{}/security/access-policies/'\
-        'access-policy-group/{}/rules'.format(appliance, org, policy)
+        'access-policy-group/{}/rules'.format(versa.appliance,
+                                              versa.organization, policy)
     data = {
         "access-policy": rule}
-    client.post(url, json.dumps(data), JSON, codes.created)
+    versa.client.post(url, json.dumps(data), JSON, codes.created)
 
 
-def update_rule(client, appliance, org, policy, rule):
+def update_rule(versa, policy, rule):
     """
-        :param  appliance (str)
-        :param org (str)
         :param policy (str)
         :param rule (dict): firewall rule properties
     """
     url = '/api/config/devices/device/{}/config/orgs'\
         '/org-services/{}/security/access-policies/'\
-        'access-policy-group/{}/rules/access-policy/{}'.format(appliance,
-                                                               org, policy,
-                                                               rule['name'])
+        'access-policy-group'\
+        '/{}/rules/access-policy/{}'.format(versa.appliance,
+                                            versa.organization, policy,
+                                            rule['name'])
     data = {
         "access-policy": rule}
-    client.put(url, json.dumps(data), JSON, codes.no_content)
+    versa.client.put(url, json.dumps(data), JSON, codes.no_content)
 
 
-def get_rule(client, appliance, org, policy, name):
+def get_rule(versa, policy, name):
     url = '/api/config/devices/device/{}/config/orgs'\
         '/org-services/{}/security/access-policies/'\
-        'access-policy-group/{}/rules?deep'.format(appliance, org, policy)
-    result = client.get(url, None, None, codes.ok, JSON)
+        'access-policy-group/{}/rules?deep'.format(versa.appliance,
+                                                   versa.organization, policy)
+    result = versa.client.get(url, None, None, codes.ok, JSON)
     if not result:
         return None
     for rule in result['rules']['access-policy']:
@@ -68,30 +70,29 @@ def get_rule(client, appliance, org, policy, name):
     return None
 
 
-def delete_rule(client, appliance, org, policy, rule):
+def delete_rule(versa, policy, rule):
     url = '/api/config/devices/device/{}/config/orgs/org-services/{}/'\
         'security/access-policies'\
-        '/access-policy-group/{}/rules/access-policy/{}'.format(appliance,
-                                                                org, policy,
-                                                                rule)
-    client.delete(url)
+        '/access-policy-group'\
+        '/{}/rules/access-policy/{}'.format(versa.appliance,
+                                            versa.organization, policy, rule)
+    versa.client.delete(url)
 
 
-def add_url_filter(client, appliance, org, url_filter):
+def add_url_filter(versa, url_filter):
     """
-        :param appliance (str)
-        :param org (str)
         :url_filter (dict)
     """
     url = '/api/config/devices/device/{}/config/orgs/org-services/{}'\
-          '/security/profiles/url-filtering'.format(appliance, org)
+          '/security/profiles/url-filtering'.format(versa.appliance,
+                                                    versa.organization)
     data = {
         "url-filtering-profile": url_filter
     }
-    client.post(url, json.dumps(data), JSON, codes.created)
+    versa.client.post(url, json.dumps(data), JSON, codes.created)
 
 
-def delete_url_filter(client, appliance, org, url_filter):
+def delete_url_filter(versa, url_filter):
     """
         :param appliance (str)
         :param org (str)
@@ -100,8 +101,8 @@ def delete_url_filter(client, appliance, org, url_filter):
     name = url_filter['name']
     url = '/api/config/devices/device/{}/config/orgs/org-services/{}'\
           '/security/profiles/url-filtering/url-filtering-profile/{}'\
-          .format(appliance, org, name)
-    client.delete(url)
+          .format(versa.appliance, versa.organization, name)
+    versa.client.delete(url)
 
 
 def _prepare_blacklist(lists):

@@ -49,7 +49,6 @@ class VersaClient():
         return self
 
     def __exit__(self, type, value, traceback):
-        # self.revoke_token()
         pass
 
     def read_tokens_form_file(self):

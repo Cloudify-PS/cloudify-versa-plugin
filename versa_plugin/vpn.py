@@ -4,23 +4,25 @@ from versa_plugin import find_by_name
 from requests import codes
 
 
-def create_profile(client, appliance, org, profile):
+def create_profile(versa, profile):
     url = '/api/config/devices/device/{}'\
-          '/config/orgs/org-services/{}/ipsec'.format(appliance, org)
+          '/config/orgs/org-services/{}/ipsec'.format(versa.appliance,
+                                                      versa.organization)
     data = {"vpn-profile": profile}
-    client.post(url, json.dumps(data), JSON, codes.created)
+    versa.client.post(url, json.dumps(data), JSON, codes.created)
 
 
-def delete_profile(client, appliance, org, name):
+def delete_profile(versa, name):
     url = '/api/config/devices/device/{}'\
           '/config/orgs/org-services/{}'\
-          '/ipsec/vpn-profile/{}'.format(appliance, org, name)
-    client.delete(url)
+          '/ipsec/vpn-profile/{}'.format(versa.appliance, versa.organization,
+                                         name)
+    versa.client.delete(url)
 
 
-def is_profile_exists(client, appliance, org, name):
+def is_profile_exists(versa, name):
     url = '/api/config/devices/device/{}'\
           '/config/orgs/org-services/{}'\
-          '/ipsec/vpn-profile?deep'.format(appliance, org)
-    result = client.get(url, None, None, codes.ok)
+          '/ipsec/vpn-profile?deep'.format(versa.appliance, versa.organization)
+    result = versa.client.get(url, None, None, codes.ok)
     return find_by_name(result, "vpn-profile", name)
