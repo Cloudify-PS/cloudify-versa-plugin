@@ -295,6 +295,8 @@ node_templates:
               services:
                 - cgnat
                 - nextgen-firewall
+                - ipsec
+                - sdwan
               networking-info:
                 - network-info:
                     network-name: { get_input: hq_network_name }
