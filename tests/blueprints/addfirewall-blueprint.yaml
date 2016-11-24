@@ -18,7 +18,7 @@ inputs:
     appliance_name:
       default: ipsec
     org_name:
-        default: vcpe1_parent_org
+        default: LEGO
     external_router_name: 
         default: external_router
     external_network_name:
