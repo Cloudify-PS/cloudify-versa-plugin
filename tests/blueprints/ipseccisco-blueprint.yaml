@@ -78,26 +78,6 @@ node_templates:
       agent_config:
         install_method: none
   
-  CPE_POST :
-    type: cloudify.nodes.Root
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        start:
-          implementation: "cisco.py"
-          executor: central_deployment_agent
-          inputs:
-            host: 87.53.86.18
-            user: tdc
-            password: tdc
-            enable_password: tdc
-            telnet: true
-            dry_run: false
-            extra_cmds: >
-              clear crypto sa
-    relationships:
-      - type: cloudify.relationships.depends_on
-        target: vpn_profile
-
   CPE:
     type: cloudify.nodes.Root
     interfaces:
