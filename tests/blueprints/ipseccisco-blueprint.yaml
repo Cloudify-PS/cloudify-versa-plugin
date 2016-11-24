@@ -78,7 +78,27 @@ node_templates:
       agent_config:
         install_method: none
   
-  CPE_POST:
+  CPE_post :
+    type: cloudify.nodes.Root
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        start:
+          implementation: "cisco.py"
+          executor: central_deployment_agent
+          inputs:
+            host: 87.53.86.18
+            user: tdc
+            password: tdc
+            enable_password: tdc
+            telnet: true
+            dry_run: false
+            extra_cmds: >
+              clear crypto sa
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: vpn_profile
+
+  CPE:
     type: cloudify.nodes.Root
     interfaces:
       cloudify.interfaces.lifecycle:
@@ -95,7 +115,6 @@ node_templates:
             remove_children_from_parent: ^interface Vlan30;ip address
             dry_run: false
             extra_cmds: >
-              clear crypto sa
               ip dhcp excluded-address 192.168.65.200 192.168.65.254
 
 
@@ -271,6 +290,8 @@ node_templates:
     relationships:
       - type: cloudify.versa.organization_connected_to_appliance
         target: organization
+      - type: cloudify.relationships.depends_on
+        target: my_host
           
   #####################
   # Interface configuration
@@ -511,8 +532,6 @@ node_templates:
     relationships:
       - type: cloudify.relationships.depends_on
         target: limits
-      - type: cloudify.relationships.depends_on
-        target: my_host
 
   #####################
   # DHCP configuration
