@@ -96,7 +96,7 @@ node_templates:
             telnet: true
             remove_global: ^ip dhcp excluded-address;^ip dhcp pool INTERNET;^ip nat inside;^access-list
             remove_children_from_parent: ^interface Vlan30;ip address
-            dry_run: true
+            dry_run: false
             extra_cmds: >
               ip dhcp excluded-address 192.168.65.200 192.168.65.254
               
@@ -158,7 +158,8 @@ node_templates:
               ip route vrf INTERNET 10.11.0.0 255.255.255.0 Tunnel4
               ip route vrf INTERNET 87.53.86.10 255.255.255.255 87.53.86.13
 
-              access-list 2 permit 192.168.65.0 0.0.0.255    relationships:
+              access-list 2 permit 192.168.65.0 0.0.0.255    
+    relationships:
       - type: cloudify.relationships.contained_in
         target: my_host
 
