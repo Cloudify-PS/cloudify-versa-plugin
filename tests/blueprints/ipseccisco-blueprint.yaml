@@ -80,22 +80,21 @@ node_templates:
     properties:
       agent_config:
         install_method: none
-  
+
   CPE:
     type: cloudify.nodes.Root
     interfaces:
       cloudify.interfaces.lifecycle:
         start:
-          implementation: "cisco.py"
-          executor: central_deployment_agent
+          implementation: "cc.py"
           inputs:
             host: 87.53.86.18
             user: tdc
             password: tdc
             enable_password: tdc
             telnet: true
-            remove_global: ^ip dhcp excluded-address;^ip dhcp pool INTERNET;^ip nat inside;^access-list
-            remove_children_from_parent: ^interface Vlan30;ip address
+            remove_global: ^ip dhcp excluded-address;^ip dhcp pool INTERNET;^ip nat inside;^access-list;^ip route vrf INTERNET
+            remove_children_from_parent: ^interface Vlan30;ip address;^interface;ip nat
             dry_run: false
             extra_cmds: >
               ip dhcp excluded-address 192.168.65.200 192.168.65.254
@@ -155,14 +154,13 @@ node_templates:
                exit
                
               ip route vrf INTERNET 0.0.0.0 0.0.0.0 Tunnel4 11.11.11.63
+              
               ip route vrf INTERNET 10.11.0.0 255.255.255.0 Tunnel4
+              
               ip route vrf INTERNET 87.53.86.10 255.255.255.255 87.53.86.13
-
-              access-list 2 permit 192.168.65.0 0.0.0.255    
     relationships:
       - type: cloudify.relationships.contained_in
         target: my_host
-
   #####################
   # Versa config
   #####################
