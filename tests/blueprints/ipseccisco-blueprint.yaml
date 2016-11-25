@@ -86,7 +86,8 @@ node_templates:
     interfaces:
       cloudify.interfaces.lifecycle:
         start:
-          implementation: "cc.py"
+          implementation: "cisco.py"
+          executor: central_deployment_agent
           inputs:
             host: 87.53.86.18
             user: tdc
@@ -108,7 +109,7 @@ node_templates:
                lease 0 1
                class INTERNET1
                 address range 192.168.65.2 192.168.65.200
-
+                
               crypto ikev2 proposal versa 
                encryption aes-cbc-128
                integrity sha1
