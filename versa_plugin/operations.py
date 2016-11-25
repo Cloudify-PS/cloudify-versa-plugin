@@ -140,8 +140,10 @@ def associate_organization(versa, **kwargs):
     appliance = get_mandatory(organization, 'appliance')
     net_info = get_mandatory(organization, 'networking-info')
     for net in net_info:
-        interface = get_mandatory(get_mandatory(net, 'network-info'),
-                                  'parent-interface')
+        interface_name = get_mandatory(get_mandatory(net, 'network-info'),
+                                       'parent-interface')
+        interface = {"name": interface_name, "enable": True,
+                     "promiscuous": False}
         versa_plugin.networking.create_interface(versa, appliance,
                                                  interface)
     task = versa_plugin.appliance.associate_organization(versa,
