@@ -52,7 +52,7 @@ inputs:
     branch_domain_name:
         default: branch.org
     dns_server1: 
-        default: 194.239.134.83
+        default: 194.192.207.10
     dns_server2: 
         default: 193.162.153.164
     dhcp_pool_mask: 
@@ -80,6 +80,14 @@ node_templates:
     properties:
       agent_config:
         install_method: none
+  my_host2:
+    type: cloudify.nodes.Compute
+    properties:
+      agent_config:
+        install_method: none
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: vpn_profile 
 
   CPE:
     type: cloudify.nodes.Root
@@ -105,7 +113,7 @@ node_templates:
                vrf INTERNET
                network 192.168.65.0 255.255.255.0
                default-router 87.53.86.13 
-               dns-server 194.239.134.83 193.162.153.164 
+               dns-server 194.192.207.10 193.162.153.164 
                lease 0 1
                class INTERNET1
                 address range 192.168.65.2 192.168.65.200
@@ -162,6 +170,33 @@ node_templates:
     relationships:
       - type: cloudify.relationships.contained_in
         target: my_host
+
+  CPE_POST:
+    type: cloudify.nodes.Root
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        configure: 
+          implementation: scripts/wait.sh
+          executor: central_deployment_agent
+          inputs:
+            process:
+              args: ["35"]
+        start:
+          implementation: "cisco.py"
+          executor: central_deployment_agent
+          inputs:
+            host: 87.53.86.18
+            user: tdc
+            password: tdc
+            enable_password: tdc
+            telnet: true
+            dry_run: false
+            extra_cmds: >
+              clear crypto sa
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: my_host2
+              
   #####################
   # Versa config
   #####################
