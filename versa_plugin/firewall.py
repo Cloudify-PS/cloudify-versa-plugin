@@ -35,8 +35,7 @@ def add_rule(versa, policy, rule):
         '/org-services/{}/security/access-policies/'\
         'access-policy-group/{}/rules'.format(versa.appliance,
                                               versa.organization, policy)
-    data = {
-        "access-policy": rule}
+    data = {"access-policy": rule}
     versa.client.post(url, json.dumps(data), JSON, codes.created)
 
 
@@ -51,8 +50,7 @@ def update_rule(versa, policy, rule):
         '/{}/rules/access-policy/{}'.format(versa.appliance,
                                             versa.organization, policy,
                                             rule['name'])
-    data = {
-        "access-policy": rule}
+    data = {"access-policy": rule}
     versa.client.put(url, json.dumps(data), JSON, codes.no_content)
 
 

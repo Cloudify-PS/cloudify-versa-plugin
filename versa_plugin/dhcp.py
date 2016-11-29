@@ -4,31 +4,21 @@ from versa_plugin import find_by_name
 from requests import codes
 
 
-def update_global_configuration(versa, lease_profile,
-                                options_profile):
+def update_global_configuration(versa, server_and_relay):
     url = '/api/config/devices/device/{}'\
         '/config/orgs/org-services/{}'\
         '/dhcp/dhcp4-server-and-relay'.format(versa.appliance,
                                               versa.organization)
-    data = {
-        "dhcp4-server-and-relay": {
-            "default-lease-profile": lease_profile,
-            "default-options-profile": options_profile,
-            "log-unmatched-requests": False}}
+    data = {"dhcp4-server-and-relay": server_and_relay}
     versa.client.put(url, json.dumps(data), JSON, codes.ok)
 
 
-def create_options_profile(versa, name, domain, servers):
+def create_options_profile(versa, options_profile):
     url = '/api/config/devices/device/{}'\
         '/config/orgs/org-services/{}'\
         '/dhcp/dhcp4-options-profiles'.format(versa.appliance,
                                               versa.organization)
-    data = {
-        "dhcp4-options-profile": {
-            "name": name,
-            "domain-name": domain,
-            "dns-server": servers,
-            "custom-options": {"custom-dhcp-option": []}}}
+    data = {"dhcp4-options-profile": options_profile}
     versa.client.post(url, json.dumps(data), JSON, codes.created)
 
 
@@ -60,17 +50,11 @@ def is_lease_profile_exsists(versa, name):
     return find_by_name(result, "dhcp4-lease-profile", name)
 
 
-def create_lease_profile(versa, name):
+def create_lease_profile(versa, lease_profile):
     url = '/api/config/devices/device/{}'\
         '/config/orgs/org-services/{}'\
         '/dhcp/dhcp4-lease-profiles'.format(versa.appliance, versa.organization)
-    data = {
-        "dhcp4-lease-profile": {
-            "name": name,
-            "valid-lifetime": "3600",
-            "renew-timer": "900",
-            "rebind-timer": "2800",
-            "log-utilization": False}}
+    data = {"dhcp4-lease-profile": lease_profile}
     versa.client.post(url, json.dumps(data), JSON, codes.created)
 
 
@@ -83,26 +67,11 @@ def delete_lease_profile(versa, name):
     versa.client.delete(url, codes.no_content)
 
 
-def create_pool(versa, pool_name, mask,
-                lease_profile, options_profile,
-                range_name, begin_address, end_address):
+def create_pool(versa, pool):
     url = '/api/config/devices/device/{}'\
         '/config/orgs/org-services/{}'\
         '/dhcp/dhcp4-dynamic-pools'.format(versa.appliance, versa.organization)
-    data = {
-        "dhcp4-dynamic-pool": {
-            "name": pool_name,
-            "subnet-mask": mask,
-            "lease-profile": lease_profile,
-            "options-profile": options_profile,
-            "address-pools": {
-                "dhcp4-address-pool-info": [{
-                    "name": range_name,
-                    "pool": {
-                        "ipv4-range": {
-                            "begin-address": begin_address,
-                            "end-address": end_address}}}]},
-            "exclude-addresses": {"dhcp4-address-pool-info": []}}}
+    data = {"dhcp4-dynamic-pool": pool}
     versa.client.post(url, json.dumps(data), JSON, codes.created)
 
 
@@ -129,26 +98,12 @@ def is_pool_exists(versa, pool_name):
     return False
 
 
-def create_server(versa, server_name,
-                  lease_profile, options_profile, networks, pool):
+def create_server(versa, server):
     url = '/api/config/devices/device/{}'\
         '/config/orgs/org-services/{}/dhcp'\
         '/dhcp4-server-and-relay/service-profiles'.format(versa.appliance,
                                                           versa.organization)
-    data = {
-        "dhcp4-service-profile": {
-            "name": server_name,
-            "lease-profile": lease_profile,
-            "options-profile": options_profile,
-            "dhcp-request-match": {
-                "networks": networks},
-            "dhcp-service-type": {
-                "service-type": {
-                    "allocate-address": {
-                        "dynamic": pool}}},
-            "dhcp-log-settings": {
-                "log-new-allocations": True,
-                "log-renewals": False}}}
+    data = {"dhcp4-service-profile": server}
     versa.client.post(url, json.dumps(data), JSON, codes.created)
 
 

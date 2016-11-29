@@ -15,11 +15,6 @@ import versa_plugin.networking
 import versa_plugin.tasks
 import versa_plugin.vpn
 import versa_plugin.limits
-from versa_plugin.cgnat import AddressRange
-from collections import namedtuple
-
-ApplianceContext = namedtuple("ApplianceContext",
-                              "client, appliance, organization")
 
 
 def is_use_existing():
@@ -180,7 +175,7 @@ def insert_to_router(versa, **kwargs):
         return
     router = _get_node_configuration('router', kwargs)
     router_name = router['name']
-    networks = ctx.node.properties.get('networks', [])
+    networks = router('networks', [])
     for net_name in networks:
         versa_plugin.networking.add_network_to_router(
             versa, router_name, net_name)
@@ -191,8 +186,9 @@ def insert_to_router(versa, **kwargs):
 def delete_from_router(versa, **kwargs):
     if is_use_existing():
         return
-    networks = ctx.node.properties.get('networks', [])
-    router_name = ctx.node.properties['name']
+    router = _get_node_configuration('router', kwargs)
+    router_name = router['name']
+    networks = router('networks', [])
     for net_name in networks:
         versa_plugin.networking.delete_network_from_router(
             versa, router_name, net_name)
@@ -200,40 +196,40 @@ def delete_from_router(versa, **kwargs):
 
 @operation
 @with_versa
-def create_cgnat(versa, **kwargs):
+def create_cgnat_pool(versa, **kwargs):
     if is_use_existing():
         return
-    pool = ctx.node.properties['pool']
-    pool_name = pool['name']
-    ranges = [AddressRange(r['name'], r['low'], r['hight'])
-              for r in pool['ranges']]
-    routing_instance = pool['routing_instance']
-    provider_org = pool['provider_org']
-    versa_plugin.cgnat.create_pool(versa,
-                                   pool_name,
-                                   ranges, routing_instance,
-                                   provider_org)
-    rule = ctx.node.properties['rule']
-    rule_name = rule['name']
-    source_addresses = rule['addresses']
-    versa_plugin.cgnat.create_rule(versa,
-                                   rule_name,
-                                   source_addresses, pool_name)
+    pool = _get_node_configuration('pool', kwargs)
+    versa_plugin.cgnat.create_pool(versa, pool)
 
 
 @operation
 @with_versa
-def delete_cgnat(versa, **kwargs):
+def delete_cgnat_pool(versa, **kwargs):
     if is_use_existing():
         return
-    pool = ctx.node.properties['pool']
+    pool = _get_node_configuration('pool', kwargs)
     pool_name = pool['name']
-    rule = ctx.node.properties['rule']
+    versa_plugin.cgnat.delete_pool(versa, pool_name)
+
+
+@operation
+@with_versa
+def create_cgnat_rule(versa, **kwargs):
+    if is_use_existing():
+        return
+    rule = _get_node_configuration('rule', kwargs)
+    versa_plugin.cgnat.create_rule(versa, rule)
+
+
+@operation
+@with_versa
+def delete_cgnat_rule(versa, **kwargs):
+    if is_use_existing():
+        return
+    rule = _get_node_configuration('rule', kwargs)
     rule_name = rule['name']
-    versa_plugin.cgnat.delete_rule(versa,
-                                   rule_name)
-    versa_plugin.cgnat.delete_pool(versa,
-                                   pool_name)
+    versa_plugin.cgnat.delete_rule(versa, rule_name)
 
 
 @operation
@@ -241,7 +237,7 @@ def delete_cgnat(versa, **kwargs):
 def create_zone(versa, **kwargs):
     if is_use_existing():
         return
-    zone = ctx.node.properties['zone']
+    zone = _get_node_configuration('zone', kwargs)
     zone_name = zone['name']
     zone_exsists = versa_plugin.networking.get_zone(versa, zone_name)
     if zone_exsists:
@@ -252,10 +248,20 @@ def create_zone(versa, **kwargs):
 
 @operation
 @with_versa
+def delete_zone(versa, **kwargs):
+    if is_use_existing():
+        return
+    zone = _get_node_configuration('zone', kwargs)
+    zone_name = zone['name']
+    versa_plugin.networking.delete_zone(versa, zone_name)
+
+
+@operation
+@with_versa
 def insert_to_zone(versa, **kwargs):
     if is_use_existing():
         return
-    zone = ctx.node.properties['zone']
+    zone = _get_node_configuration('zone', kwargs)
     zone_name = zone['name']
     zone_exsists = versa_plugin.networking.get_zone(versa,
                                                     zone_name)
@@ -267,20 +273,10 @@ def insert_to_zone(versa, **kwargs):
 
 @operation
 @with_versa
-def delete_zone(versa, **kwargs):
-    if is_use_existing():
-        return
-    zone = ctx.node.properties['zone']
-    zone_name = zone['name']
-    versa_plugin.networking.delete_zone(versa, zone_name)
-
-
-@operation
-@with_versa
 def delete_from_zone(versa, **kwargs):
     if is_use_existing():
         return
-    zone = ctx.node.properties['zone']
+    zone = _get_node_configuration('zone', kwargs)
     zone_name = zone['name']
     old_zone = ctx.instance.runtime_properties.get(zone_name, None)
     if old_zone:
@@ -292,7 +288,7 @@ def delete_from_zone(versa, **kwargs):
 def create_firewall_policy(versa, **kwargs):
     if is_use_existing():
         return
-    policy = ctx.node.properties['policy']
+    policy = _get_node_configuration('policy', kwargs)
     versa_plugin.firewall.add_policy(versa, policy)
 
 
@@ -301,7 +297,7 @@ def create_firewall_policy(versa, **kwargs):
 def delete_firewall_policy(versa, **kwargs):
     if is_use_existing():
         return
-    policy = ctx.node.properties['policy']
+    policy = _get_node_configuration('policy', kwargs)
     versa_plugin.firewall.delete_policy(versa, policy['name'])
 
 
@@ -310,8 +306,8 @@ def delete_firewall_policy(versa, **kwargs):
 def create_firewall_rules(versa, **kwargs):
     if is_use_existing():
         return
-    policy_name = ctx.node.properties['policy_name']
-    rules = ctx.node.properties['rules']
+    policy_name = get_mandatory['policy_name']
+    rules = _get_node_configuration('rules', kwargs)
     ctx.instance.runtime_properties['rules'] = {}
     ctx.instance.runtime_properties['appliance'] = versa.appliance
     ctx.instance.runtime_properties['org'] = versa.organization
@@ -320,6 +316,17 @@ def create_firewall_rules(versa, **kwargs):
         name = rule['name']
         ctx.instance.runtime_properties['rules'][name] = rule
         versa_plugin.firewall.add_rule(versa, policy_name, rule)
+
+
+@operation
+@with_versa
+def delete_firewall_rules(versa, **kwargs):
+    if is_use_existing():
+        return
+    policy_name = get_mandatory['policy_name']
+    rules = _get_node_configuration('rules', kwargs)
+    for rule in rules:
+        versa_plugin.firewall.delete_rule(versa, policy_name, rule['name'])
 
 
 @operation
@@ -355,20 +362,9 @@ def get_firewall_rule(versa, **kwargs):
 
 @operation
 @with_versa
-def delete_firewall_rules(versa, **kwargs):
-    if is_use_existing():
-        return
-    policy_name = ctx.node.properties['policy_name']
-    rules = ctx.node.properties['rules']
-    for rule in rules:
-        versa_plugin.firewall.delete_rule(versa, policy_name, rule['name'])
-
-
-@operation
-@with_versa
 def create_url_filters(versa, **kwargs):
-    url_filters = ctx.node.properties['filters']
-    for url_filter in url_filters:
+    filters = _get_node_configuration('filters', kwargs)
+    for url_filter in filters:
         ctx.logger.info("Filter: {}".format(url_filter))
         versa_plugin.firewall.add_url_filter(versa, url_filter)
 
@@ -376,8 +372,8 @@ def create_url_filters(versa, **kwargs):
 @operation
 @with_versa
 def delete_url_filters(versa, **kwargs):
-    url_filters = ctx.node.properties['filters']
-    for url_filter in url_filters:
+    filters = _get_node_configuration('filters', kwargs)
+    for url_filter in filters:
         ctx.logger.info("Filter: {}".format(url_filter))
         versa_plugin.firewall.delete_url_filter(versa, url_filter)
 
@@ -387,11 +383,12 @@ def delete_url_filters(versa, **kwargs):
 def create_dhcp_profile(versa, **kwargs):
     if is_use_existing():
         return
-    profile_name = ctx.node.properties['profile_name']
+    profile = _get_node_configuration('profile', kwargs)
+    profile_name = profile['name']
     if versa_plugin.limits.is_dhcp_profile_exists(versa,
                                                   profile_name):
-        raise cfy_exc.NonRecoverableError("Dhcp profile exists")
-    versa_plugin.limits.create_dhcp_profile(versa, profile_name)
+        raise cfy_exc.NonRecoverableError("DHCP profile exists")
+    versa_plugin.limits.create_dhcp_profile(versa, profile)
 
 
 @operation
@@ -399,7 +396,8 @@ def create_dhcp_profile(versa, **kwargs):
 def delete_dhcp_profile(versa, **kwargs):
     if is_use_existing():
         return
-    profile_name = ctx.node.properties['profile_name']
+    profile = _get_node_configuration('profile', kwargs)
+    profile_name = profile['name']
     if versa_plugin.limits.is_dhcp_profile_exists(versa,
                                                   profile_name):
         versa_plugin.limits.delete_dhcp_profile(versa,
@@ -408,33 +406,14 @@ def delete_dhcp_profile(versa, **kwargs):
 
 @operation
 @with_versa
-def create_dhcp_lease_profile(versa, **kwargs):
-    if is_use_existing():
-        return
-    lease_name = ctx.node.properties['lease_profile']
-    versa_plugin.dhcp.create_lease_profile(versa, lease_name)
-
-
-@operation
-@with_versa
-def delete_dhcp_lease_profile(versa, **kwargs):
-    if is_use_existing():
-        return
-    lease_name = ctx.node.properties['lease_profile']
-    if versa_plugin.dhcp.is_lease_profile_exsists(versa, lease_name):
-        versa_plugin.dhcp.delete_lease_profile(versa, lease_name)
-
-
-@operation
-@with_versa
 def create_dhcp_options_profile(versa, **kwargs):
     if is_use_existing():
         return
-    options_name = ctx.node.properties['name']
-    domain = ctx.node.properties['domain']
-    servers = ctx.node.properties['servers']
-    versa_plugin.dhcp.create_options_profile(versa, options_name,
-                                             domain, servers)
+    options_profile = _get_node_configuration('options_profile', kwargs)
+    options_name = options_profile['name']
+    if versa_plugin.dhcp.is_dhcp_profile_exists(versa, options_name):
+        raise cfy_exc.NonRecoverableError("DHCP options profile exists")
+    versa_plugin.dhcp.create_options_profile(versa, options_profile)
 
 
 @operation
@@ -442,9 +421,33 @@ def create_dhcp_options_profile(versa, **kwargs):
 def delete_dhcp_options_profile(versa, **kwargs):
     if is_use_existing():
         return
-    options_name = ctx.node.properties['name']
+    options_profile = _get_node_configuration('options_profile', kwargs)
+    options_name = options_profile['name']
     if versa_plugin.dhcp.is_dhcp_profile_exists(versa, options_name):
         versa_plugin.dhcp.delete_options_profile(versa, options_name)
+
+
+@operation
+@with_versa
+def create_dhcp_lease_profile(versa, **kwargs):
+    if is_use_existing():
+        return
+    lease_profile = _get_node_configuration('lease_profile', kwargs)
+    lease_name = lease_profile['lease_profile']
+    if versa_plugin.dhcp.is_lease_profile_exsists(versa, lease_name):
+        raise cfy_exc.NonRecoverableError("DHCP lease profile exists")
+    versa_plugin.dhcp.create_lease_profile(versa, lease_profile)
+
+
+@operation
+@with_versa
+def delete_dhcp_lease_profile(versa, **kwargs):
+    if is_use_existing():
+        return
+    lease_profile = _get_node_configuration('lease_profile', kwargs)
+    lease_name = lease_profile['lease_profile']
+    if versa_plugin.dhcp.is_lease_profile_exsists(versa, lease_name):
+        versa_plugin.dhcp.delete_lease_profile(versa, lease_name)
 
 
 @operation
@@ -452,11 +455,9 @@ def delete_dhcp_options_profile(versa, **kwargs):
 def create_dhcp_global_configuration(versa, **kwargs):
     if is_use_existing():
         return
-    lease_profile = ctx.node.properties['lease_profile']
-    options_profile = ctx.node.properties['options_profile']
-    versa_plugin.dhcp.update_global_configuration(versa,
-                                                  lease_profile,
-                                                  options_profile)
+
+    server_and_relay = _get_node_configuration('server_and_relay', kwargs)
+    versa_plugin.dhcp.update_global_configuration(versa, server_and_relay)
 
 
 @operation
@@ -464,10 +465,8 @@ def create_dhcp_global_configuration(versa, **kwargs):
 def delete_dhcp_global_configuration(versa, **kwargs):
     if is_use_existing():
         return
-    lease_profile = []
-    options_profile = []
-    versa_plugin.dhcp.update_global_configuration(versa, lease_profile,
-                                                  options_profile)
+    server_and_relay = []
+    versa_plugin.dhcp.update_global_configuration(versa, server_and_relay)
 
 
 @operation
@@ -475,17 +474,11 @@ def delete_dhcp_global_configuration(versa, **kwargs):
 def create_dhcp_pool(versa, **kwargs):
     if is_use_existing():
         return
-    lease_profile = ctx.node.properties['lease_profile']
-    options_profile = ctx.node.properties['options_profile']
-    pool_name = ctx.node.properties['name']
-    mask = ctx.node.properties['mask']
-    range_name = ctx.node.properties['range_name']
-    begin_address = ctx.node.properties['begin_address']
-    end_address = ctx.node.properties['end_address']
-    versa_plugin.dhcp.create_pool(versa,
-                                  pool_name, mask, lease_profile,
-                                  options_profile,
-                                  range_name, begin_address, end_address)
+    pool = _get_node_configuration('pool', kwargs)
+    pool_name = pool['name']
+    if versa_plugin.dhcp.is_pool_exists(versa, pool_name):
+        raise cfy_exc.NonRecoverableError("DHCP pool exists")
+    versa_plugin.dhcp.create_pool(versa, pool)
 
 
 @operation
@@ -493,7 +486,8 @@ def create_dhcp_pool(versa, **kwargs):
 def delete_dhcp_pool(versa, **kwargs):
     if is_use_existing():
         return
-    pool_name = ctx.node.properties['name']
+    pool = _get_node_configuration('pool', kwargs)
+    pool_name = pool['name']
     if versa_plugin.dhcp.is_pool_exists(versa, pool_name):
         versa_plugin.dhcp.delete_pool(versa, pool_name)
 
@@ -503,14 +497,11 @@ def delete_dhcp_pool(versa, **kwargs):
 def create_dhcp_server(versa, **kwargs):
     if is_use_existing():
         return
-    lease_profile = ctx.node.properties['lease_profile']
-    options_profile = ctx.node.properties['options_profile']
-    pool_name = ctx.node.properties['pool_name']
-    server_name = ctx.node.properties['name']
-    networks = ctx.node.properties['networks']
-    versa_plugin.dhcp.create_server(versa,
-                                    server_name, lease_profile, options_profile,
-                                    networks, pool_name)
+    server = _get_node_configuration('server', kwargs)
+    server_name = server['name']
+    if versa_plugin.dhcp.is_server_exists(versa, server_name):
+        raise cfy_exc.NonRecoverableError("DHCP server exists")
+    versa_plugin.dhcp.create_server(versa, server)
 
 
 @operation
@@ -518,7 +509,8 @@ def create_dhcp_server(versa, **kwargs):
 def delete_dhcp_server(versa, **kwargs):
     if is_use_existing():
         return
-    server_name = ctx.node.properties['name']
+    server = _get_node_configuration('server', kwargs)
+    server_name = server['name']
     if versa_plugin.dhcp.is_server_exists(versa, server_name):
         versa_plugin.dhcp.delete_server(versa, server_name)
 
@@ -529,6 +521,9 @@ def create_interface(versa, **kwargs):
     if is_use_existing():
         return
     interface = _get_node_configuration('interface', kwargs)
+    name = interface['name']
+    if versa_plugin.networking.is_interface_exists(versa, name):
+        raise cfy_exc.NonRecoverableError("Interface exists")
     versa_plugin.networking.create_interface(versa, interface)
 
 
@@ -539,7 +534,8 @@ def delete_interface(versa, **kwargs):
         return
     interface = _get_node_configuration('interface', kwargs)
     name = interface['name']
-    versa_plugin.networking.delete_interface(versa, name)
+    if versa_plugin.networking.is_interface_exists(versa, name):
+        versa_plugin.networking.delete_interface(versa, name)
 
 
 @operation
@@ -548,7 +544,8 @@ def create_network(versa, **kwargs):
     if is_use_existing():
         return
     network = _get_node_configuration('network', kwargs)
-    if versa_plugin.networking.is_network_exists(versa, network):
+    name = network['name']
+    if versa_plugin.networking.is_network_exists(versa, name):
         raise cfy_exc.NonRecoverableError("Network exists")
     versa_plugin.networking.create_network(versa, network)
 

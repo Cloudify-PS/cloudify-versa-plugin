@@ -22,15 +22,10 @@ def _add_organization_child(xml, tagname, text):
     org_node.appendChild(node)
 
 
-def create_dhcp_profile(versa, name):
+def create_dhcp_profile(versa, profile):
     url = '/api/config/devices/device/{}'\
           '/config/dhcp-profiles'.format(versa.appliance)
-    data = {
-        "dhcp-profile": {
-            "name": name,
-            "dhcp-options": {
-                "max-servers": "256",
-                "max-clients": "256"}}}
+    data = {"dhcp-profile": profile}
     versa.client.post(url, json.dumps(data), JSON, codes.created)
 
 

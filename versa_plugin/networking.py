@@ -19,6 +19,13 @@ def delete_interface(versa, name):
     versa.client.delete(url, codes.no_content)
 
 
+def is_interface_exists(versa, name):
+    url = '/api/config/devices/device/{}/config/interfaces?deep'.\
+          format(versa.appliance)
+    result = versa.client.get(url, None, None, codes.ok, JSON)
+    return find_by_name(result.get('interfaces'), 'itype', name)
+
+
 def create_network(versa, network):
     url = '/api/config/devices/device/{}'\
           '/config/networks'.format(versa.appliance)
