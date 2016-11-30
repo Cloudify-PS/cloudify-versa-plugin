@@ -112,8 +112,8 @@ node_templates:
               ip dhcp pool INTERNET1
                vrf INTERNET
                network 192.168.65.0 255.255.255.0
-               default-router 87.53.86.13 
-               dns-server 194.192.207.10 193.162.153.164 
+               default-router 192.168.65.1
+               dns-server 194.192.207.10 
                lease 0 1
                class INTERNET1
                 address range 192.168.65.2 192.168.65.200
@@ -146,8 +146,8 @@ node_templates:
                set transform-set versa 
                set ikev2-profile versa
               interface Vlan30
-               ip address 192.168.65.1 255.255.255.0               
                ip vrf forwarding INTERNET
+               ip address 192.168.65.1 255.255.255.0               
                ip tcp adjust-mss 1300
               interface Tunnel4
                ip vrf forwarding INTERNET
