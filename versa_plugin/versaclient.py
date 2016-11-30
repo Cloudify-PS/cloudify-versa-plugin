@@ -19,16 +19,19 @@ def _save_key_file(path, value):
 
 
 def _check_response(response, return_code, accept):
-    if response.status_code == requests.codes.no_content:
-        return None
     if response.status_code != return_code:
         raise cfy_exc.HttpException(response.url, response.status_code,
                                     response.content)
+    if response.status_code == requests.codes.no_content:
+        return None
     if response.content:
         if accept == JSON:
             return json.loads(response.content)
-        else:
+        elif accept == XML:
             return parseString(response.content)
+        else:
+            raise cfy_exc.NonRecoverableError("Incorrect accept type: {}".
+                                              format(accept))
     else:
         return None
 
@@ -91,19 +94,22 @@ class VersaClient():
             os.remove(self.key_file)
         self.access_token = None
 
-    def get(self, path, data, content_type, return_code=200, accept=JSON):
+    def get(self, path, data, content_type, return_code=requests.codes.ok,
+            accept=JSON):
         return self._request(requests.get, path, data,
                              content_type, return_code, accept)
 
-    def post(self, path, data, content_type, return_code=201, accept=JSON):
+    def post(self, path, data, content_type, return_code=requests.codes.created,
+             accept=JSON):
         return self._request(requests.post, path, data,
                              content_type, return_code, accept)
 
-    def put(self, path, data, content_type, return_code=204, accept=JSON):
+    def put(self, path, data, content_type,
+            return_code=requests.codes.no_content, accept=JSON):
         return self._request(requests.put, path, data,
                              content_type, return_code, accept)
 
-    def delete(self, path, return_code=204, accept=JSON):
+    def delete(self, path, return_code=requests.codes.no_content, accept=JSON):
         return self._request(requests.delete, path, None,
                              None, return_code, accept)
 
@@ -118,7 +124,7 @@ class VersaClient():
                 self.versa_url + path,
                 headers=headers, data=data,
                 verify=self.verify)
-            if response.status_code == 401:
+            if response.status_code == requests.codes.unauthorized:
                 if retry == 1:
                     break
                 retry += 1
