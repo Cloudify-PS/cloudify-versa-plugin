@@ -32,7 +32,7 @@ inputs:
     firewall_filter_name:
       default: firewall_filter
     filter_string:
-      default: https://www.youtube.com/*
+      default: .*youtube.com.*
 
 node_templates:
 
