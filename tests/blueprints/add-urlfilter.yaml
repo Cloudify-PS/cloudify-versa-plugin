@@ -79,12 +79,12 @@ node_templates:
           whitelist: {}
 
   captive_portal:
-    type: cloudify.versa.nodes.NGFirewallUrlFilter
+    type: cloudify.versa.nodes.CaptivePortal
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: org_name }
-      captive-portal:
+      captive_portal:
         port: 8000
         track-by-host: false
         expiration-time: 30

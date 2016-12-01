@@ -569,7 +569,7 @@ node_types:
         default: ""
       org_name:
         default: ""
-      captive-portal:
+      captive_portal:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
