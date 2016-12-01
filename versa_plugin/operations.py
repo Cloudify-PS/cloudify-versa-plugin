@@ -372,7 +372,8 @@ def get_firewall_rule(versa, **kwargs):
 @with_versa
 def create_url_filters(versa, **kwargs):
     filters = _get_node_configuration('filters', kwargs)
-    for url_filter in filters:        ctx.logger.info("Filter: {}".format(url_filter))
+    for url_filter in filters:
+        ctx.logger.info("Filter: {}".format(url_filter))
         versa_plugin.firewall.add_url_filter(versa, url_filter)
 
 
@@ -649,7 +650,7 @@ def insert_captive_portal(versa, **kwargs):
     if is_use_existing():
         return
     portal = _get_node_configuration('captive_portal', kwargs)
-    versa_plugin.firewall.update_captive_portal(versa_client,
+    versa_plugin.firewall.update_captive_portal(versa,
                                                 portal)
 
 
