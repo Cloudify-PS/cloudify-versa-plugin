@@ -50,8 +50,21 @@ def update_rule(client, appliance, org, policy, rule):
         'access-policy-group/{}/rules/access-policy/{}'.format(appliance,
                                                                org, policy,
                                                                rule['name'])
-    data = {
-        "access-policy": rule}
+    data = {"access-policy": rule}
+    client.put(url, json.dumps(data), JSON, codes.no_content)
+
+
+def reorder_rules(client, appliance, org, policy, rules):
+    """
+        :param  appliance (str)
+        :param org (str)
+        :param policy (str)
+        :param rules (list): firewall rules with new order
+    """
+    url = '/api/config/devices/device/{}/config/orgs'\
+        '/org-services/{}/security/access-policies/'\
+        'access-policy-group/{}/rules'.format(appliance, org, policy)
+    data = {"rules": {"access-policy": rules}}
     client.put(url, json.dumps(data), JSON, codes.no_content)
 
 
@@ -66,6 +79,16 @@ def get_rule(client, appliance, org, policy, name):
         if name == rule['name']:
             return rule
     return None
+
+
+def get_all_rules(client, appliance, org, policy):
+    url = '/api/config/devices/device/{}/config/orgs'\
+        '/org-services/{}/security/access-policies/'\
+        'access-policy-group/{}/rules?deep'.format(appliance, org, policy)
+    result = client.get(url, None, None, codes.ok, JSON)
+    if not result:
+        return None
+    return result['rules']['access-policy']
 
 
 def delete_rule(client, appliance, org, policy, rule):
@@ -148,5 +171,3 @@ def _prepare_reputations(actions):
             for rep in actions]
     else:
         return {}
-
-

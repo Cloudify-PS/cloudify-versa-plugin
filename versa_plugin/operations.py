@@ -348,22 +348,33 @@ def delete_firewall_policy(versa_client, **kwargs):
 
 @operation
 @with_versa_client
-def create_firewall_rules(versa_client, **kwargs):
+def create_firewall_rule(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
     policy_name = ctx.node.properties['policy_name']
-    rules = ctx.node.properties['rules']
+    rule = ctx.node.properties['rule']
     ctx.instance.runtime_properties['rules'] = {}
     ctx.instance.runtime_properties['appliance'] = appliance_name
     ctx.instance.runtime_properties['org'] = org_name
     ctx.instance.runtime_properties['policy'] = policy_name
-    for rule in rules:
-        name = rule['name']
-        ctx.instance.runtime_properties['rules'][name] = rule
-        versa_plugin.firewall.add_rule(versa_client, appliance_name,
-                                       org_name, policy_name, rule)
+    name = rule['name']
+    ctx.instance.runtime_properties['rules'][name] = rule
+    versa_plugin.firewall.add_rule(versa_client, appliance_name,
+                                   org_name, policy_name, rule)
+    if ctx.node.properties['on_top']:
+        all_rules = versa_plugin.firewall.get_all_rules(versa_client,
+                                                        appliance_name,
+                                                        org_name, policy_name)
+        sorted_list = []
+        for rule in all_rules:
+            if rule['name'] == name:
+                sorted_list.insert(0, rule)
+            else:
+                sorted_list.append(rule)
+        versa_plugin.firewall.reorder_rules(versa_client, appliance_name,
+                                            org_name, policy_name, sorted_list)
 
 
 @operation
@@ -405,16 +416,15 @@ def get_firewall_rule(versa_client, **kwargs):
 
 @operation
 @with_versa_client
-def delete_firewall_rules(versa_client, **kwargs):
+def delete_firewall_rule(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
     policy_name = ctx.node.properties['policy_name']
-    rules = ctx.node.properties['rules']
-    for rule in rules:
-        versa_plugin.firewall.delete_rule(versa_client, appliance_name,
-                                          org_name, policy_name, rule['name'])
+    rule = ctx.node.properties['rule']
+    versa_plugin.firewall.delete_rule(versa_client, appliance_name,
+                                      org_name, policy_name, rule['name'])
 
 
 @operation

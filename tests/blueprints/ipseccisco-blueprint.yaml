@@ -668,20 +668,20 @@ node_templates:
       appliance_name: { get_input: appliance_name }
       org_name: { get_input: org_name }
       policy_name: { get_input: firewall_policy_name }
-      rules:
-        - name: { get_input: firewall_rule_name }
-          match:
-            source:
-              zone:
-                zone-list:
-                  - trust
-          set:
-            lef:
-              event: end
-              options:
-                send-pcap-data:
-                    enable: False
-            action: allow
+      rule:
+        name: { get_input: firewall_rule_name }
+        match:
+          source:
+            zone:
+              zone-list:
+                - trust
+        set:
+          lef:
+            event: end
+            options:
+              send-pcap-data:
+                  enable: False
+          action: allow
     relationships:
       - type: cloudify.relationships.depends_on
         target: trust_zone
