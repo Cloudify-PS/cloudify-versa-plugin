@@ -54,24 +54,24 @@ rules = """
     appliance_name: $appliance_name
     org_name: $org_name
     policy_name: $firewall_policy
-    rules:
-        - name: test_rule_name
-          match:
-            source:
-                zone:
-                    zone-list:
-                        - trust
-            destination:
-                zone:
-                    zone-list:
-                        - untrust
-          set:
-              lef:
-                  event: end
-                  options:
-                      send-pcap-data:
-                          enable: False
-              action: allow
+    rule:
+        name: test_rule_name
+        match:
+        source:
+            zone:
+                zone-list:
+                    - trust
+        destination:
+            zone:
+                zone-list:
+                    - untrust
+        set:
+            lef:
+                event: end
+                options:
+                    send-pcap-data:
+                        enable: False
+            action: allow
     """
 
 rules_with_filter = """
@@ -79,26 +79,26 @@ rules_with_filter = """
     appliance_name: $appliance_name
     org_name: $org_name
     policy_name: $firewall_policy
-    rules:
-        - name: test_rule_name
-          match:
-            source:
-                zone:
-                    zone-list:
-                        - trust
-            destination:
-                zone:
-                    zone-list:
-                        - untrust
-          set:
-              lef:
-                  event: end
-                  options:
-                      send-pcap-data:
-                          enable: False
-              action: allow
-              security-profile:
-                  urlf: test
+    rule:
+        name: test_rule_name
+        match:
+        source:
+            zone:
+                zone-list:
+                    - trust
+        destination:
+            zone:
+                zone-list:
+                    - untrust
+        set:
+            lef:
+                event: end
+                options:
+                    send-pcap-data:
+                        enable: False
+            action: allow
+            security-profile:
+                urlf: test
     """
 
 

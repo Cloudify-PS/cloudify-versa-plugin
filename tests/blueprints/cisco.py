@@ -208,9 +208,12 @@ while attempt < int(script_opts.retries):
         with configProvider as confInterf:
 
             for parent in script_opts.remove_children_from_parent:
-                configProvider.removeParentWithChild(parent, script_opts.remove_children_from_parent[parent])
+                child = script_opts.remove_children_from_parent[parent]
+                if len(parent) > 0 and len(child) > 0:
+                  configProvider.removeParentWithChild(parent, child)
             for remove_global in script_opts.remove_global:
-                configProvider.removeGlobal(remove_global)
+                if len(remove_global) > 0:
+                  configProvider.removeGlobal(remove_global)
 
             # Add configuration lines from file
             # extra_cmds = []

@@ -54,6 +54,20 @@ def update_rule(versa, policy, rule):
     versa.client.put(url, json.dumps(data), JSON, codes.no_content)
 
 
+def reorder_rules(versa, policy, rules):
+    """
+        :param  appliance (str)
+        :param org (str)
+        :param policy (str)
+        :param rules (list): firewall rules with new order
+    """
+    url = '/api/config/devices/device/{}/config/orgs'\
+        '/org-services/{}/security/access-policies/'\
+        'access-policy-group/{}/rules'.format(versa.appliance, versa.org, policy)
+    data = {"rules": {"access-policy": rules}}
+    versa.client.put(url, json.dumps(data), JSON, codes.no_content)
+
+
 def get_rule(versa, policy, name):
     url = '/api/config/devices/device/{}/config/orgs'\
         '/org-services/{}/security/access-policies/'\
@@ -67,6 +81,16 @@ def get_rule(versa, policy, name):
             return rule
     return None
 
+
+def get_all_rules(versa, policy):
+    url = '/api/config/devices/device/{}/config/orgs'\
+        '/org-services/{}/security/access-policies/'\
+        'access-policy-group/{}/rules?deep'.format(versa.appliance,
+                                                   versa.org, policy)
+    result = versa.client.get(url, None, None, codes.ok, JSON)
+    if not result:
+        return None
+    return result['rules']['access-policy']
 
 def delete_rule(versa, policy, rule):
     url = '/api/config/devices/device/{}/config/orgs/org-services/{}/'\
@@ -101,6 +125,13 @@ def delete_url_filter(versa, url_filter):
           '/security/profiles/url-filtering/url-filtering-profile/{}'\
           .format(versa.appliance, versa.organization, name)
     versa.client.delete(url)
+
+
+def update_captive_portal(versa, portal):
+    url = '/api/config/devices/device/{}/config/orgs'\
+          '/org-services/{}/security/captive-portal'.format(versa.appliance, versa.org)
+    data = {"captive-portal": portal}
+    versa.client.put(url, json.dumps(data), JSON, codes.no_content)
 
 
 def _prepare_blacklist(lists):

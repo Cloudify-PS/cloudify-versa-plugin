@@ -303,30 +303,39 @@ def delete_firewall_policy(versa, **kwargs):
 
 @operation
 @with_versa
-def create_firewall_rules(versa, **kwargs):
+def create_firewall_rule(versa, **kwargs):
     if is_use_existing():
         return
     policy_name = get_mandatory['policy_name']
-    rules = _get_node_configuration('rules', kwargs)
+    rule = _get_node_configuration('rule', kwargs)
     ctx.instance.runtime_properties['rules'] = {}
     ctx.instance.runtime_properties['appliance'] = versa.appliance
     ctx.instance.runtime_properties['org'] = versa.organization
     ctx.instance.runtime_properties['policy'] = policy_name
-    for rule in rules:
-        name = rule['name']
-        ctx.instance.runtime_properties['rules'][name] = rule
-        versa_plugin.firewall.add_rule(versa, policy_name, rule)
+    name = rule['name']
+    ctx.instance.runtime_properties['rules'][name] = rule
+    versa_plugin.firewall.add_rule(versa, policy_name, rule)
+    if ctx.node.properties['on_top']:
+        all_rules = versa_plugin.firewall.get_all_rules(versa,
+                                                        policy_name)
+        sorted_list = []
+        for rule in all_rules:
+            if rule['name'] == name:
+                sorted_list.insert(0, rule)
+            else:
+                sorted_list.append(rule)
+        versa_plugin.firewall.reorder_rules(versa,
+                                            policy_name, sorted_list)
 
 
 @operation
 @with_versa
-def delete_firewall_rules(versa, **kwargs):
+def delete_firewall_rule(versa, **kwargs):
     if is_use_existing():
         return
     policy_name = get_mandatory['policy_name']
-    rules = _get_node_configuration('rules', kwargs)
-    for rule in rules:
-        versa_plugin.firewall.delete_rule(versa, policy_name, rule['name'])
+    rule = _get_node_configuration('rule', kwargs)
+    versa_plugin.firewall.delete_rule(versa, policy_name, rule['name'])
 
 
 @operation
@@ -360,12 +369,10 @@ def get_firewall_rule(versa, **kwargs):
     ctx.logger.info("Rule '{} is: {}".format(name, rule))
 
 
-@operation
 @with_versa
 def create_url_filters(versa, **kwargs):
     filters = _get_node_configuration('filters', kwargs)
-    for url_filter in filters:
-        ctx.logger.info("Filter: {}".format(url_filter))
+    for url_filter in filters:        ctx.logger.info("Filter: {}".format(url_filter))
         versa_plugin.firewall.add_url_filter(versa, url_filter)
 
 
@@ -634,3 +641,24 @@ def delete_vpn_profile(versa, **kwargs):
     if versa_plugin.vpn.is_profile_exists(versa,
                                           name):
         versa_plugin.vpn.delete_profile(versa, name)
+
+
+@operation
+@with_versa
+def insert_captive_portal(versa, **kwargs):
+    if is_use_existing():
+        return
+    portal = _get_node_configuration('captive_portal', kwargs)
+    versa_plugin.firewall.update_captive_portal(versa_client,
+                                                portal)
+
+
+@operation
+@with_versa
+def clean_captove_portal(versa, **kwargs):
+    if is_use_existing():
+        return
+    portal = {"port": "0", "track-by-host": False, "expiration-time": "30",
+              "custom-pages": {}}
+    versa_plugin.firewall.update_captive_portal(versa,
+                                                portal)
