@@ -575,12 +575,10 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.insert_captive_portal
-          inputs: 
-            captive-portal: {}
+          inputs: {}
         delete:
           implementation: versa.versa_plugin.operations.clean_captove_portal
-          inputs:
-            captive-portal: {}
+          inputs: {}
 
 relationships:
     cloudify.versa.pool_connected_to_vm:
