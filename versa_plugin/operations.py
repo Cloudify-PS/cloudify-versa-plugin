@@ -780,7 +780,7 @@ def insert_captive_portal(versa_client, **kwargs):
         return
     appliance_name = ctx.node.properties['appliance_name']
     org_name = ctx.node.properties['org_name']
-    portal = _get_node_configuration('captive-portal', kwargs)
+    portal = _get_node_configuration('captive_portal', kwargs)
     versa_plugin.firewall.update_captive_portal(versa_client, appliance_name,
                                                 org_name, portal)
 

@@ -73,7 +73,7 @@ node_templates:
              reputation-action: []
           blacklist:
              action:
-               predefined: alert
+               predefined: block
              patterns:
                - { get_input: filter_string }
           whitelist: {}
@@ -105,10 +105,6 @@ node_templates:
               zone:
                 zone-list:
                   - trust
-            destination:
-              zone:
-                zone-list:
-                  - untrust
           set:
             lef:
               event: end
