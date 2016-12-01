@@ -558,6 +558,30 @@ node_types:
           implementation: versa.versa_plugin.operations.delete_vpn_profile
           inputs: {}
 
+  cloudify.versa.nodes.CaptivePortal:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      use_existing:
+        default: false
+      versa_config:
+        default: {}
+      appliance_name:
+        default: ""
+      org_name:
+        default: ""
+      captive-portal:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.insert_captive_portal
+          inputs: 
+            captive-portal: {}
+        delete:
+          implementation: versa.versa_plugin.operations.clean_captove_portal
+          inputs:
+            captive-portal: {}
+
 relationships:
     cloudify.versa.pool_connected_to_vm:
       derived_from: cloudify.relationships.connected_to

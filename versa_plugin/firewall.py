@@ -104,6 +104,13 @@ def delete_url_filter(client, appliance, org, url_filter):
     client.delete(url)
 
 
+def update_captive_portal(client, appliance, org, portal):
+    url = '/api/config/devices/device/{}/config/orgs'\
+          '/org-services/{}/security/captive-portal'.format(appliance, org)
+    data = {"captive-portal": portal}
+    client.put(url, json.dumps(data), JSON, codes.no_content)
+
+
 def _prepare_blacklist(lists):
     if lists:
         return {
@@ -141,3 +148,5 @@ def _prepare_reputations(actions):
             for rep in actions]
     else:
         return {}
+
+

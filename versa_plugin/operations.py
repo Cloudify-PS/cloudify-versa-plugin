@@ -771,3 +771,28 @@ def delete_vpn_profile(versa_client, **kwargs):
                                           name):
         versa_plugin.vpn.delete_profile(versa_client, appliance_name, org_name,
                                         name)
+
+
+@operation
+@with_versa_client
+def insert_captive_portal(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    portal = _get_node_configuration('captive-portal', kwargs)
+    versa_plugin.firewall.update_captive_portal(versa_client, appliance_name,
+                                                org_name, portal)
+
+
+@operation
+@with_versa_client
+def clean_captove_portal(versa_client, **kwargs):
+    if is_use_existing():
+        return
+    appliance_name = ctx.node.properties['appliance_name']
+    org_name = ctx.node.properties['org_name']
+    portal = {"port": "0", "track-by-host": False, "expiration-time": "30",
+              "custom-pages": {}}
+    versa_plugin.firewall.update_captive_portal(versa_client, appliance_name,
+                                                org_name, portal)
