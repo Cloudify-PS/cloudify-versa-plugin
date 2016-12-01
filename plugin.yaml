@@ -283,15 +283,17 @@ node_types:
         default: ""
       policy_name:
         default: ""
-      rules:
+      on_top:
+        default: false
+      rule:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: versa.versa_plugin.operations.create_firewall_rules
+          implementation: versa.versa_plugin.operations.create_firewall_rule
           inputs: {}
         delete:
-          implementation: versa.versa_plugin.operations.delete_firewall_rules
+          implementation: versa.versa_plugin.operations.delete_firewall_rule
           inputs: {}
       versa.interfaces.actions:
         update:
