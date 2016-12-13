@@ -117,16 +117,23 @@ class ConfigProvider(object):
         self.original_config = CiscoConfParse(config)
         self.modified_config = CiscoConfParse(config)
         self.logger = logger
+        self.config_diff = []
+        self.config = config
     def updateConfig(self, extra_cmds):
         pass
     def getConfigDiffToRemove(self):
-        return self.original_config.req_cfgspec_excl_diff(".*", ".*", self.modified_config.ioscfg)
+        #return self.original_config.req_cfgspec_excl_diff(".*", ".*", self.modified_config.ioscfg)
+        return self.config_diff
     def removeGlobal(self, global_config_regex):
         for line in self.modified_config.find_objects(global_config_regex):
             line.delete(False)
+        self.config_diff.extend(self.original_config.req_cfgspec_excl_diff(".*", ".*", self.modified_config.ioscfg))
+        self.modified_config = CiscoConfParse(self.config)
     def removeParentWithChild(self, parent_config_regex, child_config_regex):
         for parent in self.modified_config.find_objects(parent_config_regex):
             parent.delete_children_matching(child_config_regex)
+        self.config_diff.extend(self.original_config.req_cfgspec_excl_diff(".*", ".*", self.modified_config.ioscfg))
+        self.modified_config = CiscoConfParse(self.config)
     def __enter__(self):
         return self
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -218,8 +225,8 @@ while attempt < int(script_opts.retries):
             # Add configuration lines from file
             # extra_cmds = []
             # if script_opts.cmds_file:
-                # with open(script_opts.cmds_file, 'r') as cmdsfile:
-                    # extra_cmds = [line.rstrip() for line in cmdsfile]
+            #     with open(script_opts.cmds_file, 'r') as cmdsfile:
+            #         extra_cmds = [line.rstrip() for line in cmdsfile]
 
             configProvider.updateConfig(extra_cmds)
         break
