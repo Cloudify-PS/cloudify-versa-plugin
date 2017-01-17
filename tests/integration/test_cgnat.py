@@ -21,6 +21,41 @@ import configuration
 requests.packages.urllib3.disable_warnings()
 
 
+pool = """
+            "name": pool_name,
+            "icmp-mapping-timeout": "60",
+            "udp-mapping-timeout": "300",
+            "tcp-mapping-timeout": "7440",
+            "address-allocation": "round-robin",
+            "routing-instance": routing_instance,
+            "provider-org": provider_org,
+            "source-port": {
+                "allocation-scheme": "automatic",
+                "random-allocation": ""},
+            "address-range": {
+                'range': range_list}}}
+    range_list = [{'name': r.name,
+                   'low': r.low,
+                   'high': r.high} for r in ranges]
+"""
+
+rule = """
+            "name": rule_name,
+            "precedence": "1",
+            "from": {
+                "destination-address-range": {
+                    "range": []},
+                "source-address": source_addresses,
+                "source-address-range": {
+                    "range": []}},
+            "then": {
+                "translated": {
+                    "translation-type": "napt-44",
+                    "source-pool": source_pool,
+                    "filtering-type": "none",
+                    "mapping-type": "none"}}}}
+"""
+
 class CgnatTestCase(unittest.TestCase):
     def setUp(self):
         self.config = configuration.data

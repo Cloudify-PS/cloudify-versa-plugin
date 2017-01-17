@@ -18,6 +18,61 @@ import configuration
 requests.packages.urllib3.disable_warnings()
 
 
+options_profile = """
+            "name": name,
+            "domain-name": domain,
+            "dns-server": servers,
+            "custom-options": {"custom-dhcp-option": []}}}
+
+"""
+
+lease_profile = """
+
+            "name": name,
+            "valid-lifetime": "3600",
+            "renew-timer": "900",
+            "rebind-timer": "2800",
+            "log-utilization": False}}
+"""
+
+
+global_configuration = """
+
+            "default-lease-profile": lease_profile,
+            "default-options-profile": options_profile,
+            "log-unmatched-requests": False}}
+"""
+
+pool = """
+            "name": pool_name,
+            "subnet-mask": mask,
+            "lease-profile": lease_profile,
+            "options-profile": options_profile,
+            "address-pools": {
+                "dhcp4-address-pool-info": [{
+                    "name": range_name,
+                    "pool": {
+                        "ipv4-range": {
+                            "begin-address": begin_address,
+                            "end-address": end_address}}}]},
+            "exclude-addresses": {"dhcp4-address-pool-info": []}}}
+"""
+
+server = """
+            "name": server_name,
+            "lease-profile": lease_profile,
+            "options-profile": options_profile,
+            "dhcp-request-match": {
+                "networks": networks},
+            "dhcp-service-type": {
+                "service-type": {
+                    "allocate-address": {
+                        "dynamic": pool}}},
+            "dhcp-log-settings": {
+                "log-new-allocations": True,
+                "log-renewals": False}}}
+"""
+
 class DHCPTestCase(base.BaseTest):
     def test_create_pool(self):
         nc = configuration.Node
