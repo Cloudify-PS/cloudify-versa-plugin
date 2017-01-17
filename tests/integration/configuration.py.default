@@ -1,7 +1,14 @@
-data = {
+versa_config = {
+    "versa_url": "https://172.19.0.210:9183",
     "client_id": "voae_rest",
     "client_secret": "asrevnet_123",
-    "username": "username",
-    "password": "password",
+    "username": "Administrator",
+    "password": "versa123",
     "grant_type": "password"
 }
+
+
+appliance = {
+    'appliance_name': 'manualtesting',
+    'org_name': 'TDC'}
+    # 'org_name': 'test'}
