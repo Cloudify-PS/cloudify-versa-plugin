@@ -1,0 +1,37 @@
+
+# Minimal blueprint for upload testing
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/4.1.1/types.yaml
+  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/proximus/plugin.yaml
+
+inputs:
+    versa_url:
+      default: "https://35.158.170.27:9183"
+    client_id:
+        default: "voae_rest"
+    client_secret:
+        default: "asrevnet_123"
+    username:
+        default: "Administrator"
+    password:
+        default: "versa123"
+
+#
+# Node templates
+#
+node_templates:
+  #####################
+  # Versa config
+  #####################
+  versa_configuration:
+    type: cloudify.versa.nodes.versa_configuration
+    properties:
+      versa_config:
+        username: { get_input: username }
+        password: { get_input: password }
+        versa_url: { get_input: versa_url}
+        client_id: { get_input: client_id}
+        client_secret: { get_input: client_secret}
+
