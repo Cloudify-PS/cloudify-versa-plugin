@@ -797,7 +797,7 @@ def insert_captive_portal(versa_client, **kwargs):
 
 @operation
 @with_versa_client
-def clean_captove_portal(versa_client, **kwargs):
+def clean_captive_portal(versa_client, **kwargs):
     if is_use_existing():
         return
     appliance_name = ctx.node.properties['appliance_name']
@@ -806,3 +806,13 @@ def clean_captove_portal(versa_client, **kwargs):
               "custom-pages": {}}
     versa_plugin.firewall.update_captive_portal(versa_client, appliance_name,
                                                 org_name, portal)
+
+
+@operation
+@with_versa_client
+def update_template(versa_client, **kwargs):
+    parameters = kwargs.get('parameters')
+    if not parameters:
+        ctx.logger.info("Key 'parameters' is absent.")
+        return
+    versa_plugin.template.update(versa_client, parameters)

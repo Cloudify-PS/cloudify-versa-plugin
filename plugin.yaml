@@ -579,8 +579,21 @@ node_types:
           implementation: versa.versa_plugin.operations.insert_captive_portal
           inputs: {}
         delete:
-          implementation: versa.versa_plugin.operations.clean_captove_portal
+          implementation: versa.versa_plugin.operations.clean_captive_portal
           inputs: {}
+
+  cloudify.versa.nodes.Template:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      versa_config:
+        default: {}
+    interfaces:
+      versa.interfaces.actions:
+        update:
+          implementation: versa.versa_plugin.operations.update_template
+          inputs:
+            config:
+              default: {}
 
 relationships:
     cloudify.versa.pool_connected_to_vm:

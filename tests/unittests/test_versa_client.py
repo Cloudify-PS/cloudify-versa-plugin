@@ -15,6 +15,7 @@
 import mock
 import unittest
 
+
 from versa_plugin.versaclient import VersaClient, _check_response
 from cloudify import exceptions as cfy_exc
 
@@ -107,10 +108,11 @@ class VersaPluginMockTestCase(unittest.TestCase):
             self.client.post('/path', 'data', 'json')
 
     def test_delete(self):
-        with mock.patch('versa_plugin.versaclient.requests', mock.MagicMock(
-                return_value={})),\
+        with mock.patch('versa_plugin.versaclient.requests', mock.MagicMock()) as req,\
              mock.patch('versa_plugin.versaclient._check_response',
-                        mock.MagicMock()):
+                        mock.MagicMock()),\
+             mock.patch('versa_plugin.versaclient.ctx',  mock.MagicMock()):
+            req.delete.__name__ = 'delete'
             self.client.delete('/path')
 
     def test_request(self):

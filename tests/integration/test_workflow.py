@@ -1,3 +1,4 @@
+
 # Copyright (c) 2014 GigaSpaces Technologies Ltd. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import requests
-
+import base
 from versa_plugin.versaclient import VersaClient
-import configuration
+import versa_plugin.workflow
 requests.packages.urllib3.disable_warnings()
 
 
-class VersaPluginTestCase(unittest.TestCase):
+class WorkflowTestCase(base.BaseTest):
 
-    def test_get_revoke_token(self):
-        config = configuration.versa_config
-        client = VersaClient(config, '/tmp/versa.key')
-        client.get_token()
-        client.revoke_token()
+    def test_create_device(self):
+        with VersaClient(self.config, '/tmp/versa.key') as client:
+            config = {}
+            versa_plugin.workflow.create_device(client, config)
