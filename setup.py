@@ -22,7 +22,7 @@ setup(
     license='LICENSE',
     packages=['versa_plugin'],
     install_requires=[
-        'cloudify-plugins-common>=4.1',
+        'cloudify-plugins-common==4.1',
         'requests',
         'dicttoxml']
 )
