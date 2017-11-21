@@ -15,6 +15,8 @@ import versa_plugin.networking
 import versa_plugin.tasks
 import versa_plugin.vpn
 import versa_plugin.limits
+import versa_plugin.template
+import versa_plugin.workflow
 from versa_plugin.cgnat import AddressRange
 from collections import namedtuple
 
