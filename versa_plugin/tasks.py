@@ -14,7 +14,7 @@ def get_all_tasks(client):
 
 
 def get_task_info(client, task):
-    url = "/api/operational/tasks/task/" + task
+    url = "/api/operational/tasks/task/{}".format(task)
     return client.get(url, None, None, codes.ok)
 
 

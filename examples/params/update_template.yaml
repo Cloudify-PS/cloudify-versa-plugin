@@ -4,12 +4,12 @@ node_ids: [template]
 allow_kwargs_override: true
 operation_kwargs:
   config:
-    template: branch,
-    organization: Provider,
-    interface: vni-0/0,
+    template: branch
+    organization: Provider
+    interface: vni-0/0
     parameters: 
       interface: 
-        name: vni-0/0,
+        name: vni-0/0
         shaping-rate:
-          burst-size: 40000,
+          burst-size: 40000
           rate: 1000

@@ -602,15 +602,16 @@ node_types:
     properties:
       versa_config:
         default: {}
-      config:
+      device:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
           implementation: versa.versa_plugin.operations.create_device
-          inputs:
-            config:
-              default: {}
+          inputs: {}
+        delete:
+          implementation: versa.versa_plugin.operations.delete_device
+          inputs: {}
 
 relationships:
     cloudify.versa.pool_connected_to_vm:

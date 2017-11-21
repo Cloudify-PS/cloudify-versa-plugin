@@ -1,12 +1,14 @@
-# Update parameter in template
+# Create and delete deivce in workflow
 #
-# Use prameters files for execute operation:
-# cfy executions start execute_operation -d <deployment> -p params/param.yaml
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
   - include/imports.yaml
   - include/versa-default.yaml
+
+inputs:
+    device_name:
+        default: CPE2
 
 
 #
@@ -26,7 +28,17 @@ node_templates:
         client_id: { get_input: client_id}
         client_secret: { get_input: client_secret}
 
-  template:
-    type: cloudify.versa.nodes.Template
+  workflow_device:
+    type: cloudify.versa.nodes.Workflow
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
+      device:
+        name: { get_input: device_name }
+        location: 
+          country: nl
+          longitude: 0
+          latitude: 0
+        variables: 
+          "{$v_Lan_IPv4__staticaddress}": 192.168.1.1/32
+          "{$v_mpls_IPv4__staticaddress}":  192.168.2.2/32
+          "{$v_mpls-Transport-VR_IPv4__vrHopAddress}": 192.168.3.3

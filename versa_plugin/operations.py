@@ -815,7 +815,7 @@ def clean_captive_portal(versa_client, **kwargs):
 def update_template(versa_client, **kwargs):
     config = _get_node_configuration('config', kwargs)
     if not config:
-        ctx.logger.info("Key 'parameters' is absent.")
+        ctx.logger.info("Key 'config' is absent.")
         return
     versa_plugin.template.update(versa_client, config)
 
@@ -823,8 +823,20 @@ def update_template(versa_client, **kwargs):
 @operation
 @with_versa_client
 def create_device(versa_client, **kwargs):
-    parameters = kwargs.get('parameters')
+    parameters = kwargs.get('device')
     if not parameters:
-        ctx.logger.info("Key 'parameters' is absent.")
+        ctx.logger.info("Key 'device' is absent.")
         return
-    versa_plugin.template.update(versa_client, parameters)
+    task = versa_plugin.workflow.create_device(versa_client, parameters)
+    versa_plugin.tasks.wait_for_task(versa_client, task, ctx)
+
+
+@operation
+@with_versa_client
+def delete_device(versa_client, **kwargs):
+    parameters = kwargs.get('device')
+    if not parameters:
+        ctx.logger.info("Key 'device' is absent.")
+        return
+    task = versa_plugin.workflow.delete_device(versa_client, parameters)
+    versa_plugin.tasks.wait_for_task(versa_client, task, ctx)

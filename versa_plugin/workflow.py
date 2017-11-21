@@ -22,15 +22,12 @@ def _substitute_vars(body, vars):
 
 def create_device(client, config):
     new_id = _get_new_id(client)
-    name = "CPE2"
+    name = config['name']
     data = {"versanms.sdwan-device-workflow":
             {"deviceName": name, "siteId": new_id,
              "orgName": "Provider", "deviceGroup": "CPE1",
-             "locationInfo": {"country": "nl",
-                              "longitude": "0", "latitude": "0"}}}
-    template_vars = {"{$v_Lan_IPv4__staticaddress}": "192.168.1.1/32",
-                     "{$v_mpls_IPv4__staticaddress}":  "192.168.2.2/32",
-                     "{$v_mpls-Transport-VR_IPv4__vrHopAddress}": "192.168.3.3"}
+             "locationInfo": config['location']}}
+    template_vars = config['variables']
     url = "/vnms/sdwan/workflow/devices/device/template/data/{}".format(name)
     reply = client.post(url, json.dumps(data), JSON, codes.ok)
     _substitute_vars(reply, template_vars)
@@ -38,4 +35,11 @@ def create_device(client, config):
     client.post(url, json.dumps(reply), JSON, codes.ok)
     url = "/vnms/sdwan/workflow/devices/device/deploy/{}".format(name)
     result = client.post(url, None, JSON, codes.accepted)
+    return _get_task_id(result)
+
+
+def delete_device(client, config):
+    name = config['name']
+    url = '/vnms/sdwan/workflow/devices/{}'.format(name)
+    result = client.delete(url, codes.accepted)
     return _get_task_id(result)
