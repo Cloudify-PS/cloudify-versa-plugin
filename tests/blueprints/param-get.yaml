@@ -1,3 +1,4 @@
+# cfy executions start execute_operation -d <deployment> -p param_get.yaml
 operation: get
 node_instance_ids: [hq_firewall_503ce]
 allow_kwargs_override: true

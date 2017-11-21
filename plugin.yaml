@@ -587,10 +587,25 @@ node_types:
     properties:
       versa_config:
         default: {}
+      org_name:
+        default: ""
     interfaces:
       versa.interfaces.actions:
         update:
           implementation: versa.versa_plugin.operations.update_template
+          inputs:
+            config:
+              default: {}
+
+  cloudify.versa.nodes.Workflow:
+    derived_from: cloudify.nodes.SoftwareComponent
+    properties:
+      versa_config:
+        default: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: versa.versa_plugin.operations.create_device
           inputs:
             config:
               default: {}
