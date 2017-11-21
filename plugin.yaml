@@ -587,8 +587,8 @@ node_types:
     properties:
       versa_config:
         default: {}
-      org_name:
-        default: ""
+      config:
+        default: {}
     interfaces:
       versa.interfaces.actions:
         update:
@@ -601,6 +601,8 @@ node_types:
     derived_from: cloudify.nodes.SoftwareComponent
     properties:
       versa_config:
+        default: {}
+      config:
         default: {}
     interfaces:
       cloudify.interfaces.lifecycle:

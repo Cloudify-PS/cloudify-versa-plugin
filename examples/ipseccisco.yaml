@@ -1,8 +1,7 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/master/plugin.yaml
+  - include/imports.yaml
 
 inputs:
     versa_url:
@@ -18,7 +17,7 @@ inputs:
     appliance_name:
       default: ipsec
     org_name:
-        default: vcpe1_parent_org
+        default: LEGO
     use_exsisting_appliance:
         default: true
     pool_name: 
@@ -51,25 +50,155 @@ inputs:
         default: dhcp_options_profile
     branch_domain_name:
         default: branch.org
-    dns_server: 
-        default: 8.8.8.8
+    dns_server1: 
+        default: 194.192.207.10
+    dns_server2: 
+        default: 193.162.153.164
     dhcp_pool_mask: 
         default: 255.255.255.0
     branch1_dhcp_begin_address: 
         default: 10.11.0.100
     branch1_dhcp_end_address: 
         default: 10.11.0.200
-    created_by_appliance:
-        default: true
     hq_range_low: 
         default: 87.53.87.1
     hq_range_high: 
         default: 87.53.87.4
     hq_nat_rule_source_address: 
         default: 10.11.0.0/24
-
+    firewall_policy_name:
+      default: firewall_policy
+    firewall_rule_name:
+      default: allow_from_trust
 
 node_templates:
+
+
+  my_host:
+    type: cloudify.nodes.Compute
+    properties:
+      agent_config:
+        install_method: none
+  my_host2:
+    type: cloudify.nodes.Compute
+    properties:
+      agent_config:
+        install_method: none
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: vpn_profile 
+
+  CPE:
+    type: cloudify.nodes.Root
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        start:
+          implementation: "cisco.py"
+          executor: central_deployment_agent
+          inputs:
+            host: 87.53.86.18
+            user: tdc
+            password: tdc
+            enable_password: tdc
+            telnet: true
+            remove_global: ^ip dhcp excluded-address;^ip dhcp pool INTERNET;^ip nat inside;^access-list;^ip route vrf INTERNET
+            remove_children_from_parent: ^interface Vlan30;ip address;^interface;ip nat
+            dry_run: false
+            extra_cmds: >
+              ip dhcp excluded-address 192.168.65.200 192.168.65.254
+              
+              
+              ip dhcp pool INTERNET1
+               vrf INTERNET
+               network 192.168.65.0 255.255.255.0
+               default-router 192.168.65.1
+               dns-server 194.192.207.10 
+               lease 0 1
+               class INTERNET1
+                address range 192.168.65.2 192.168.65.200
+                
+              crypto ikev2 proposal versa 
+               encryption aes-cbc-128
+               integrity sha1
+               group 2
+              crypto ikev2 policy versa 
+               match fvrf INTERNET
+               proposal versa
+              crypto ikev2 keyring versa1
+               peer branch3
+                address 87.53.86.10
+                pre-shared-key local versa123
+                pre-shared-key remote versa123
+               !
+              crypto ikev2 profile versa
+               match fvrf INTERNET
+               match identity remote address 87.53.86.10 255.255.255.255 
+               identity local address 87.53.86.14
+               authentication remote pre-share
+               authentication local pre-share
+               keyring local versa1
+               dpd 30 5 on-demand
+               ivrf INTERNET
+              crypto ipsec transform-set versa esp-aes esp-sha-hmac 
+               mode tunnel
+              crypto ipsec profile versa
+               set transform-set versa 
+               set ikev2-profile versa
+              interface Vlan30
+               ip vrf forwarding INTERNET
+               ip address 192.168.65.1 255.255.255.0               
+               ip tcp adjust-mss 1300
+              interface Tunnel4
+               ip vrf forwarding INTERNET
+               ip address 11.11.11.1 255.255.255.0
+               ip mtu 1400
+               ip virtual-reassembly in
+               tunnel source GigabitEthernet8.2000
+               tunnel mode ipsec ipv4
+               tunnel destination 87.53.86.10
+               tunnel path-mtu-discovery
+               tunnel vrf INTERNET
+               tunnel protection ipsec profile versa
+              interface GigabitEthernet8.2000
+               ip vrf forwarding INTERNET
+               ip address 87.53.86.14 255.255.255.252
+               exit
+               
+              ip route vrf INTERNET 0.0.0.0 0.0.0.0 Tunnel4 11.11.11.63
+              
+              ip route vrf INTERNET 10.11.0.0 255.255.255.0 Tunnel4
+              
+              ip route vrf INTERNET 87.53.86.10 255.255.255.255 87.53.86.13
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: my_host
+
+  CPE_POST:
+    type: cloudify.nodes.Root
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        configure: 
+          implementation: scripts/wait.sh
+          executor: central_deployment_agent
+          inputs:
+            process:
+              args: ["35"]
+        start:
+          implementation: "cisco.py"
+          executor: central_deployment_agent
+          inputs:
+            host: 87.53.86.18
+            user: tdc
+            password: tdc
+            enable_password: tdc
+            telnet: true
+            dry_run: false
+            extra_cmds: >
+              clear crypto sa
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: my_host2
+              
   #####################
   # Versa config
   #####################
@@ -178,6 +307,8 @@ node_templates:
     relationships:
       - type: cloudify.versa.organization_connected_to_appliance
         target: organization
+      - type: cloudify.relationships.depends_on
+        target: my_host
           
   #####################
   # Interface configuration
@@ -200,27 +331,6 @@ node_templates:
     relationships:
       - type: cloudify.relationships.depends_on
         target: appliance
-
-  external_interface:
-    type: cloudify.versa.nodes.Interface
-    properties:
-      versa_config: { get_property: [versa_configuration, versa_config] }
-      use_existing: { get_input : created_by_appliance }
-      appliance_name: { get_input: appliance_name }
-      interface:
-        name: { get_input: external_interface_name }
-        enable: true
-        promiscuous: false
-        unit:
-          - name: 0
-            family:
-                inet:
-                  address:
-                    addr: 87.53.86.10/30
-    relationships:
-      - type: cloudify.relationships.depends_on
-        target: appliance
-
 
   tunnel_interface:
     type: cloudify.versa.nodes.Interface
@@ -248,20 +358,6 @@ node_templates:
   #####################
   # Network configuration
   #####################
-  external_network:
-    type: cloudify.versa.nodes.Network
-    properties:
-      versa_config: { get_property: [versa_configuration, versa_config] }
-      appliance_name: { get_input: appliance_name }
-      use_existing: { get_input : created_by_appliance }
-      network:
-        name: { get_input: external_network_name }
-        interfaces: 
-          - { concat: [get_input: external_interface_name, ".", get_input: unit] }
-    relationships:
-      - type: cloudify.relationships.depends_on
-        target: external_interface
-          
   hq_network:
     type: cloudify.versa.nodes.Network
     properties:
@@ -324,9 +420,14 @@ node_templates:
                   preference: 1
                   tag: 0
                   interface: none
+                #- ip-prefix: 192.168.65.0/24
+                  #next-hop: 0.0.0.0
+                  #preference: 1
+                  #tag: 0
+                  #interface: none
     relationships:
       - type: cloudify.relationships.depends_on
-        target: external_network
+        target: appliance
 
   #####################
   # Limits configuration
@@ -368,6 +469,8 @@ node_templates:
         target: dhcp_profile
       - type: cloudify.relationships.depends_on
         target: tunnel_interface
+      - type: cloudify.relationships.depends_on
+        target: hq_network
 
   #####################
   # VPN configuration
@@ -442,7 +545,8 @@ node_templates:
       name: { get_input: dhcp_options_profile_name }
       domain: { get_input: branch_domain_name }
       servers:
-        - { get_input: dns_server }
+        - { get_input: dns_server1 }
+        - { get_input: dns_server2 }
     relationships:
       - type: cloudify.relationships.depends_on
         target: limits
@@ -478,12 +582,6 @@ node_templates:
     relationships:
       - type: cloudify.relationships.depends_on
         target: dhcp_global_configuration
-      - type: cloudify.relationships.depends_on
-        target: limits
-      - type: cloudify.relationships.depends_on
-        target: dhcp_lease_profile
-      - type: cloudify.relationships.depends_on
-        target: dhcp_options_profile
 
   dhcp_server:
     type: cloudify.versa.nodes.DHCPServer
@@ -522,9 +620,79 @@ node_templates:
         name: hq_nat_rule
         addresses:
           - { get_input: hq_nat_rule_source_address }
+          - 192.168.65.0/24
     relationships:
-      - type: cloudify.versa.cgnat_connected_to_routing
-        target: hq_router
       - type: cloudify.relationships.depends_on
         target: limits
+          
+  #####################
+  # Zone configuration
+  #####################
+  trust_zone:
+    type: cloudify.versa.nodes.ZoneUpdate
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      zone:
+        name: trust
+        networks: 
+            - { get_input: external_network_name }
+            - { get_input: hq_network_name }
+        interface-list:
+            - { concat: [get_input: tunnel_interface_name, ".", get_input: unit] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: limits
+
+  #####################
+  # Firewall configuration
+  #####################
+  hq_firewall_policy:
+    type: cloudify.versa.nodes.NGFirewallPolicy
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      policy:
+        name: { get_input: firewall_policy_name }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: limits
+
+  hq_firewall_rule:
+    type: cloudify.versa.nodes.NGFirewallRule
+    properties:
+      versa_config: { get_property: [versa_configuration, versa_config] }
+      appliance_name: { get_input: appliance_name }
+      org_name: { get_input: org_name }
+      policy_name: { get_input: firewall_policy_name }
+      rule:
+        name: { get_input: firewall_rule_name }
+        match:
+          source:
+            zone:
+              zone-list:
+                - trust
+        set:
+          lef:
+            event: end
+            options:
+              send-pcap-data:
+                  enable: False
+          action: allow
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: trust_zone
+      - type: cloudify.relationships.depends_on
+        target: hq_firewall_policy
+
+
+outputs:
+  configuration:
+    value:
+      HQ_network: { get_input: hq_nat_rule_source_address }
+      branch2_network: 192.168.65.1/24
+      DHCP_address_pool: { concat: [get_input: branch1_dhcp_begin_address, "-", get_input: branch1_dhcp_end_address] }
+      FW: disable
 

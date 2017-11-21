@@ -1,8 +1,7 @@
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-  - http://www.getcloudify.org/spec/cloudify/3.4/types.yaml
-  - https://raw.githubusercontent.com/Cloudify-PS/cloudify-versa-plugin/cleanup/plugin.yaml
+  - include/imports.yaml
 
 inputs:
     versa_url:
@@ -54,19 +53,6 @@ inputs:
     branch2_dhcp_end_address: 
         default: 10.2.0.40
 
-    use_exsisting_appliance:
-        default: true
-    pool_name: 
-        default: l2testing
-    pool_ip: 
-        default: 192.168.200.203
-    cms_org_name: 
-        default: l2testing
-    org_name: 
-        default: l2testing
-    appliance_name:
-        default: l2testing
-
 node_templates:
   #####################
   # Versa config
@@ -81,102 +67,6 @@ node_templates:
         client_id: { get_input: client_id}
         client_secret: { get_input: client_secret}
 
-  #####################
-  # CMS config
-  #####################
-  resource_pool:
-    type: cloudify.versa.nodes.ResourcePool
-    properties:
-      versa_config: { get_property: [versa_configuration, versa_config] }
-      use_existing: { get_input : use_exsisting_appliance }
-    relationships:
-      - type: cloudify.versa.pool_connected_to_vm
-        target: flexvm
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          inputs:
-            instance:
-              name: { get_input: pool_name }
-              ip-address: { get_input: pool_ip }
-
-  cms_organization:
-    type: cloudify.versa.nodes.CMSLocalOrganization
-    properties:
-      versa_config: { get_property: [versa_configuration, versa_config] }
-      use_existing: { get_input : use_exsisting_appliance }
-      organization:
-        name: { get_input: cms_org_name }
-        resource-pool:
-          instances: 
-            - { get_input: pool_name }
-        org-networks:
-          org-network:
-            - name: { get_input: branch1_network_name }
-              ipaddress-allocation-mode: manual
-            - name: { get_input: branch2_network_name }
-              ipaddress-allocation-mode: manual
-    relationships:
-      - type: cloudify.versa.cms_org_connected_to_pool
-        target: resource_pool
-
-  #####################
-  # NMS organizations
-  #####################
-  parent_organization:
-    type: cloudify.versa.nodes.Organization
-    properties:
-      versa_config: { get_property: [versa_configuration, versa_config] }
-      use_existing: { get_input : use_exsisting_appliance }
-      organization:
-        name: { get_input: org_name }
-        parent-org: none
-        subscription-plan: Default-All-Services-Plan
-        cms-orgs: 
-            name: { get_input: cms_org_name }
-            cms-connector: local
-    relationships:
-      - type: cloudify.versa.nms_org_connected_to_cms_org
-        target: cms_organization
-
-  #####################
-  # Appliance configuration
-  #####################
-  appliance:
-    type: cloudify.versa.nodes.Appliance
-    properties:
-      versa_config: { get_property: [versa_configuration, versa_config] }
-      use_existing: { get_input : use_exsisting_appliance }
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        create:
-          inputs:
-            device:
-              mgmt-ip: { get_input: pool_ip }
-              name: { get_input: appliance_name }
-              org: { get_input: org_name }
-              cmsorg: { get_input: cms_org_name }
-              type: service-vnf
-              networking-info:
-                  - network-info:
-                      network-name: { get_input: branch1_network_name }
-              snglist:
-                  - sng:
-                      name: Default_All_Services
-                      isPartOfVCSN: true
-                      services:
-                          - cgnat
-                          - nextgen-firewall
-              subscription:
-                  solution-tier: nextgen-firewall
-                  bandwidth: 100
-                  is-analytics-enabled: true
-    relationships:
-      - type: cloudify.versa.organization_connected_to_appliance
-        target: parent_organization
-      - type: cloudify.versa.organization_connected_to_appliance
-        target: hq_organization
-          
   #####################
   # Interface configuration
   #####################
@@ -195,9 +85,6 @@ node_templates:
                 inet:
                   address:
                     addr: 10.1.0.2/24
-    relationships:
-      - type: cloudify.relationships.depends_on
-        target: appliance
 
   branch2_interface:
     type: cloudify.versa.nodes.Interface
@@ -215,9 +102,6 @@ node_templates:
                 inet:
                   address:
                     addr: 10.2.0.2/24
-    relationships:
-      - type: cloudify.relationships.depends_on
-        target: appliance
 
 
   #####################
@@ -284,9 +168,6 @@ node_templates:
       profile_name: { get_input: dhcp_profile_name }
       organizations:
         - { get_input: org_name }
-    relationships:
-      - type: cloudify.relationships.depends_on
-        target: appliance
 
   limits:
     type: cloudify.versa.nodes.Limits

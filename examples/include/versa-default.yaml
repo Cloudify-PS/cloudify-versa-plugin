@@ -1,0 +1,11 @@
+inputs:
+    versa_url:
+        default: "https://18.195.122.107:9183"
+    client_id:
+        default: "voae_rest"
+    client_secret:
+        default: "asrevnet_123"
+    username:
+        default: "Administrator"
+    password:
+        default: "versa123"

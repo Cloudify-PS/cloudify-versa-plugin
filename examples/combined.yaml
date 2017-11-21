@@ -1,14 +1,14 @@
-#Create enviroment with networks and VMs.
-#Then create appliance with 2 organizations on flexvnf.
 tosca_definitions_version: cloudify_dsl_1_3
 
 imports:
-  - imports.yaml
-  - networks.yaml
-  - vms.yaml
-  - multinet.yaml
+  - include/imports.yaml
+  - include/vcloud.yaml
+  - include/networks.yaml
+  - include/vm-blueprint.yaml
+  - include/appliance.yaml
  
 inputs:
+
 #
 # Network configuration
 #
@@ -34,8 +34,6 @@ inputs:
   branch2_network_name:
     type: string
 
-  branch3_network_name:
-    default: ""
 #
 # VMs configuration
 #
@@ -59,9 +57,6 @@ inputs:
 
   branch2_vm_name:
     type: string
-
-  branch3_vm_name:
-    default: ""
 
   use_existing_vms:
     type: boolean
@@ -135,13 +130,13 @@ inputs:
   parent_org_name:
     default: ""
 
-  hq_name:
+  hq_org_name:
     default: ""
 
-  branch1_name:
+  branch1_org_name:
     default: ""
 
-  branch2_name:
+  branch2_org_name:
     default: ""
 #
 # Appliance configuration
@@ -186,6 +181,15 @@ inputs:
 
   parent_routing_name:
     default: ""
+
+  hq_routing_name:
+    default: ""
+
+  branch1_routing_name:
+    default: ""
+
+  branch2_routing_name:
+    default: ""
 #
 # DHCP Configuration
 #
@@ -195,13 +199,28 @@ inputs:
   dhcp_options_profile_name:
     default: ""
 
-
   dhcp_lease_profile_name:
     default: ""
+
+  dhcp_pool_name: 
+    default: ""
+
+  dhcp_range_name:
+    default: ""
+
+  dhcp_server_name:
+    default: ""
+
   dns_server:
     default: ""
 
   hq_domain_name:
+    default: ""
+
+  branch1_domain_name:
+    default: ""
+
+  branch2_domain_name:
     default: ""
         
   hq_dhcp_pool_mask:
@@ -241,6 +260,11 @@ inputs:
 #
 # NAT configuration
 #
+  nat_pool_name:
+    default: ""
+
+  nat_range_name:
+    default: ""
 
   nat_rule_name:
     default: ""
@@ -248,7 +272,7 @@ inputs:
   hq_range_low:
     default: ""
 
-  hq_range_high:
+  hq_range_hight:
     default: ""
 
   hq_nat_rule_source_address:
@@ -257,7 +281,7 @@ inputs:
   branch1_range_low:
     default: ""
 
-  branch1_range_high:
+  branch1_range_hight:
     default: ""
 
   branch1_nat_rule_source_address:
@@ -266,15 +290,8 @@ inputs:
   branch2_range_low:
     default: ""
 
-  branch2_range_high:
+  branch2_range_hight:
     default: ""
 
   branch2_nat_rule_source_address:
     default: ""
-
-  natbranch1_rule_name: 
-    default: ""
-
-  natbranch2_rule_name: 
-    default: ""
-

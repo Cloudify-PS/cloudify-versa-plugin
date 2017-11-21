@@ -9,16 +9,6 @@ imports:
   - include/imports.yaml
   - include/versa-default.yaml
 
-inputs:
-    appliance_name:
-        default: vcpe1tdcappliance
-    hq_org_name:
-        default: hq_org
-    firewall_policy:
-        default: tdc_firewall_policy
-    rule_name:
-        default: test_firewall_rule
-
 
 #
 # Node templates
@@ -37,28 +27,7 @@ node_templates:
         client_id: { get_input: client_id}
         client_secret: { get_input: client_secret}
 
-  hq_firewall:
-    type: cloudify.versa.nodes.NGFirewallRule
+  template:
+    type: cloudify.versa.nodes.Template
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
-      appliance_name: { get_input: appliance_name }
-      org_name: { get_input: hq_org_name }
-      policy_name: { get_input: firewall_policy }
-      rule:
-        name: { get_input: rule_name }
-        match:
-          source:
-            zone:
-              zone-list:
-                - trust
-          destination:
-            zone:
-              zone-list:
-                - untrust
-        set:
-          lef:
-            event: end
-            options:
-              send-pcap-data:
-                  enable: False
-          action: allow

@@ -811,6 +811,16 @@ def clean_captive_portal(versa_client, **kwargs):
 @operation
 @with_versa_client
 def update_template(versa_client, **kwargs):
+    config = _get_node_configuration('config', kwargs)
+    if not config:
+        ctx.logger.info("Key 'parameters' is absent.")
+        return
+    versa_plugin.template.update(versa_client, config)
+
+
+@operation
+@with_versa_client
+def create_device(versa_client, **kwargs):
     parameters = kwargs.get('parameters')
     if not parameters:
         ctx.logger.info("Key 'parameters' is absent.")

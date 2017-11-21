@@ -1,4 +1,5 @@
 # cfy executions start execute_operation -d <deployment> -p param.yaml
+# used with small_url_filtering.yaml
 operation: update
 node_instance_ids: [hq_firewall_503ce]
 allow_kwargs_override: true
