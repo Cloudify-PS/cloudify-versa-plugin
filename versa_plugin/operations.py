@@ -823,7 +823,7 @@ def update_template(versa_client, **kwargs):
 @operation
 @with_versa_client
 def create_device(versa_client, **kwargs):
-    parameters = kwargs.get('device')
+    parameters = _get_node_configuration('device', kwargs)
     if not parameters:
         ctx.logger.info("Key 'device' is absent.")
         return
@@ -834,7 +834,7 @@ def create_device(versa_client, **kwargs):
 @operation
 @with_versa_client
 def delete_device(versa_client, **kwargs):
-    parameters = kwargs.get('device')
+    parameters = _get_node_configuration('device', kwargs)
     if not parameters:
         ctx.logger.info("Key 'device' is absent.")
         return
