@@ -1,0 +1,15 @@
+# cfy executions start execute_operation -d <deployment> -p param.yaml
+operation: update
+node_ids: [template]
+allow_kwargs_override: true
+operation_kwargs:
+  config:
+    template: branch
+    organization: Provider
+    interface: vni-0/0
+    parameters: 
+      interface: 
+        name: vni-0/0
+        shaping-rate:
+          burst-size: 40000
+          rate: 1000

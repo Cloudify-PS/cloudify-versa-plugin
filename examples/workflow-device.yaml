@@ -42,3 +42,13 @@ node_templates:
           "{$v_Lan_IPv4__staticaddress}": 192.168.1.1/32
           "{$v_mpls_IPv4__staticaddress}":  192.168.2.2/32
           "{$v_mpls-Transport-VR_IPv4__vrHopAddress}": 192.168.3.3
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          inputs:
+            device:
+              name: { get_input: device_name }
+        delete:
+          inputs:
+            device:
+              name: { get_input: device_name }
