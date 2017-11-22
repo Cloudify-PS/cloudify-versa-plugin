@@ -60,8 +60,12 @@ class VersaClient():
         return False
 
     def save_token_to_file(self):
-        with open(self.key_file, "w") as file:
-            file.write(self.access_token)
+        try:
+            with open(self.key_file, "w") as file:
+                file.write(self.access_token)
+        except IOError:
+            raise cfy_exc.NonRecoverableError(
+                "Can't save key file to: {}".format(self.key_file))
 
     def get_token(self):
         if self.read_tokens_form_file():

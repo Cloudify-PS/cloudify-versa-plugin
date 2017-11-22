@@ -12,7 +12,7 @@ if not os.path.isfile(file_name):
     print 'Wrong file'
     quit()
 
-client = VersaClient(configuration.data, '')
+client = VersaClient(configuration.versa_config, '')
 for line in open(file_name):
     if line.startswith('nms rbac oauth'):
         token = line.split()[5]
