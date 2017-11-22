@@ -11,7 +11,11 @@ def _create_path():
     if ctx._local:
         key_dir = ctx._context['storage']._storage_dir
     else:
-        key_dir = os.path.dirname(os.environ.get('VIRTUAL_ENV', '/tmp'))
+        base_path = os.environ.get('VIRTUALENV_DIR')
+        if base_path:
+            key_dir = os.path.dirname(base_path)
+        else:
+            key_dir = '/tmp'
     return '{}/versa.key'.format(key_dir)
 
 

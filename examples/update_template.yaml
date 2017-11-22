@@ -26,7 +26,11 @@ node_templates:
         client_id: { get_input: client_id}
         client_secret: { get_input: client_secret}
 
-  template:
+  branch_template:
     type: cloudify.versa.nodes.Template
     properties:
       versa_config: { get_property: [versa_configuration, versa_config] }
+      config:
+        template: branch
+        organization: Provider
+        interface: vni-0/0

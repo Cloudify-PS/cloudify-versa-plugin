@@ -9,8 +9,12 @@ imports:
 inputs:
     device_name:
         default: CPE2
-
-
+    v_Lan_IPv4__staticaddress: 
+      default: 192.168.1.1/32
+    v_mpls_IPv4__staticaddress: 
+      default:  192.168.2.2/32
+    v_mpls-Transport-VR_IPv4__vrHopAddress: 
+      default: 192.168.3.3
 #
 # Node templates
 #
@@ -39,9 +43,9 @@ node_templates:
           longitude: 0
           latitude: 0
         variables: 
-          "{$v_Lan_IPv4__staticaddress}": 192.168.1.1/32
-          "{$v_mpls_IPv4__staticaddress}":  192.168.2.2/32
-          "{$v_mpls-Transport-VR_IPv4__vrHopAddress}": 192.168.3.3
+          "{$v_Lan_IPv4__staticaddress}": {get_input: v_Lan_IPv4__staticaddress }
+          "{$v_mpls_IPv4__staticaddress}": {get_input: v_mpls_IPv4__staticaddress }
+          "{$v_mpls-Transport-VR_IPv4__vrHopAddress}": {get_input: v_mpls-Transport-VR_IPv4__vrHopAddress }
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
